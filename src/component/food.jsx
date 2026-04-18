@@ -1,13 +1,18 @@
 import React, { useState } from "react";
 import { data } from "../data/data.js";
 import { BsFillCartFill } from "react-icons/bs";
-import { AiOutlineCheck } from "react-icons/ai";
+import { AiOutlineCheck, AiOutlineClose } from "react-icons/ai";
+
+const colors = ['Space Black', 'Silver', 'Gold', 'Deep Purple', 'Blue', 'White']
 
 const Food = ({ searchQuery, addToCart }) => {
   const [foods, setFoods] = useState(data);
   const [activeType, setActiveType] = useState('All');
   const [activePrice, setActivePrice] = useState(null);
   const [toast, setToast] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedColor, setSelectedColor] = useState(colors[0]);
+  const [quantity, setQuantity] = useState(1);
 
   const filterType = (category) => {
     setActiveType(category);
@@ -21,11 +26,19 @@ const Food = ({ searchQuery, addToCart }) => {
     setFoods(data.filter((item) => item.price === price));
   };
 
-  const handleAddToCart = (item) => {
-    addToCart(item);
+  const handleAddToCart = (item, qty = 1, color = colors[0]) => {
+    addToCart({ ...item, quantity: qty, color });
     setToast(item);
     setTimeout(() => setToast(null), 3000);
   };
+
+  const openProduct = (item) => {
+    setSelectedProduct(item);
+    setSelectedColor(colors[0]);
+    setQuantity(1);
+  };
+
+  const closeProduct = () => setSelectedProduct(null);
 
   const displayedFoods = searchQuery
     ? data.filter((item) =>
@@ -35,44 +48,186 @@ const Food = ({ searchQuery, addToCart }) => {
     : foods;
 
   return (
-    <div className="max-w-[1640px] mx-auto px-4 relative" id="products">
+    <div className="max-w-[1640px] mx-auto px-3 sm:px-4 relative" id="products">
 
       {/* Toast Popup */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-gray-900 text-white px-5 py-4 rounded-2xl shadow-2xl border border-orange-500">
-          <div className="bg-orange-500 rounded-full p-1">
-            <AiOutlineCheck size={16} className="text-white" />
+        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-auto z-50 flex items-center gap-3 bg-gray-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-orange-500">
+          <div className="bg-orange-500 rounded-full p-1 shrink-0">
+            <AiOutlineCheck size={14} className="text-white" />
           </div>
-          <div>
+          <div className="flex-1">
             <p className="font-bold text-sm">{toast.name}</p>
             <p className="text-gray-400 text-xs">Added to cart successfully!</p>
           </div>
           <button
             onClick={() => setToast(null)}
-            className="ml-4 text-gray-500 hover:text-white text-lg leading-none"
+            className="text-gray-500 hover:text-white text-lg leading-none shrink-0"
           >
             ✕
           </button>
         </div>
       )}
 
+      {/* Product Detail Modal */}
+      {selectedProduct && (
+        <>
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black/60 z-40"
+            onClick={closeProduct}
+          />
+
+          {/* Modal — slides up from bottom on mobile */}
+          <div className="fixed bottom-0 left-0 right-0 sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:bottom-auto w-full sm:max-w-3xl bg-white z-50 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col">
+
+            {/* Close button */}
+            <button
+              onClick={closeProduct}
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-black z-10 bg-white rounded-full p-1.5 shadow"
+            >
+              <AiOutlineClose size={20} />
+            </button>
+
+            {/* Drag handle — mobile only */}
+            <div className="sm:hidden flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 bg-gray-300 rounded-full" />
+            </div>
+
+            <div className="flex flex-col sm:flex-row overflow-y-auto">
+
+              {/* Product Image */}
+              <div className="w-full sm:w-1/2 h-[220px] sm:h-auto shrink-0">
+                <img
+                  src={selectedProduct.image}
+                  alt={selectedProduct.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Product Details */}
+              <div className="w-full sm:w-1/2 p-4 sm:p-6 flex flex-col gap-3 sm:gap-4">
+
+                {/* Category & Name */}
+                <div>
+                  <p className="text-orange-500 uppercase tracking-widest text-xs font-semibold capitalize">
+                    {selectedProduct.category}
+                  </p>
+                  <h2 className="text-xl sm:text-2xl font-black text-gray-800 mt-1">
+                    {selectedProduct.name}
+                  </h2>
+                </div>
+
+                {/* Price */}
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl sm:text-3xl font-black text-orange-500">
+                    ₦{selectedProduct.amount.toLocaleString()}
+                  </span>
+                  <span className="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full font-semibold">
+                    In Stock
+                  </span>
+                </div>
+
+                {/* Description */}
+                <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">
+                  Premium quality {selectedProduct.name} with the latest features.
+                  Comes with full warranty and official accessories.
+                  Fast delivery across Nigeria.
+                </p>
+
+                {/* Color Selection */}
+                <div>
+                  <p className="font-bold text-gray-700 text-sm mb-2">
+                    Color: <span className="text-orange-500">{selectedColor}</span>
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {colors.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition
+                          ${selectedColor === color
+                            ? 'bg-orange-500 text-white border-orange-500'
+                            : 'bg-white text-gray-600 border-gray-300 hover:border-orange-400'
+                          }`}
+                      >
+                        {color}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Quantity */}
+                <div>
+                  <p className="font-bold text-gray-700 text-sm mb-2">Quantity</p>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <button
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      className="w-9 h-9 rounded-full border border-gray-300 flex items-center justify-center text-xl font-bold hover:bg-gray-100 transition"
+                    >
+                      −
+                    </button>
+                    <span className="font-black text-lg w-6 text-center">{quantity}</span>
+                    <button
+                      onClick={() => setQuantity((q) => q + 1)}
+                      className="w-9 h-9 rounded-full border border-gray-300 flex items-center justify-center text-xl font-bold hover:bg-gray-100 transition"
+                    >
+                      +
+                    </button>
+                    <span className="text-gray-400 text-xs sm:text-sm">
+                      Subtotal:{' '}
+                      <span className="text-orange-500 font-bold">
+                        ₦{(selectedProduct.amount * quantity).toLocaleString()}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Delivery Info */}
+                <div className="bg-orange-50 border border-orange-100 rounded-xl p-3">
+                  <p className="text-xs text-orange-700 font-semibold mb-1">🚚 Delivery Info</p>
+                  <p className="text-xs text-gray-500">
+                    Fast delivery available across Nigeria. Order today and receive within 2-5 business days.
+                  </p>
+                </div>
+
+                {/* Add to Cart Button */}
+                <button
+                  onClick={() => {
+                    handleAddToCart(selectedProduct, quantity, selectedColor)
+                    closeProduct()
+                  }}
+                  className="w-full flex items-center justify-center gap-2 bg-orange-500
+                  hover:bg-orange-600 text-white font-bold py-3 rounded-full
+                  transition duration-200 text-sm mt-auto"
+                >
+                  <BsFillCartFill size={16} />
+                  Add to Cart — ₦{(selectedProduct.amount * quantity).toLocaleString()}
+                </button>
+
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* Heading */}
-      <h1 className="font-bold text-center text-4xl bg-gradient-to-r from-orange-600 to-yellow-400 bg-clip-text text-transparent mt-4 mb-2">
+      <h1 className="font-bold text-center text-2xl sm:text-3xl md:text-4xl bg-gradient-to-r from-orange-600 to-yellow-400 bg-clip-text text-transparent mt-4 mb-2">
         Top Rated Gadgets & Accessories
       </h1>
 
       {/* Filter Row */}
-      <div className="flex flex-col lg:flex-row justify-between mt-4">
+      <div className="flex flex-col lg:flex-row justify-between mt-4 gap-4">
 
         {/* Filter Type */}
         <div>
-          <p className="font-bold text-gray-700">Filter Type</p>
-          <div className="flex flex-wrap gap-2">
+          <p className="font-bold text-gray-700 text-sm">Filter Type</p>
+          <div className="flex flex-wrap">
             {['All', 'phones', 'laptops', 'headphones', 'speakers', 'chargers', 'tablets'].map((cat) => (
               <button
                 key={cat}
                 onClick={() => filterType(cat)}
-                className={`m-1 border px-3 py-1 rounded-full capitalize transition
+                className={`m-1 border px-3 py-1 rounded-full capitalize transition text-xs sm:text-sm
                   ${activeType === cat
                     ? 'bg-orange-500 text-white border-orange-500'
                     : 'border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white'
@@ -86,18 +241,18 @@ const Food = ({ searchQuery, addToCart }) => {
 
         {/* Filter Price */}
         <div>
-          <p className="font-bold text-gray-700">Filter Price</p>
-          <div className="flex flex-wrap gap-2">
+          <p className="font-bold text-gray-700 text-sm">Filter Price</p>
+          <div className="flex flex-wrap">
             {[
               { label: 'Under ₦50k', value: '$' },
-              { label: '₦50k - ₦150k', value: '$$' },
-              { label: '₦150k - ₦500k', value: '$$$' },
+              { label: '₦50k-₦150k', value: '$$' },
+              { label: '₦150k-₦500k', value: '$$$' },
               { label: '₦500k+', value: '$$$$' },
             ].map((p) => (
               <button
                 key={p.value}
                 onClick={() => filterPrice(p.value)}
-                className={`m-1 border px-3 py-1 rounded-full transition
+                className={`m-1 border px-3 py-1 rounded-full transition text-xs sm:text-sm
                   ${activePrice === p.value
                     ? 'bg-orange-500 text-white border-orange-500'
                     : 'border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white'
@@ -113,40 +268,43 @@ const Food = ({ searchQuery, addToCart }) => {
 
       {/* Search result info */}
       {searchQuery && (
-        <p className="text-gray-500 text-sm mt-2">
+        <p className="text-gray-500 text-xs sm:text-sm mt-2">
           {displayedFoods.length} result{displayedFoods.length !== 1 ? 's' : ''} for{' '}
           <span className="text-orange-500 font-semibold">"{searchQuery}"</span>
         </p>
       )}
 
       {/* Product Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pt-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 pt-4">
         {displayedFoods.map((item) => (
           <div
             key={item.id}
-            className="shadow-lg rounded-lg hover:scale-105 duration-300 overflow-hidden"
+            className="shadow-md rounded-xl hover:scale-105 duration-300 overflow-hidden bg-white cursor-pointer"
           >
-            <img
-              src={item.image}
-              alt={item.name}
-              className="w-full h-[200px] object-cover rounded-t-lg"
-            />
-            <div className="flex justify-between items-center px-2 py-2">
-              <p className="font-bold text-sm">{item.name}</p>
-              <span className="bg-orange-500 text-white rounded-full px-2 py-1 text-xs font-bold">
-                ₦{item.amount.toLocaleString()}
-              </span>
+            {/* Image and name — opens modal */}
+            <div onClick={() => openProduct(item)}>
+              <img
+                src={item.image}
+                alt={item.name}
+                className="w-full h-[150px] sm:h-[200px] object-cover"
+              />
+              <div className="flex justify-between items-center px-2 py-2 gap-1">
+                <p className="font-bold text-xs sm:text-sm leading-tight">{item.name}</p>
+                <span className="bg-orange-500 text-white rounded-full px-2 py-1 text-xs font-bold shrink-0">
+                  ₦{item.amount.toLocaleString()}
+                </span>
+              </div>
             </div>
 
             {/* Add to Cart Button */}
             <div className="px-2 pb-3">
               <button
                 onClick={() => handleAddToCart(item)}
-                className="w-full flex items-center justify-center gap-2 bg-orange-500
-                hover:bg-orange-600 text-white text-sm font-semibold py-2 rounded-full
+                className="w-full flex items-center justify-center gap-1 sm:gap-2 bg-orange-500
+                hover:bg-orange-600 text-white text-xs sm:text-sm font-semibold py-2 rounded-full
                 transition duration-200"
               >
-                <BsFillCartFill size={16} />
+                <BsFillCartFill size={14} />
                 Add to Cart
               </button>
             </div>
@@ -158,7 +316,7 @@ const Food = ({ searchQuery, addToCart }) => {
       {/* Empty State */}
       {displayedFoods.length === 0 && (
         <div className="text-center py-16">
-          <p className="text-gray-400 text-lg">
+          <p className="text-gray-400 text-base sm:text-lg">
             No products found for "<span className="text-orange-500">{searchQuery}</span>"
           </p>
         </div>

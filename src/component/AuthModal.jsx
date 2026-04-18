@@ -49,160 +49,210 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
     })
   }
 
+  if (!authOpen) return null
+
   return (
     <>
       {/* Overlay */}
-      {authOpen && (
-        <div
-          className='bg-black/60 fixed w-full h-screen z-20 top-0 left-0'
-          onClick={handleClose}
-        />
-      )}
+      <div
+        className='bg-black/60 fixed inset-0 z-40'
+        onClick={handleClose}
+      />
 
-      {/* Modal */}
-      <div className={authOpen
-        ? 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white z-30 rounded-2xl shadow-2xl duration-300 p-6'
-        : 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white z-30 rounded-2xl shadow-2xl duration-300 p-6 opacity-0 pointer-events-none'
-      }>
+      {/* Modal — bottom sheet on mobile, centered on desktop */}
+      <div className='
+        fixed z-50
+        bottom-0 left-0 right-0 rounded-t-3xl
+        sm:top-1/2 sm:left-1/2 sm:bottom-auto sm:right-auto
+        sm:-translate-x-1/2 sm:-translate-y-1/2
+        sm:rounded-2xl sm:w-[420px]
+        bg-white shadow-2xl
+        max-h-[92vh] sm:max-h-[90vh]
+        flex flex-col
+        duration-300
+      '>
 
-        {/* Header */}
-        <div className='flex justify-between items-center mb-6'>
-          <h2 className='text-2xl font-black text-gray-800'>
-            {success ? '🎉 Welcome!' : isSignIn ? 'Sign In' : 'Create Account'}
-          </h2>
-          <button onClick={handleClose} className='text-gray-400 hover:text-black transition'>
-            <AiOutlineClose size={24} />
-          </button>
+        {/* Drag handle — mobile only */}
+        <div className='sm:hidden flex justify-center pt-3 pb-1 shrink-0'>
+          <div className='w-10 h-1 bg-gray-300 rounded-full' />
         </div>
 
-        {success ? (
-          /* Success Screen */
-          <div className='text-center py-6'>
-            <div className='w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4'>
-              <FaUser size={30} className='text-orange-500' />
+        {/* Scrollable content */}
+        <div className='overflow-y-auto flex-1 px-5 sm:px-6 pb-6 pt-2 sm:pt-6'>
+
+          {/* Header */}
+          <div className='flex justify-between items-center mb-5'>
+            <div>
+              <h2 className='text-xl sm:text-2xl font-black text-gray-800'>
+                {success ? '🎉 Welcome!' : isSignIn ? 'Sign In' : 'Create Account'}
+              </h2>
+              {!success && (
+                <p className='text-xs text-gray-400 mt-0.5'>
+                  {isSignIn ? 'Welcome back to OBISCO Gadgets' : 'Join OBISCO Gadgets today'}
+                </p>
+              )}
             </div>
-            <h3 className='text-xl font-bold text-gray-800 mb-2'>
-              {isSignIn ? 'Welcome Back!' : 'Account Created!'}
-            </h3>
-            <p className='text-gray-500 text-sm mb-6'>
-              {isSignIn
-                ? `You are now signed in as ${form.email}`
-                : `Welcome to OBISCO Gadgets, ${form.fullName}!`
-              }
-            </p>
             <button
               onClick={handleClose}
-              className='w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-full transition'
+              className='text-gray-400 hover:text-black transition p-1 shrink-0'
             >
-              Continue Shopping
+              <AiOutlineClose size={22} />
             </button>
           </div>
 
-        ) : (
-          <>
-            {/* Toggle Tabs */}
-            <div className='flex bg-gray-100 rounded-full p-1 mb-6'>
+          {success ? (
+            /* Success Screen */
+            <div className='text-center py-4'>
+              <div className='w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4'>
+                <FaUser size={28} className='text-orange-500' />
+              </div>
+              <h3 className='text-lg sm:text-xl font-bold text-gray-800 mb-2'>
+                {isSignIn ? 'Welcome Back!' : 'Account Created!'}
+              </h3>
+              <p className='text-gray-500 text-sm mb-1'>
+                {isSignIn
+                  ? `Signed in as ${form.email}`
+                  : `Welcome, ${form.fullName}!`
+                }
+              </p>
+              <p className='text-gray-400 text-xs mb-6'>
+                You can now shop and checkout seamlessly.
+              </p>
               <button
-                onClick={() => setIsSignIn(true)}
-                className={`flex-1 py-2 rounded-full text-sm font-bold transition ${
-                  isSignIn ? 'bg-orange-500 text-white shadow' : 'text-gray-500'
-                }`}
+                onClick={handleClose}
+                className='w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-full transition text-sm'
               >
-                Sign In
-              </button>
-              <button
-                onClick={() => setIsSignIn(false)}
-                className={`flex-1 py-2 rounded-full text-sm font-bold transition ${
-                  !isSignIn ? 'bg-orange-500 text-white shadow' : 'text-gray-500'
-                }`}
-              >
-                Sign Up
+                Continue Shopping
               </button>
             </div>
 
-            {/* Form */}
-            <div className='flex flex-col gap-3'>
+          ) : (
+            <>
+              {/* Toggle Tabs */}
+              <div className='flex bg-gray-100 rounded-full p-1 mb-5'>
+                <button
+                  onClick={() => setIsSignIn(true)}
+                  className={`flex-1 py-2 rounded-full text-sm font-bold transition ${
+                    isSignIn
+                      ? 'bg-orange-500 text-white shadow'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={() => setIsSignIn(false)}
+                  className={`flex-1 py-2 rounded-full text-sm font-bold transition ${
+                    !isSignIn
+                      ? 'bg-orange-500 text-white shadow'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Sign Up
+                </button>
+              </div>
 
-              {/* Sign Up only fields */}
-              {!isSignIn && (
-                <>
-                  <input
-                    name='fullName'
-                    value={form.fullName}
-                    onChange={handleChange}
-                    placeholder='Full Name'
-                    className='border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full'
-                  />
-                  <input
-                    name='phone'
-                    value={form.phone}
-                    onChange={handleChange}
-                    placeholder='Phone Number'
-                    className='border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full'
-                  />
-                </>
-              )}
+              {/* Form */}
+              <div className='flex flex-col gap-3'>
 
-              {/* Common fields */}
-              <input
-                name='email'
-                value={form.email}
-                onChange={handleChange}
-                placeholder='Email Address'
-                type='email'
-                className='border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full'
-              />
-              <input
-                name='password'
-                value={form.password}
-                onChange={handleChange}
-                placeholder='Password'
-                type='password'
-                className='border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full'
-              />
+                {/* Sign Up only */}
+                {!isSignIn && (
+                  <>
+                    <input
+                      name='fullName'
+                      value={form.fullName}
+                      onChange={handleChange}
+                      placeholder='Full Name'
+                      className='border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full'
+                    />
+                    <input
+                      name='phone'
+                      value={form.phone}
+                      onChange={handleChange}
+                      placeholder='Phone Number'
+                      type='tel'
+                      className='border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full'
+                    />
+                  </>
+                )}
 
-              {/* Sign Up only */}
-              {!isSignIn && (
+                {/* Common fields */}
                 <input
-                  name='confirmPassword'
-                  value={form.confirmPassword}
+                  name='email'
+                  value={form.email}
                   onChange={handleChange}
-                  placeholder='Confirm Password'
+                  placeholder='Email Address'
+                  type='email'
+                  className='border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full'
+                />
+                <input
+                  name='password'
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder='Password'
                   type='password'
                   className='border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full'
                 />
-              )}
 
-              {/* Forgot Password */}
-              {isSignIn && (
-                <p className='text-right text-xs text-orange-500 hover:underline cursor-pointer'>
-                  Forgot Password?
-                </p>
-              )}
+                {/* Sign Up only */}
+                {!isSignIn && (
+                  <input
+                    name='confirmPassword'
+                    value={form.confirmPassword}
+                    onChange={handleChange}
+                    placeholder='Confirm Password'
+                    type='password'
+                    className='border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full'
+                  />
+                )}
 
-              {/* Submit Button */}
-              <button
-                onClick={handleSubmit}
-                className='w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-full transition text-sm mt-2'
-              >
-                {isSignIn ? 'Sign In' : 'Create Account'}
-              </button>
+                {/* Forgot Password */}
+                {isSignIn && (
+                  <p className='text-right text-xs text-orange-500 hover:underline cursor-pointer'>
+                    Forgot Password?
+                  </p>
+                )}
 
-              {/* Switch */}
-              <p className='text-center text-xs text-gray-500 mt-2'>
-                {isSignIn ? "Don't have an account?" : 'Already have an account?'}{' '}
-                <span
-                  onClick={() => setIsSignIn(!isSignIn)}
-                  className='text-orange-500 font-bold cursor-pointer hover:underline'
+                {/* Submit Button */}
+                <button
+                  onClick={handleSubmit}
+                  className='w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-full transition text-sm mt-1'
                 >
-                  {isSignIn ? 'Sign Up' : 'Sign In'}
-                </span>
-              </p>
+                  {isSignIn ? 'Sign In' : 'Create Account'}
+                </button>
 
-            </div>
-          </>
-        )}
+                {/* Divider */}
+                <div className='flex items-center gap-3 my-1'>
+                  <div className='flex-1 h-px bg-gray-200' />
+                  <span className='text-xs text-gray-400'>or continue with</span>
+                  <div className='flex-1 h-px bg-gray-200' />
+                </div>
 
+                {/* Google Button */}
+                <button className='w-full border border-gray-200 text-gray-700 font-semibold py-3 rounded-full transition text-sm hover:bg-gray-50 flex items-center justify-center gap-2'>
+                  <img
+                    src='https://www.google.com/favicon.ico'
+                    alt='Google'
+                    className='w-4 h-4'
+                  />
+                  Continue with Google
+                </button>
+
+                {/* Switch */}
+                <p className='text-center text-xs text-gray-500 mt-1'>
+                  {isSignIn ? "Don't have an account?" : 'Already have an account?'}{' '}
+                  <span
+                    onClick={() => setIsSignIn(!isSignIn)}
+                    className='text-orange-500 font-bold cursor-pointer hover:underline'
+                  >
+                    {isSignIn ? 'Sign Up' : 'Sign In'}
+                  </span>
+                </p>
+
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </>
   )
