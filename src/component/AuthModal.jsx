@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import { AiOutlineClose } from 'react-icons/ai'
 import { FaUser } from 'react-icons/fa'
+import { registerUser, loginUser } from '../api/api.js'
 
 const AuthModal = ({ authOpen, setAuthOpen }) => {
   const [isSignIn, setIsSignIn] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -12,18 +14,29 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
     confirmPassword: '',
   })
   const [success, setSuccess] = useState(false)
+  const [loggedInUser, setLoggedInUser] = useState(null)
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (isSignIn) {
       if (!form.email || !form.password) {
         alert('Please fill in all fields.')
         return
       }
-      setSuccess(true)
+      setLoading(true)
+      const res = await loginUser({ email: form.email, password: form.password })
+      setLoading(false)
+      if (res.token) {
+        localStorage.setItem('token', res.token)
+        localStorage.setItem('user', JSON.stringify(res.user))
+        setLoggedInUser(res.user)
+        setSuccess(true)
+      } else {
+        alert(res.message || 'Login failed. Please try again.')
+      }
     } else {
       if (!form.fullName || !form.email || !form.phone || !form.password || !form.confirmPassword) {
         alert('Please fill in all fields.')
@@ -33,13 +46,29 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
         alert('Passwords do not match!')
         return
       }
-      setSuccess(true)
+      setLoading(true)
+      const res = await registerUser({
+        fullName: form.fullName,
+        email: form.email,
+        phone: form.phone,
+        password: form.password,
+      })
+      setLoading(false)
+      if (res.token) {
+        localStorage.setItem('token', res.token)
+        localStorage.setItem('user', JSON.stringify(res.user))
+        setLoggedInUser(res.user)
+        setSuccess(true)
+      } else {
+        alert(res.message || 'Registration failed. Please try again.')
+      }
     }
   }
 
   const handleClose = () => {
     setAuthOpen(false)
     setSuccess(false)
+    setLoading(false)
     setForm({
       fullName: '',
       email: '',
@@ -88,7 +117,10 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
               </h2>
               {!success && (
                 <p className='text-xs text-gray-400 mt-0.5'>
-                  {isSignIn ? 'Welcome back to OBISCO Gadgets' : 'Join OBISCO Gadgets today'}
+                  {isSignIn
+                    ? 'Welcome back to OBISCO Gadgets'
+                    : 'Join OBISCO Gadgets today'
+                  }
                 </p>
               )}
             </div>
@@ -111,9 +143,12 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
               </h3>
               <p className='text-gray-500 text-sm mb-1'>
                 {isSignIn
-                  ? `Signed in as ${form.email}`
-                  : `Welcome, ${form.fullName}!`
+                  ? `Signed in as `
+                  : `Welcome, `
                 }
+                <span className='font-bold text-orange-500'>
+                  {loggedInUser?.fullName || loggedInUser?.email}
+                </span>
               </p>
               <p className='text-gray-400 text-xs mb-6'>
                 You can now shop and checkout seamlessly.
@@ -155,7 +190,7 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
               {/* Form */}
               <div className='flex flex-col gap-3'>
 
-                {/* Sign Up only */}
+                {/* Sign Up only fields */}
                 {!isSignIn && (
                   <>
                     <input
@@ -216,9 +251,17 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
                 {/* Submit Button */}
                 <button
                   onClick={handleSubmit}
-                  className='w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-full transition text-sm mt-1'
+                  disabled={loading}
+                  className='w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold py-3 rounded-full transition text-sm mt-1 flex items-center justify-center gap-2'
                 >
-                  {isSignIn ? 'Sign In' : 'Create Account'}
+                  {loading ? (
+                    <>
+                      <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin' />
+                      Please wait...
+                    </>
+                  ) : (
+                    isSignIn ? 'Sign In' : 'Create Account'
+                  )}
                 </button>
 
                 {/* Divider */}

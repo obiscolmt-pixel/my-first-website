@@ -1,29 +1,47 @@
-import React, { useState } from "react";
-import { data } from "../data/data.js";
+import React, { useState, useEffect } from "react";
+import { fetchProducts } from "../api/api.js";
 import { BsFillCartFill } from "react-icons/bs";
 import { AiOutlineCheck, AiOutlineClose } from "react-icons/ai";
 
 const colors = ['Space Black', 'Silver', 'Gold', 'Deep Purple', 'Blue', 'White']
 
 const Food = ({ searchQuery, addToCart }) => {
-  const [foods, setFoods] = useState(data);
+  const [allProducts, setAllProducts] = useState([])
+  const [foods, setFoods] = useState([]);
   const [activeType, setActiveType] = useState('All');
   const [activePrice, setActivePrice] = useState(null);
   const [toast, setToast] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedColor, setSelectedColor] = useState(colors[0]);
   const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true)
+
+  // Fetch products from backend
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const data = await fetchProducts()
+        setAllProducts(data)
+        setFoods(data)
+      } catch (err) {
+        console.error('Failed to load products:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadProducts()
+  }, [])
 
   const filterType = (category) => {
     setActiveType(category);
     setActivePrice(null);
-    setFoods(category === 'All' ? data : data.filter((item) => item.category === category));
+    setFoods(category === 'All' ? allProducts : allProducts.filter((item) => item.category === category));
   };
 
   const filterPrice = (price) => {
     setActivePrice(price);
     setActiveType(null);
-    setFoods(data.filter((item) => item.price === price));
+    setFoods(allProducts.filter((item) => item.price === price));
   };
 
   const handleAddToCart = (item, qty = 1, color = colors[0]) => {
@@ -41,11 +59,23 @@ const Food = ({ searchQuery, addToCart }) => {
   const closeProduct = () => setSelectedProduct(null);
 
   const displayedFoods = searchQuery
-    ? data.filter((item) =>
+    ? allProducts.filter((item) =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.category.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : foods;
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="max-w-[1640px] mx-auto px-4 py-16 text-center" id="products">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-400 text-sm">Loading products...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-[1640px] mx-auto px-3 sm:px-4 relative" id="products">
@@ -78,7 +108,7 @@ const Food = ({ searchQuery, addToCart }) => {
             onClick={closeProduct}
           />
 
-          {/* Modal — slides up from bottom on mobile */}
+          {/* Modal — bottom sheet on mobile, centered on desktop */}
           <div className="fixed bottom-0 left-0 right-0 sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:bottom-auto w-full sm:max-w-3xl bg-white z-50 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col">
 
             {/* Close button */}
@@ -90,7 +120,7 @@ const Food = ({ searchQuery, addToCart }) => {
             </button>
 
             {/* Drag handle — mobile only */}
-            <div className="sm:hidden flex justify-center pt-3 pb-1">
+            <div className="sm:hidden flex justify-center pt-3 pb-1 shrink-0">
               <div className="w-10 h-1 bg-gray-300 rounded-full" />
             </div>
 
@@ -278,7 +308,7 @@ const Food = ({ searchQuery, addToCart }) => {
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 pt-4">
         {displayedFoods.map((item) => (
           <div
-            key={item.id}
+            key={item._id}
             className="shadow-md rounded-xl hover:scale-105 duration-300 overflow-hidden bg-white cursor-pointer"
           >
             {/* Image and name — opens modal */}
@@ -314,7 +344,7 @@ const Food = ({ searchQuery, addToCart }) => {
       </div>
 
       {/* Empty State */}
-      {displayedFoods.length === 0 && (
+      {displayedFoods.length === 0 && !loading && (
         <div className="text-center py-16">
           <p className="text-gray-400 text-base sm:text-lg">
             No products found for "<span className="text-orange-500">{searchQuery}</span>"
