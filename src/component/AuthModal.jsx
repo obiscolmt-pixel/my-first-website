@@ -1,11 +1,18 @@
 import React, { useState } from 'react'
 import { AiOutlineClose } from 'react-icons/ai'
 import { FaUser } from 'react-icons/fa'
-import { registerUser, loginUser } from '../api/api.js'
+import { registerUser, loginUser, forgotPassword, resetPassword } from '../api/api.js'
 
 const AuthModal = ({ authOpen, setAuthOpen }) => {
   const [isSignIn, setIsSignIn] = useState(true)
   const [loading, setLoading] = useState(false)
+  const [forgotMode, setForgotMode] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotSent, setForgotSent] = useState(false)
+  const [resetStep, setResetStep] = useState(1)
+  const [resetCode, setResetCode] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmNewPassword, setConfirmNewPassword] = useState('')
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -65,10 +72,58 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
     }
   }
 
+  const handleForgotPassword = async () => {
+    if (!forgotEmail) {
+      alert('Please enter your email address.')
+      return
+    }
+    setLoading(true)
+    const res = await forgotPassword(forgotEmail)
+    setLoading(false)
+    if (res.message) {
+      setResetStep(2)
+    } else {
+      alert(res.message || 'Something went wrong.')
+    }
+  }
+
+  const handleResetPassword = async () => {
+    if (!newPassword || !confirmNewPassword) {
+      alert('Please fill in all fields.')
+      return
+    }
+    if (newPassword !== confirmNewPassword) {
+      alert('Passwords do not match!')
+      return
+    }
+    setLoading(true)
+    const res = await resetPassword(forgotEmail, resetCode, newPassword)
+    setLoading(false)
+    if (res.message === 'Password reset successful! You can now sign in.') {
+      alert('✅ Password reset successful! Please sign in.')
+      setForgotMode(false)
+      setResetStep(1)
+      setResetCode('')
+      setNewPassword('')
+      setConfirmNewPassword('')
+      setForgotEmail('')
+      setIsSignIn(true)
+    } else {
+      alert(res.message || 'Something went wrong.')
+    }
+  }
+
   const handleClose = () => {
     setAuthOpen(false)
     setSuccess(false)
     setLoading(false)
+    setForgotMode(false)
+    setForgotEmail('')
+    setForgotSent(false)
+    setResetStep(1)
+    setResetCode('')
+    setNewPassword('')
+    setConfirmNewPassword('')
     setForm({
       fullName: '',
       email: '',
@@ -88,7 +143,7 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
         onClick={handleClose}
       />
 
-      {/* Modal — bottom sheet on mobile, centered on desktop */}
+      {/* Modal */}
       <div className='
         fixed z-50
         bottom-0 left-0 right-0 rounded-t-3xl
@@ -113,14 +168,29 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
           <div className='flex justify-between items-center mb-5'>
             <div>
               <h2 className='text-xl sm:text-2xl font-black text-gray-800'>
-                {success ? '🎉 Welcome!' : isSignIn ? 'Sign In' : 'Create Account'}
+                {success
+                  ? '🎉 Welcome!'
+                  : forgotMode
+                  ? resetStep === 1
+                    ? '🔐 Forgot Password'
+                    : resetStep === 2
+                    ? '📧 Enter Code'
+                    : '🔑 New Password'
+                  : isSignIn
+                  ? 'Sign In'
+                  : 'Create Account'}
               </h2>
               {!success && (
                 <p className='text-xs text-gray-400 mt-0.5'>
-                  {isSignIn
+                  {forgotMode
+                    ? resetStep === 1
+                      ? 'We will send you a 6-digit reset code'
+                      : resetStep === 2
+                      ? `Code sent to ${forgotEmail}`
+                      : 'Enter your new password'
+                    : isSignIn
                     ? 'Welcome back to OBISCO Gadgets'
-                    : 'Join OBISCO Gadgets today'
-                  }
+                    : 'Join OBISCO Gadgets today'}
                 </p>
               )}
             </div>
@@ -132,8 +202,8 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
             </button>
           </div>
 
+          {/* Success Screen */}
           {success ? (
-            /* Success Screen */
             <div className='text-center py-4'>
               <div className='w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4'>
                 <FaUser size={28} className='text-orange-500' />
@@ -142,14 +212,17 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
                 {isSignIn ? 'Welcome Back!' : 'Account Created!'}
               </h3>
               <p className='text-gray-500 text-sm mb-1'>
-                {isSignIn
-                  ? `Signed in as `
-                  : `Welcome, `
-                }
+                {isSignIn ? 'Signed in as ' : 'Welcome, '}
                 <span className='font-bold text-orange-500'>
                   {loggedInUser?.fullName || loggedInUser?.email}
                 </span>
               </p>
+              {!isSignIn && (
+                <p className='text-gray-400 text-xs mb-2'>
+                  📧 A welcome email has been sent to{' '}
+                  <span className='font-bold'>{loggedInUser?.email}</span>
+                </p>
+              )}
               <p className='text-gray-400 text-xs mb-6'>
                 You can now shop and checkout seamlessly.
               </p>
@@ -159,6 +232,151 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
               >
                 Continue Shopping
               </button>
+            </div>
+
+          ) : forgotMode ? (
+            /* Forgot Password Flow */
+            <div className='flex flex-col gap-3'>
+
+              {/* Step 1 — Enter Email */}
+              {resetStep === 1 && (
+                <>
+                  <p className='text-gray-500 text-sm'>
+                    Enter your registered email and we'll send you a 6-digit reset code.
+                  </p>
+                  <input
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    placeholder='Email Address'
+                    type='email'
+                    className='border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full'
+                  />
+                  <button
+                    onClick={handleForgotPassword}
+                    disabled={loading}
+                    className='w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold py-3 rounded-full transition text-sm flex items-center justify-center gap-2'
+                  >
+                    {loading ? (
+                      <>
+                        <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin' />
+                        Sending...
+                      </>
+                    ) : 'Send Reset Code'}
+                  </button>
+                  <button
+                    onClick={() => setForgotMode(false)}
+                    className='text-center text-sm text-gray-500 hover:text-orange-500 transition'
+                  >
+                    ← Back to Sign In
+                  </button>
+                </>
+              )}
+
+              {/* Step 2 — Enter Code */}
+              {resetStep === 2 && (
+                <>
+                  <div className='text-center mb-2'>
+                    <p className='text-5xl mb-3'>📧</p>
+                    <p className='text-gray-500 text-sm'>
+                      We sent a 6-digit code to{' '}
+                      <span className='text-orange-500 font-bold'>{forgotEmail}</span>
+                    </p>
+                    <p className='text-gray-400 text-xs mt-1'>
+                      Check your spam folder if you don't see it.
+                    </p>
+                  </div>
+
+                  {/* Code input */}
+                  <input
+                    value={resetCode}
+                    onChange={(e) => setResetCode(e.target.value.replace(/\D/g, ''))}
+                    placeholder='000000'
+                    type='text'
+                    maxLength={6}
+                    className='border-2 border-orange-200 focus:border-orange-500 rounded-xl px-4 py-4 text-center tracking-[0.8em] font-black text-2xl focus:outline-none w-full'
+                  />
+
+                  <button
+                    onClick={() => {
+                      if (resetCode.length !== 6) {
+                        alert('Please enter the complete 6-digit code.')
+                        return
+                      }
+                      setResetStep(3)
+                    }}
+                    className='w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-full transition text-sm'
+                  >
+                    Verify Code →
+                  </button>
+
+                  <button
+                    onClick={handleForgotPassword}
+                    disabled={loading}
+                    className='text-center text-sm text-orange-500 hover:underline disabled:opacity-50'
+                  >
+                    {loading ? 'Resending...' : "Didn't receive code? Resend"}
+                  </button>
+
+                  <button
+                    onClick={() => { setResetStep(1); setResetCode('') }}
+                    className='text-center text-sm text-gray-500 hover:text-orange-500 transition'
+                  >
+                    ← Change Email
+                  </button>
+                </>
+              )}
+
+              {/* Step 3 — Enter New Password */}
+              {resetStep === 3 && (
+                <>
+                  <p className='text-gray-500 text-sm'>
+                    Enter your new password below.
+                  </p>
+
+                  <input
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder='New Password'
+                    type='password'
+                    className='border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full'
+                  />
+                  <input
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    placeholder='Confirm New Password'
+                    type='password'
+                    className='border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full'
+                  />
+
+                  {/* Password match indicator */}
+                  {confirmNewPassword && (
+                    <p className={`text-xs ${newPassword === confirmNewPassword ? 'text-green-500' : 'text-red-500'}`}>
+                      {newPassword === confirmNewPassword ? '✅ Passwords match' : '❌ Passwords do not match'}
+                    </p>
+                  )}
+
+                  <button
+                    onClick={handleResetPassword}
+                    disabled={loading}
+                    className='w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold py-3 rounded-full transition text-sm flex items-center justify-center gap-2'
+                  >
+                    {loading ? (
+                      <>
+                        <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin' />
+                        Resetting...
+                      </>
+                    ) : 'Reset Password'}
+                  </button>
+
+                  <button
+                    onClick={() => { setResetStep(2); setNewPassword(''); setConfirmNewPassword('') }}
+                    className='text-center text-sm text-gray-500 hover:text-orange-500 transition'
+                  >
+                    ← Back
+                  </button>
+                </>
+              )}
+
             </div>
 
           ) : (
@@ -243,7 +461,10 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
 
                 {/* Forgot Password */}
                 {isSignIn && (
-                  <p className='text-right text-xs text-orange-500 hover:underline cursor-pointer'>
+                  <p
+                    onClick={() => { setForgotMode(true); setResetStep(1) }}
+                    className='text-right text-xs text-orange-500 hover:underline cursor-pointer'
+                  >
                     Forgot Password?
                   </p>
                 )}

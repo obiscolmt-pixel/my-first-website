@@ -34,3 +34,21 @@ export const placeOrder = async (orderData) => {
   })
   return res.json()
 }
+
+export const forgotPassword = async (email) => {
+  const res = await fetch(`${BASE_URL}/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  })
+  return res.json()
+}
+
+export const resetPassword = async (email, code, password) => {
+  const res = await fetch(`${BASE_URL}/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, code, password }),
+  })
+  return res.json()
+}
