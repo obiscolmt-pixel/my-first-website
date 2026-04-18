@@ -27,19 +27,19 @@ const App = () => {
   };
 
   const removeFromCart = (id) => {
-    setCartItems((prev) => prev.filter((i) => i.id !== id));
+    setCartItems((prev) => prev.filter((i) => i._id !== id));
   };
 
   const increaseQty = (id) => {
     setCartItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, quantity: i.quantity + 1 } : i)),
+      prev.map((i) => (i._id === id ? { ...i, quantity: i.quantity + 1 } : i)),
     );
   };
 
   const decreaseQty = (id) => {
     setCartItems((prev) =>
       prev
-        .map((i) => (i.id === id ? { ...i, quantity: i.quantity - 1 } : i))
+        .map((i) => (i._id === id ? { ...i, quantity: i.quantity - 1 } : i))
         .filter((i) => i.quantity > 0),
     );
   };
