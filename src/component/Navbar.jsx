@@ -16,6 +16,8 @@ const Navbar = ({
   cartItems,
   setCartOpen,
   setAuthOpen,
+  setTrackOpen,
+  setAdminOpen,
 }) => {
   const [nav, setNav] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -26,13 +28,12 @@ const Navbar = ({
   const handleSignOut = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    window.location.reload()
+    window.location.reload();
   };
 
   return (
     <>
       <div className="max-w-[1640px] mx-auto flex justify-between items-center p-4">
-
         {/* Left side */}
         <div className="flex items-center gap-3">
           <div onClick={() => setNav(!nav)} className="cursor-pointer">
@@ -65,7 +66,6 @@ const Navbar = ({
 
         {/* Right side */}
         <div className="flex items-center gap-2">
-
           {/* Search icon — mobile only */}
           <button
             onClick={() => setSearchOpen(!searchOpen)}
@@ -77,7 +77,9 @@ const Navbar = ({
           {/* Account button — shows dropdown if logged in */}
           <div className="relative">
             <button
-              onClick={() => user ? setShowUserMenu(!showUserMenu) : setAuthOpen(true)}
+              onClick={() =>
+                user ? setShowUserMenu(!showUserMenu) : setAuthOpen(true)
+              }
               className="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-black rounded-full px-3 py-2 transition text-sm"
             >
               <FaUser size={14} />
@@ -95,31 +97,44 @@ const Navbar = ({
                   onClick={() => setShowUserMenu(false)}
                 />
                 <div className="absolute right-0 top-12 bg-white rounded-2xl shadow-xl border border-gray-100 z-20 w-52 overflow-hidden">
-
                   {/* User info */}
                   <div className="px-4 py-3 border-b bg-orange-50">
-                    <p className="font-bold text-gray-800 text-sm">{user.fullName}</p>
-                    <p className="text-gray-500 text-xs truncate">{user.email}</p>
+                    <p className="font-bold text-gray-800 text-sm">
+                      {user.fullName}
+                    </p>
+                    <p className="text-gray-500 text-xs truncate">
+                      {user.email}
+                    </p>
                   </div>
 
                   {/* Menu items */}
                   <ul className="py-1">
                     <li
-                      onClick={() => { setShowUserMenu(false) }}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition"
+                      onClick={() => {
+                        setTrackOpen(true);
+                        setNav(false);
+                      }}
+                      className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
                     >
-                      <TbTruckDelivery size={18} className="text-orange-500" />
+                      <TbTruckDelivery
+                        size={22}
+                        className="mr-4 text-orange-500"
+                      />
                       Track Order
                     </li>
                     <li
-                      onClick={() => { setShowUserMenu(false) }}
+                      onClick={() => {
+                        setShowUserMenu(false);
+                      }}
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition"
                     >
                       <MdFavorite size={18} className="text-orange-500" />
                       Wishlist
                     </li>
                     <li
-                      onClick={() => { setShowUserMenu(false) }}
+                      onClick={() => {
+                        setShowUserMenu(false);
+                      }}
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition"
                     >
                       <AiFillTag size={18} className="text-orange-500" />
@@ -137,7 +152,6 @@ const Navbar = ({
                       Sign Out
                     </button>
                   </div>
-
                 </div>
               </>
             )}
@@ -156,7 +170,6 @@ const Navbar = ({
               </span>
             )}
           </button>
-
         </div>
       </div>
 
@@ -232,7 +245,10 @@ const Navbar = ({
             </button>
           ) : (
             <button
-              onClick={() => { setAuthOpen(true); setNav(false) }}
+              onClick={() => {
+                setAuthOpen(true);
+                setNav(false);
+              }}
               className="flex-1 flex items-center justify-center gap-2 bg-gray-100 rounded-full py-2 text-sm font-semibold hover:bg-gray-200 transition"
             >
               <FaUser size={14} />
@@ -240,7 +256,10 @@ const Navbar = ({
             </button>
           )}
           <button
-            onClick={() => { setCartOpen(true); setNav(false) }}
+            onClick={() => {
+              setCartOpen(true);
+              setNav(false);
+            }}
             className="flex-1 flex items-center justify-center gap-2 bg-orange-500 text-white rounded-full py-2 text-sm font-semibold hover:bg-orange-600 transition"
           >
             <BsFillCartFill size={14} />
@@ -253,7 +272,13 @@ const Navbar = ({
         {/* Drawer Menu */}
         <nav className="flex-1 overflow-y-auto">
           <ul className="flex flex-col p-4 text-gray-800">
-            <li className="text-lg py-3 flex items-center border-b border-gray-100">
+            <li
+              onClick={() => {
+                setTrackOpen(true);
+                setNav(false);
+              }}
+              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
+            >
               <TbTruckDelivery size={22} className="mr-4 text-orange-500" />
               Track Order
             </li>
@@ -281,6 +306,16 @@ const Navbar = ({
               <FaUserFriends size={22} className="mr-4 text-orange-500" />
               Refer a Friend
             </li>
+            <li
+              onClick={() => {
+                setAdminOpen(true);
+                setNav(false);
+              }}
+              className="text-lg py-3 flex items-center cursor-pointer hover:text-orange-500 transition"
+            >
+              <AiFillTag size={22} className="mr-4 text-orange-500" />
+              ⚙️ Admin
+            </li>
           </ul>
         </nav>
 
@@ -290,7 +325,6 @@ const Navbar = ({
             © 2025 OBISCO Gadgets
           </p>
         </div>
-
       </div>
     </>
   );

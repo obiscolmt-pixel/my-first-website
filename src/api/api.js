@@ -52,3 +52,25 @@ export const resetPassword = async (email, code, password) => {
   })
   return res.json()
 }
+
+// Track order by ID
+export const trackOrder = async (orderId) => {
+  const res = await fetch(`${BASE_URL}/orders/${orderId}`)
+  return res.json()
+}
+
+// Update order status (admin)
+export const updateOrderStatus = async (orderId, data) => {
+  const res = await fetch(`${BASE_URL}/orders/${orderId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+  return res.json()
+}
+
+// Get all orders (admin)
+export const getAllOrders = async () => {
+  const res = await fetch(`${BASE_URL}/orders`)
+  return res.json()
+}
