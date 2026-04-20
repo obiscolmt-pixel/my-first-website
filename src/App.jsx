@@ -10,6 +10,7 @@ import AuthModal from "./component/AuthModal";
 import TrackOrder from "./component/TrackOrder";
 import AdminDashboard from "./component/AdminDashboard";
 import WhatsAppButton from "./component/WhatsAppButton";
+import ChatBot from './component/ChatBot'
 
 const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -50,6 +51,8 @@ const App = () => {
     );
   };
 
+  
+
   return (
     <>
       <Navbar
@@ -87,6 +90,7 @@ const App = () => {
 
       <AdminDashboard adminOpen={adminOpen} setAdminOpen={setAdminOpen} />
       <WhatsAppButton />
+      <ChatBot />
     </>
   );
 };
