@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Navbar from "./component/Navbar";
 import Hero from "./component/Hero";
 import Headlinecards from "./component/Headlinecards";
-import Food from "./component/Food";
+import Products from "./component/Products";
 import Category from "./component/Category";
 import Footer from "./component/footer";
 import CartSidebar from "./component/CartSidebar";
@@ -63,7 +63,7 @@ const App = () => {
       />
       <Hero />
       <Headlinecards />
-      <Food
+      <Products
         searchQuery={searchQuery}
         addToCart={addToCart}
       />

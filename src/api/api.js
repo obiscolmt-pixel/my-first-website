@@ -74,3 +74,22 @@ export const getAllOrders = async () => {
   const res = await fetch(`${BASE_URL}/orders`)
   return res.json()
 }
+
+// ─── REVIEWS ─────────────────────────────────────────
+export const getReviews = async (productId) => {
+  const res = await fetch(`${BASE_URL}/reviews/${productId}`)
+  return res.json()
+}
+
+export const addReview = async (productId, reviewData) => {
+  const token = localStorage.getItem('token')
+  const res = await fetch(`${BASE_URL}/reviews/${productId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(reviewData),
+  })
+  return res.json()
+}
