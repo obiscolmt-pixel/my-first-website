@@ -2,47 +2,52 @@ import React, { useState, useEffect } from "react";
 import { fetchProducts, getReviews, addReview } from "../api/api.js";
 import { BsFillCartFill } from "react-icons/bs";
 import { AiOutlineCheck, AiOutlineClose } from "react-icons/ai";
+import { MdFavorite } from "react-icons/md";
 
-const Products = ({ searchQuery, addToCart }) => {
-  const [allProducts, setAllProducts] = useState([])
+const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
+  const [allProducts, setAllProducts] = useState([]);
   const [products, setProducts] = useState([]);
-  const [activeType, setActiveType] = useState('All');
+  const [activeType, setActiveType] = useState("All");
   const [activePrice, setActivePrice] = useState(null);
   const [toast, setToast] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [selectedColor, setSelectedColor] = useState('');
-  const [selectedImage, setSelectedImage] = useState('');
+  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedImage, setSelectedImage] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
 
   // Reviews state
-  const [reviews, setReviews] = useState([])
-  const [avgRating, setAvgRating] = useState(0)
-  const [totalReviews, setTotalReviews] = useState(0)
-  const [userRating, setUserRating] = useState(5)
-  const [userComment, setUserComment] = useState('')
-  const [reviewLoading, setReviewLoading] = useState(false)
-  const [showReviewForm, setShowReviewForm] = useState(false)
+  const [reviews, setReviews] = useState([]);
+  const [avgRating, setAvgRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [userRating, setUserRating] = useState(5);
+  const [userComment, setUserComment] = useState("");
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
 
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const data = await fetchProducts()
-        setAllProducts(data)
-        setProducts(data)
+        const data = await fetchProducts();
+        setAllProducts(data);
+        setProducts(data);
       } catch (err) {
-        console.error('Failed to load products:', err)
+        console.error("Failed to load products:", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    loadProducts()
-  }, [])
+    };
+    loadProducts();
+  }, []);
 
   const filterType = (category) => {
     setActiveType(category);
     setActivePrice(null);
-    setProducts(category === 'All' ? allProducts : allProducts.filter((item) => item.category === category));
+    setProducts(
+      category === "All"
+        ? allProducts
+        : allProducts.filter((item) => item.category === category),
+    );
   };
 
   const filterPrice = (price) => {
@@ -51,103 +56,111 @@ const Products = ({ searchQuery, addToCart }) => {
     setProducts(allProducts.filter((item) => item.price === price));
   };
 
-  const handleAddToCart = (item, qty = 1, color = '') => {
+  const handleAddToCart = (item, qty = 1, color = "") => {
     addToCart({ ...item, quantity: qty, color });
     setToast(item);
     setTimeout(() => setToast(null), 3000);
   };
 
   const openProduct = async (item) => {
-    setSelectedProduct(item)
-    setSelectedColor(item.colors?.length > 0 ? item.colors[0].name : '')
-    setSelectedImage(item.colors?.length > 0 ? item.colors[0].image : item.image)
-    setQuantity(1)
-    setReviews([])
-    setAvgRating(0)
-    setTotalReviews(0)
-    setShowReviewForm(false)
-    setUserComment('')
-    setUserRating(5)
+    setSelectedProduct(item);
+    setSelectedColor(item.colors?.length > 0 ? item.colors[0].name : "");
+    setSelectedImage(
+      item.colors?.length > 0 ? item.colors[0].image : item.image,
+    );
+    setQuantity(1);
+    setReviews([]);
+    setAvgRating(0);
+    setTotalReviews(0);
+    setShowReviewForm(false);
+    setUserComment("");
+    setUserRating(5);
 
     try {
-      const data = await getReviews(item._id)
+      const data = await getReviews(item._id);
       if (data.reviews) {
-        setReviews(data.reviews)
-        setAvgRating(data.avgRating)
-        setTotalReviews(data.total)
+        setReviews(data.reviews);
+        setAvgRating(data.avgRating);
+        setTotalReviews(data.total);
       }
     } catch (err) {
-      console.error('Failed to load reviews:', err)
+      console.error("Failed to load reviews:", err);
     }
   };
 
   const closeProduct = () => setSelectedProduct(null);
 
   const handleSubmitReview = async () => {
-    const user = JSON.parse(localStorage.getItem('user'))
+    const user = JSON.parse(localStorage.getItem("user"));
     if (!user) {
-      alert('Please sign in to leave a review.')
-      return
+      alert("Please sign in to leave a review.");
+      return;
     }
     if (!userComment.trim()) {
-      alert('Please write a comment.')
-      return
+      alert("Please write a comment.");
+      return;
     }
-    setReviewLoading(true)
+    setReviewLoading(true);
     const res = await addReview(selectedProduct._id, {
       rating: userRating,
       comment: userComment,
       fullName: user.fullName,
-    })
-    setReviewLoading(false)
+    });
+    setReviewLoading(false);
     if (res.review) {
-      setReviews((prev) => [res.review, ...prev])
-      const newTotal = totalReviews + 1
-      const newAvg = ((parseFloat(avgRating) * totalReviews + userRating) / newTotal).toFixed(1)
-      setTotalReviews(newTotal)
-      setAvgRating(newAvg)
-      setUserComment('')
-      setUserRating(5)
-      setShowReviewForm(false)
+      setReviews((prev) => [res.review, ...prev]);
+      const newTotal = totalReviews + 1;
+      const newAvg = (
+        (parseFloat(avgRating) * totalReviews + userRating) /
+        newTotal
+      ).toFixed(1);
+      setTotalReviews(newTotal);
+      setAvgRating(newAvg);
+      setUserComment("");
+      setUserRating(5);
+      setShowReviewForm(false);
     } else {
-      alert(res.message || 'Failed to submit review.')
+      alert(res.message || "Failed to submit review.");
     }
-  }
+  };
 
   const displayedProducts = searchQuery
-    ? allProducts.filter((item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchQuery.toLowerCase())
+    ? allProducts.filter(
+        (item) =>
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.category.toLowerCase().includes(searchQuery.toLowerCase()),
       )
     : products;
 
-  const StarDisplay = ({ rating, size = 'text-sm' }) => (
+  const StarDisplay = ({ rating, size = "text-sm" }) => (
     <div className="flex">
-      {[1,2,3,4,5].map((star) => (
+      {[1, 2, 3, 4, 5].map((star) => (
         <span
           key={star}
-          className={`${size} ${star <= Math.round(rating) ? 'text-yellow-400' : 'text-gray-200'}`}
+          className={`${size} ${star <= Math.round(rating) ? "text-yellow-400" : "text-gray-200"}`}
         >
           ★
         </span>
       ))}
     </div>
-  )
+  );
 
   if (loading) {
     return (
-      <div className="max-w-[1640px] mx-auto px-4 py-16 text-center" id="products">
+      <div
+        className="max-w-[1640px] mx-auto px-4 py-16 text-center"
+        id="products"
+      >
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-gray-400 text-sm">Loading products...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="max-w-[1640px] mx-auto px-3 sm:px-4 relative" id="products">
-
       {/* Toast Popup */}
       {toast && (
         <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-auto z-50 flex items-center gap-3 bg-gray-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-orange-500">
@@ -176,7 +189,6 @@ const Products = ({ searchQuery, addToCart }) => {
           />
 
           <div className="fixed bottom-0 left-0 right-0 sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:bottom-auto w-full sm:max-w-3xl bg-white z-50 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col">
-
             <button
               onClick={closeProduct}
               className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-black z-10 bg-white rounded-full p-1.5 shadow"
@@ -189,7 +201,6 @@ const Products = ({ searchQuery, addToCart }) => {
             </div>
 
             <div className="flex flex-col sm:flex-row overflow-y-auto">
-
               {/* Product Image */}
               <div className="w-full sm:w-1/2 h-[220px] sm:h-auto shrink-0">
                 <img
@@ -201,7 +212,6 @@ const Products = ({ searchQuery, addToCart }) => {
 
               {/* Product Details */}
               <div className="w-full sm:w-1/2 p-4 sm:p-6 flex flex-col gap-3 sm:gap-4 overflow-y-auto">
-
                 {/* Category & Name */}
                 <div>
                   <p className="text-orange-500 uppercase tracking-widest text-xs font-semibold capitalize">
@@ -232,41 +242,46 @@ const Products = ({ searchQuery, addToCart }) => {
 
                 {/* Description */}
                 <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">
-                  Premium quality {selectedProduct.name} with the latest features.
-                  Comes with full warranty and official accessories.
+                  Premium quality {selectedProduct.name} with the latest
+                  features. Comes with full warranty and official accessories.
                   Fast delivery across Nigeria.
                 </p>
 
                 {/* Color Selection */}
-                {selectedProduct.colors && selectedProduct.colors.length > 0 && (
-                  <div>
-                    <p className="font-bold text-gray-700 text-sm mb-2">
-                      Color: <span className="text-orange-500">{selectedColor}</span>
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedProduct.colors.map((color) => (
-                        <button
-                          key={color.name}
-                          onClick={() => {
-                            setSelectedColor(color.name)
-                            setSelectedImage(color.image)
-                          }}
-                          className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition
-                            ${selectedColor === color.name
-                              ? 'bg-orange-500 text-white border-orange-500'
-                              : 'bg-white text-gray-600 border-gray-300 hover:border-orange-400'
+                {selectedProduct.colors &&
+                  selectedProduct.colors.length > 0 && (
+                    <div>
+                      <p className="font-bold text-gray-700 text-sm mb-2">
+                        Color:{" "}
+                        <span className="text-orange-500">{selectedColor}</span>
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedProduct.colors.map((color) => (
+                          <button
+                            key={color.name}
+                            onClick={() => {
+                              setSelectedColor(color.name);
+                              setSelectedImage(color.image);
+                            }}
+                            className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition
+                            ${
+                              selectedColor === color.name
+                                ? "bg-orange-500 text-white border-orange-500"
+                                : "bg-white text-gray-600 border-gray-300 hover:border-orange-400"
                             }`}
-                        >
-                          {color.name}
-                        </button>
-                      ))}
+                          >
+                            {color.name}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Quantity */}
                 <div>
-                  <p className="font-bold text-gray-700 text-sm mb-2">Quantity</p>
+                  <p className="font-bold text-gray-700 text-sm mb-2">
+                    Quantity
+                  </p>
                   <div className="flex items-center gap-3 flex-wrap">
                     <button
                       onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -274,7 +289,9 @@ const Products = ({ searchQuery, addToCart }) => {
                     >
                       −
                     </button>
-                    <span className="font-black text-lg w-6 text-center">{quantity}</span>
+                    <span className="font-black text-lg w-6 text-center">
+                      {quantity}
+                    </span>
                     <button
                       onClick={() => setQuantity((q) => q + 1)}
                       className="w-9 h-9 rounded-full border border-gray-300 flex items-center justify-center text-xl font-bold hover:bg-gray-100 transition"
@@ -282,7 +299,7 @@ const Products = ({ searchQuery, addToCart }) => {
                       +
                     </button>
                     <span className="text-gray-400 text-xs sm:text-sm">
-                      Subtotal:{' '}
+                      Subtotal:{" "}
                       <span className="text-orange-500 font-bold">
                         ₦{(selectedProduct.amount * quantity).toLocaleString()}
                       </span>
@@ -292,55 +309,79 @@ const Products = ({ searchQuery, addToCart }) => {
 
                 {/* Delivery Info */}
                 <div className="bg-orange-50 border border-orange-100 rounded-xl p-3">
-                  <p className="text-xs text-orange-700 font-semibold mb-1">🚚 Delivery Info</p>
+                  <p className="text-xs text-orange-700 font-semibold mb-1">
+                    🚚 Delivery Info
+                  </p>
                   <p className="text-xs text-gray-500">
-                    Fast delivery available across Nigeria. Order today and receive within 2-5 business days.
+                    Fast delivery available across Nigeria. Order today and
+                    receive within 2-5 business days.
                   </p>
                 </div>
 
                 {/* Add to Cart Button */}
                 <button
                   onClick={() => {
-                    handleAddToCart(selectedProduct, quantity, selectedColor)
-                    closeProduct()
+                    handleAddToCart(selectedProduct, quantity, selectedColor);
+                    closeProduct();
                   }}
                   className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-full transition duration-200 text-sm"
                 >
                   <BsFillCartFill size={16} />
-                  Add to Cart — ₦{(selectedProduct.amount * quantity).toLocaleString()}
+                  Add to Cart — ₦
+                  {(selectedProduct.amount * quantity).toLocaleString()}
+                </button>
+
+                {/* Wishlist button in modal */}
+                <button
+                  onClick={() => addToWishlist(selectedProduct)}
+                  className={`w-full flex items-center justify-center gap-2 border-2 font-bold py-3 rounded-full transition duration-200 text-sm ${
+                    isWishlisted(selectedProduct._id)
+                      ? "border-red-500 text-red-500 hover:bg-red-50"
+                      : "border-gray-300 text-gray-500 hover:border-red-400 hover:text-red-400"
+                  }`}
+                >
+                  <MdFavorite size={16} />
+                  {isWishlisted(selectedProduct._id)
+                    ? "Remove from Wishlist"
+                    : "Add to Wishlist"}
                 </button>
 
                 {/* Reviews Section */}
                 <div className="border-t pt-4">
-
                   {/* Rating Summary */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <StarDisplay rating={avgRating} size="text-base" />
-                      <span className="font-black text-gray-800 text-sm">{avgRating}</span>
-                      <span className="text-gray-400 text-xs">({totalReviews} reviews)</span>
+                      <span className="font-black text-gray-800 text-sm">
+                        {avgRating}
+                      </span>
+                      <span className="text-gray-400 text-xs">
+                        ({totalReviews} reviews)
+                      </span>
                     </div>
                     <button
                       onClick={() => setShowReviewForm(!showReviewForm)}
                       className="text-xs text-orange-500 font-bold hover:underline"
                     >
-                      {showReviewForm ? 'Cancel' : '+ Write Review'}
+                      {showReviewForm ? "Cancel" : "+ Write Review"}
                     </button>
                   </div>
 
                   {/* Review Form */}
                   {showReviewForm && (
                     <div className="bg-orange-50 rounded-xl p-3 mb-3 border border-orange-100">
-                      <p className="text-xs font-bold text-gray-700 mb-1">Your Rating</p>
+                      <p className="text-xs font-bold text-gray-700 mb-1">
+                        Your Rating
+                      </p>
                       <div className="flex gap-1 mb-2">
-                        {[1,2,3,4,5].map((star) => (
+                        {[1, 2, 3, 4, 5].map((star) => (
                           <button
                             key={star}
                             onClick={() => setUserRating(star)}
                             className={`text-2xl transition ${
                               star <= userRating
-                                ? 'text-yellow-400'
-                                : 'text-gray-300 hover:text-yellow-300'
+                                ? "text-yellow-400"
+                                : "text-gray-300 hover:text-yellow-300"
                             }`}
                           >
                             ★
@@ -361,7 +402,9 @@ const Products = ({ searchQuery, addToCart }) => {
                       >
                         {reviewLoading ? (
                           <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        ) : 'Submit Review ⭐'}
+                        ) : (
+                          "Submit Review ⭐"
+                        )}
                       </button>
                     </div>
                   )}
@@ -377,17 +420,30 @@ const Products = ({ searchQuery, addToCart }) => {
                   ) : (
                     <div className="flex flex-col gap-3 max-h-[200px] overflow-y-auto pr-1">
                       {reviews.map((review) => (
-                        <div key={review._id} className="border rounded-xl p-3 bg-gray-50">
+                        <div
+                          key={review._id}
+                          className="border rounded-xl p-3 bg-gray-50"
+                        >
                           <div className="flex justify-between items-start mb-1">
                             <div>
-                              <p className="font-bold text-xs text-gray-800">{review.fullName}</p>
+                              <p className="font-bold text-xs text-gray-800">
+                                {review.fullName}
+                              </p>
                               <p className="text-gray-300 text-xs">
-                                {new Date(review.createdAt).toLocaleDateString('en-NG', {
-                                  day: 'numeric', month: 'short', year: 'numeric'
-                                })}
+                                {new Date(review.createdAt).toLocaleDateString(
+                                  "en-NG",
+                                  {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  },
+                                )}
                               </p>
                             </div>
-                            <StarDisplay rating={review.rating} size="text-xs" />
+                            <StarDisplay
+                              rating={review.rating}
+                              size="text-xs"
+                            />
                           </div>
                           <p className="text-gray-600 text-xs leading-relaxed mt-1">
                             {review.comment}
@@ -396,9 +452,7 @@ const Products = ({ searchQuery, addToCart }) => {
                       ))}
                     </div>
                   )}
-
                 </div>
-
               </div>
             </div>
           </div>
@@ -412,19 +466,27 @@ const Products = ({ searchQuery, addToCart }) => {
 
       {/* Filter Row */}
       <div className="flex flex-col lg:flex-row justify-between mt-4 gap-4">
-
         {/* Filter Type */}
         <div>
           <p className="font-bold text-gray-700 text-sm">Filter Type</p>
           <div className="flex flex-wrap">
-            {['All', 'phones', 'laptops', 'headphones', 'speakers', 'chargers', 'tablets'].map((cat) => (
+            {[
+              "All",
+              "phones",
+              "laptops",
+              "headphones",
+              "speakers",
+              "chargers",
+              "tablets",
+            ].map((cat) => (
               <button
                 key={cat}
                 onClick={() => filterType(cat)}
                 className={`m-1 border px-3 py-1 rounded-full capitalize transition text-xs sm:text-sm
-                  ${activeType === cat
-                    ? 'bg-orange-500 text-white border-orange-500'
-                    : 'border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white'
+                  ${
+                    activeType === cat
+                      ? "bg-orange-500 text-white border-orange-500"
+                      : "border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white"
                   }`}
               >
                 {cat}
@@ -438,18 +500,19 @@ const Products = ({ searchQuery, addToCart }) => {
           <p className="font-bold text-gray-700 text-sm">Filter Price</p>
           <div className="flex flex-wrap">
             {[
-              { label: 'Under ₦50k', value: '$' },
-              { label: '₦50k-₦150k', value: '$$' },
-              { label: '₦150k-₦500k', value: '$$$' },
-              { label: '₦500k+', value: '$$$$' },
+              { label: "Under ₦50k", value: "$" },
+              { label: "₦50k-₦150k", value: "$$" },
+              { label: "₦150k-₦500k", value: "$$$" },
+              { label: "₦500k+", value: "$$$$" },
             ].map((p) => (
               <button
                 key={p.value}
                 onClick={() => filterPrice(p.value)}
                 className={`m-1 border px-3 py-1 rounded-full transition text-xs sm:text-sm
-                  ${activePrice === p.value
-                    ? 'bg-orange-500 text-white border-orange-500'
-                    : 'border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white'
+                  ${
+                    activePrice === p.value
+                      ? "bg-orange-500 text-white border-orange-500"
+                      : "border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white"
                   }`}
               >
                 {p.label}
@@ -457,13 +520,13 @@ const Products = ({ searchQuery, addToCart }) => {
             ))}
           </div>
         </div>
-
       </div>
 
       {/* Search result info */}
       {searchQuery && (
         <p className="text-gray-500 text-xs sm:text-sm mt-2">
-          {displayedProducts.length} result{displayedProducts.length !== 1 ? 's' : ''} for{' '}
+          {displayedProducts.length} result
+          {displayedProducts.length !== 1 ? "s" : ""} for{" "}
           <span className="text-orange-500 font-semibold">"{searchQuery}"</span>
         </p>
       )}
@@ -475,18 +538,37 @@ const Products = ({ searchQuery, addToCart }) => {
             key={item._id}
             className="shadow-md rounded-xl hover:scale-105 duration-300 overflow-hidden bg-white cursor-pointer"
           >
-            <div onClick={() => openProduct(item)}>
+            <div onClick={() => openProduct(item)} className="relative">
               <img
                 src={item.image}
                 alt={item.name}
-                className="w-full h-[150px] sm:h-[200px] object-cover"
+                className="w-full h-[120px] sm:h-[160px] object-cover"
               />
-              <div className="flex justify-between items-center px-2 py-2 gap-1">
-                <p className="font-bold text-xs sm:text-sm leading-tight">{item.name}</p>
-                <span className="bg-orange-500 text-white rounded-full px-2 py-1 text-xs font-bold shrink-0">
-                  ₦{item.amount.toLocaleString()}
-                </span>
-              </div>
+              {/* Wishlist heart button */}
+              {/* Wishlist heart button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addToWishlist(item);
+                }}
+                className="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow hover:scale-110 transition"
+              >
+                {isWishlisted(item._id) ? (
+                  <span className="text-red-500 text-base leading-none">♥</span>
+                ) : (
+                  <span className="text-gray-400 text-base leading-none">
+                    ♡
+                  </span>
+                )}
+              </button>
+            </div>
+            <div className="flex justify-between items-center px-2 py-2 gap-1">
+              <p className="font-bold text-xs sm:text-sm leading-tight">
+                {item.name}
+              </p>
+              <span className="bg-orange-500 text-white rounded-full px-2 py-1 text-xs font-bold shrink-0">
+                ₦{item.amount.toLocaleString()}
+              </span>
             </div>
 
             {/* Add to Cart Button */}
@@ -499,7 +581,6 @@ const Products = ({ searchQuery, addToCart }) => {
                 Add to Cart
               </button>
             </div>
-
           </div>
         ))}
       </div>
@@ -508,11 +589,11 @@ const Products = ({ searchQuery, addToCart }) => {
       {displayedProducts.length === 0 && !loading && (
         <div className="text-center py-16">
           <p className="text-gray-400 text-base sm:text-lg">
-            No products found for "<span className="text-orange-500">{searchQuery}</span>"
+            No products found for "
+            <span className="text-orange-500">{searchQuery}</span>"
           </p>
         </div>
       )}
-
     </div>
   );
 };

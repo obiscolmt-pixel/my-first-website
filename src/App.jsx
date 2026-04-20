@@ -10,7 +10,8 @@ import AuthModal from "./component/AuthModal";
 import TrackOrder from "./component/TrackOrder";
 import AdminDashboard from "./component/AdminDashboard";
 import WhatsAppButton from "./component/WhatsAppButton";
-import ChatBot from './component/ChatBot'
+import ChatBot from "./component/ChatBot";
+import WishlistSidebar from "./component/WishlistSidebar";
 
 const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,7 +20,6 @@ const App = () => {
   const [authOpen, setAuthOpen] = useState(false);
   const [trackOpen, setTrackOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
-  
 
   const addToCart = (item) => {
     setCartItems((prev) => {
@@ -51,7 +51,30 @@ const App = () => {
     );
   };
 
-  
+  const [wishlist, setWishlist] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("obisco_wishlist")) || [];
+    } catch {
+      return [];
+    }
+  });
+  const [wishlistOpen, setWishlistOpen] = useState(false);
+
+  const addToWishlist = (item) => {
+    setWishlist((prev) => {
+      const exists = prev.find((i) => i._id === item._id);
+      if (exists) {
+        const updated = prev.filter((i) => i._id !== item._id);
+        localStorage.setItem("obisco_wishlist", JSON.stringify(updated));
+        return updated;
+      }
+      const updated = [...prev, item];
+      localStorage.setItem("obisco_wishlist", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const isWishlisted = (id) => wishlist.some((i) => i._id === id);
 
   return (
     <>
@@ -63,14 +86,18 @@ const App = () => {
         setAuthOpen={setAuthOpen}
         setTrackOpen={setTrackOpen}
         setAdminOpen={setAdminOpen}
+        wishlist={wishlist}
+        setWishlistOpen={setWishlistOpen}
       />
       <Hero />
       <Headlinecards />
       <Products
         searchQuery={searchQuery}
         addToCart={addToCart}
+        addToWishlist={addToWishlist}
+        isWishlisted={isWishlisted}
       />
-     
+
       <Category />
       <Footer />
 
@@ -82,6 +109,13 @@ const App = () => {
         increaseQty={increaseQty}
         decreaseQty={decreaseQty}
         setCartItems={setCartItems}
+      />
+      <WishlistSidebar
+        wishlistOpen={wishlistOpen}
+        setWishlistOpen={setWishlistOpen}
+        wishlist={wishlist}
+        addToCart={addToCart}
+        addToWishlist={addToWishlist}
       />
 
       <AuthModal authOpen={authOpen} setAuthOpen={setAuthOpen} />

@@ -4,6 +4,7 @@ import {
   AiOutlineSearch,
   AiOutlineClose,
   AiFillTag,
+  AiOutlineHome,
 } from "react-icons/ai";
 import { BsFillCartFill, BsFillSaveFill } from "react-icons/bs";
 import { TbTruckDelivery } from "react-icons/tb";
@@ -19,62 +20,63 @@ const Navbar = ({
   setAuthOpen,
   setTrackOpen,
   setAdminOpen,
+  wishlist,
+  setWishlistOpen,
 }) => {
   const [nav, setNav] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [allProducts, setAllProducts] = useState([])
-  const [suggestions, setSuggestions] = useState([])
-  const [showSuggestions, setShowSuggestions] = useState(false)
-  const searchRef = useRef(null)
+  const [allProducts, setAllProducts] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchRef = useRef(null);
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // Load products for suggestions
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const data = await fetchProducts()
-        setAllProducts(data)
+        const data = await fetchProducts();
+        setAllProducts(data);
       } catch (err) {
-        console.error('Failed to load products for search:', err)
+        console.error("Failed to load products for search:", err);
       }
-    }
-    loadProducts()
-  }, [])
+    };
+    loadProducts();
+  }, []);
 
-  // Filter suggestions as user types
   useEffect(() => {
     if (searchQuery.trim().length > 0) {
-      const filtered = allProducts.filter((item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchQuery.toLowerCase())
-      ).slice(0, 6) // show max 6 suggestions
-      setSuggestions(filtered)
-      setShowSuggestions(true)
+      const filtered = allProducts
+        .filter(
+          (item) =>
+            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.category.toLowerCase().includes(searchQuery.toLowerCase()),
+        )
+        .slice(0, 6);
+      setSuggestions(filtered);
+      setShowSuggestions(true);
     } else {
-      setSuggestions([])
-      setShowSuggestions(false)
+      setSuggestions([]);
+      setShowSuggestions(false);
     }
-  }, [searchQuery, allProducts])
+  }, [searchQuery, allProducts]);
 
-  // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
-        setShowSuggestions(false)
+        setShowSuggestions(false);
       }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleSelectSuggestion = (item) => {
-    setSearchQuery(item.name)
-    setShowSuggestions(false)
-    // Scroll to products section
-    document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })
-  }
+    setSearchQuery(item.name);
+    setShowSuggestions(false);
+    document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const handleSignOut = () => {
     localStorage.removeItem("user");
@@ -115,8 +117,8 @@ const Navbar = ({
                   size={18}
                   className="cursor-pointer text-gray-400 hover:text-black"
                   onClick={() => {
-                    setSearchQuery("")
-                    setShowSuggestions(false)
+                    setSearchQuery("");
+                    setShowSuggestions(false);
                   }}
                 />
               )}
@@ -126,7 +128,7 @@ const Navbar = ({
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute top-12 left-0 right-0 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden">
                 <p className="text-xs text-gray-400 px-4 py-2 border-b">
-                  {suggestions.length} result{suggestions.length !== 1 ? 's' : ''} found
+                  {suggestions.length} result{suggestions.length !== 1 ? "s" : ""} found
                 </p>
                 {suggestions.map((item) => (
                   <div
@@ -148,11 +150,10 @@ const Navbar = ({
                     </p>
                   </div>
                 ))}
-                {/* View all results */}
                 <div
                   onClick={() => {
-                    setShowSuggestions(false)
-                    document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })
+                    setShowSuggestions(false);
+                    document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
                   }}
                   className="px-4 py-2.5 text-center text-sm text-orange-500 font-bold hover:bg-orange-50 cursor-pointer transition"
                 >
@@ -203,7 +204,7 @@ const Navbar = ({
                         Track Order
                       </li>
                       <li
-                        onClick={() => setShowUserMenu(false)}
+                        onClick={() => { setWishlistOpen(true); setShowUserMenu(false) }}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition"
                       >
                         <MdFavorite size={18} className="text-orange-500" />
@@ -249,7 +250,7 @@ const Navbar = ({
         </div>
       </div>
 
-      {/* Mobile Search Bar — slides down */}
+      {/* Mobile Search Bar */}
       {searchOpen && (
         <div className="md:hidden px-4 pb-3 bg-white shadow-sm" ref={searchRef}>
           <div className="flex items-center bg-gray-100 rounded-full px-4">
@@ -267,8 +268,8 @@ const Navbar = ({
                 size={18}
                 className="cursor-pointer text-gray-400"
                 onClick={() => {
-                  setSearchQuery("")
-                  setShowSuggestions(false)
+                  setSearchQuery("");
+                  setShowSuggestions(false);
                 }}
               />
             )}
@@ -281,8 +282,8 @@ const Navbar = ({
                 <div
                   key={item._id}
                   onClick={() => {
-                    handleSelectSuggestion(item)
-                    setSearchOpen(false)
+                    handleSelectSuggestion(item);
+                    setSearchOpen(false);
                   }}
                   className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 cursor-pointer transition border-b last:border-0"
                 >
@@ -302,9 +303,9 @@ const Navbar = ({
               ))}
               <div
                 onClick={() => {
-                  setShowSuggestions(false)
-                  setSearchOpen(false)
-                  document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })
+                  setShowSuggestions(false);
+                  setSearchOpen(false);
+                  document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
                 }}
                 className="px-4 py-2.5 text-center text-sm text-orange-500 font-bold hover:bg-orange-50 cursor-pointer"
               >
@@ -376,6 +377,20 @@ const Navbar = ({
 
         <nav className="flex-1 overflow-y-auto">
           <ul className="flex flex-col p-4 text-gray-800">
+
+            {/* Home */}
+            <li
+              onClick={() => {
+                setNav(false)
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+              }}
+              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
+            >
+              <AiOutlineHome size={22} className="mr-4 text-orange-500" />
+              Home
+            </li>
+
+            {/* Track Order */}
             <li
               onClick={() => { setTrackOpen(true); setNav(false) }}
               className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
@@ -383,30 +398,52 @@ const Navbar = ({
               <TbTruckDelivery size={22} className="mr-4 text-orange-500" />
               Track Order
             </li>
-            <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
+
+            {/* Wishlist */}
+            <li
+              onClick={() => { setWishlistOpen(true); setNav(false) }}
+              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
+            >
               <MdFavorite size={22} className="mr-4 text-orange-500" />
               Wishlist
+              {wishlist.length > 0 && (
+                <span className="ml-auto bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  {wishlist.length}
+                </span>
+              )}
             </li>
+
+            {/* Wallet */}
             <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
               <FaWallet size={22} className="mr-4 text-orange-500" />
               Wallet
             </li>
+
+            {/* Support */}
             <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
               <MdHelp size={22} className="mr-4 text-orange-500" />
               Support
             </li>
+
+            {/* Deals & Offers */}
             <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
               <AiFillTag size={22} className="mr-4 text-orange-500" />
               Deals & Offers
             </li>
+
+            {/* Saved Items */}
             <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
               <BsFillSaveFill size={22} className="mr-4 text-orange-500" />
               Saved Items
             </li>
+
+            {/* Refer a Friend */}
             <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
               <FaUserFriends size={22} className="mr-4 text-orange-500" />
               Refer a Friend
             </li>
+
+            {/* Admin */}
             <li
               onClick={() => { setAdminOpen(true); setNav(false) }}
               className="text-lg py-3 flex items-center cursor-pointer hover:text-orange-500 transition"
@@ -414,6 +451,7 @@ const Navbar = ({
               <AiFillTag size={22} className="mr-4 text-orange-500" />
               ⚙️ Admin
             </li>
+
           </ul>
         </nav>
 
