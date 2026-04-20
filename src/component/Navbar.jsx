@@ -33,6 +33,7 @@ const Navbar = ({
 
   return (
     <>
+    <div className="sticky top-0 bg-white z-10 shadow-sm">
       <div className="max-w-[1640px] mx-auto flex justify-between items-center p-4">
         {/* Left side */}
         <div className="flex items-center gap-3">
@@ -171,6 +172,7 @@ const Navbar = ({
             )}
           </button>
         </div>
+      </div>
       </div>
 
       {/* Mobile Search Bar */}

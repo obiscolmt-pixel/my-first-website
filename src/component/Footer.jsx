@@ -80,7 +80,7 @@ function Footer() {
             <li className='flex items-center gap-3'>
               <MdEmail size={20} className='text-orange-500 shrink-0' />
               <a href='mailto:obiscogadgets@gmail.com' className='text-sm text-gray-400 hover:text-orange-500 transition'>
-                obiscogadgets@gmail.com
+                obiscogadgets1@gmail.com
               </a>
             </li>
             <li className='flex items-center gap-3'>
