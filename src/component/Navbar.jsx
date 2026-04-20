@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   AiOutlineMenu,
   AiOutlineSearch,
@@ -9,6 +9,7 @@ import { BsFillCartFill, BsFillSaveFill } from "react-icons/bs";
 import { TbTruckDelivery } from "react-icons/tb";
 import { MdFavorite, MdHelp } from "react-icons/md";
 import { FaUser, FaUserFriends, FaWallet, FaSignOutAlt } from "react-icons/fa";
+import { fetchProducts } from "../api/api.js";
 
 const Navbar = ({
   searchQuery,
@@ -22,8 +23,58 @@ const Navbar = ({
   const [nav, setNav] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [allProducts, setAllProducts] = useState([])
+  const [suggestions, setSuggestions] = useState([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const searchRef = useRef(null)
 
   const user = JSON.parse(localStorage.getItem("user"));
+
+  // Load products for suggestions
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const data = await fetchProducts()
+        setAllProducts(data)
+      } catch (err) {
+        console.error('Failed to load products for search:', err)
+      }
+    }
+    loadProducts()
+  }, [])
+
+  // Filter suggestions as user types
+  useEffect(() => {
+    if (searchQuery.trim().length > 0) {
+      const filtered = allProducts.filter((item) =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.category.toLowerCase().includes(searchQuery.toLowerCase())
+      ).slice(0, 6) // show max 6 suggestions
+      setSuggestions(filtered)
+      setShowSuggestions(true)
+    } else {
+      setSuggestions([])
+      setShowSuggestions(false)
+    }
+  }, [searchQuery, allProducts])
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleSelectSuggestion = (item) => {
+    setSearchQuery(item.name)
+    setShowSuggestions(false)
+    // Scroll to products section
+    document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   const handleSignOut = () => {
     localStorage.removeItem("user");
@@ -33,151 +84,174 @@ const Navbar = ({
 
   return (
     <>
-    <div className="sticky top-0 bg-white z-10 shadow-sm">
-      <div className="max-w-[1640px] mx-auto flex justify-between items-center p-4">
-        {/* Left side */}
-        <div className="flex items-center gap-3">
-          <div onClick={() => setNav(!nav)} className="cursor-pointer">
-            <AiOutlineMenu size={28} />
+      <div className="sticky top-0 bg-white z-10 shadow-sm">
+        <div className="max-w-[1640px] mx-auto flex justify-between items-center p-4">
+
+          {/* Left side */}
+          <div className="flex items-center gap-3">
+            <div onClick={() => setNav(!nav)} className="cursor-pointer">
+              <AiOutlineMenu size={28} />
+            </div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl">
+              <span className="font-bold text-black">OBISCO</span>{" "}
+              <span className="text-orange-500">gadgets</span>
+            </h1>
           </div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl">
-            <span className="font-bold text-black">OBISCO</span>{" "}
-            <span className="text-orange-500">gadgets</span>
-          </h1>
-        </div>
 
-        {/* Search — desktop */}
-        <div className="hidden md:flex items-center bg-gray-100 rounded-full px-4 w-[300px] lg:w-[500px]">
-          <AiOutlineSearch size={22} className="text-gray-400" />
-          <input
-            className="bg-transparent p-2 w-full focus:outline-none text-sm"
-            type="text"
-            placeholder="Search gadgets..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <AiOutlineClose
-              size={18}
-              className="cursor-pointer text-gray-400 hover:text-black"
-              onClick={() => setSearchQuery("")}
-            />
-          )}
-        </div>
+          {/* Search — desktop */}
+          <div className="hidden md:block relative w-[300px] lg:w-[500px]" ref={searchRef}>
+            <div className="flex items-center bg-gray-100 rounded-full px-4">
+              <AiOutlineSearch size={22} className="text-gray-400" />
+              <input
+                className="bg-transparent p-2 w-full focus:outline-none text-sm"
+                type="text"
+                placeholder="Search gadgets..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => searchQuery && setShowSuggestions(true)}
+              />
+              {searchQuery && (
+                <AiOutlineClose
+                  size={18}
+                  className="cursor-pointer text-gray-400 hover:text-black"
+                  onClick={() => {
+                    setSearchQuery("")
+                    setShowSuggestions(false)
+                  }}
+                />
+              )}
+            </div>
 
-        {/* Right side */}
-        <div className="flex items-center gap-2">
-          {/* Search icon — mobile only */}
-          <button
-            onClick={() => setSearchOpen(!searchOpen)}
-            className="md:hidden p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition"
-          >
-            <AiOutlineSearch size={22} />
-          </button>
+            {/* Suggestions Dropdown — desktop */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-12 left-0 right-0 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+                <p className="text-xs text-gray-400 px-4 py-2 border-b">
+                  {suggestions.length} result{suggestions.length !== 1 ? 's' : ''} found
+                </p>
+                {suggestions.map((item) => (
+                  <div
+                    key={item._id}
+                    onClick={() => handleSelectSuggestion(item)}
+                    className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 cursor-pointer transition border-b last:border-0"
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-10 h-10 object-cover rounded-lg shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm text-gray-800 truncate">{item.name}</p>
+                      <p className="text-xs text-orange-500 capitalize">{item.category}</p>
+                    </div>
+                    <p className="text-xs font-bold text-orange-500 shrink-0">
+                      ₦{item.amount.toLocaleString()}
+                    </p>
+                  </div>
+                ))}
+                {/* View all results */}
+                <div
+                  onClick={() => {
+                    setShowSuggestions(false)
+                    document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })
+                  }}
+                  className="px-4 py-2.5 text-center text-sm text-orange-500 font-bold hover:bg-orange-50 cursor-pointer transition"
+                >
+                  View all results for "{searchQuery}"
+                </div>
+              </div>
+            )}
+          </div>
 
-          {/* Account button — shows dropdown if logged in */}
-          <div className="relative">
+          {/* Right side */}
+          <div className="flex items-center gap-2">
+
+            {/* Search icon — mobile only */}
             <button
-              onClick={() =>
-                user ? setShowUserMenu(!showUserMenu) : setAuthOpen(true)
-              }
-              className="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-black rounded-full px-3 py-2 transition text-sm"
+              onClick={() => setSearchOpen(!searchOpen)}
+              className="md:hidden p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition"
             >
-              <FaUser size={14} />
-              <span className="hidden sm:inline">
-                {user ? user.fullName.split(" ")[0] : "Account"}
-              </span>
+              <AiOutlineSearch size={22} />
             </button>
 
-            {/* Dropdown menu — only when logged in */}
-            {showUserMenu && user && (
-              <>
-                {/* Click outside to close */}
-                <div
-                  className="fixed inset-0 z-10"
-                  onClick={() => setShowUserMenu(false)}
-                />
-                <div className="absolute right-0 top-12 bg-white rounded-2xl shadow-xl border border-gray-100 z-20 w-52 overflow-hidden">
-                  {/* User info */}
-                  <div className="px-4 py-3 border-b bg-orange-50">
-                    <p className="font-bold text-gray-800 text-sm">
-                      {user.fullName}
-                    </p>
-                    <p className="text-gray-500 text-xs truncate">
-                      {user.email}
-                    </p>
-                  </div>
+            {/* Account button with dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => user ? setShowUserMenu(!showUserMenu) : setAuthOpen(true)}
+                className="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-black rounded-full px-3 py-2 transition text-sm"
+              >
+                <FaUser size={14} />
+                <span className="hidden sm:inline">
+                  {user ? user.fullName.split(" ")[0] : "Account"}
+                </span>
+              </button>
 
-                  {/* Menu items */}
-                  <ul className="py-1">
-                    <li
-                      onClick={() => {
-                        setTrackOpen(true);
-                        setNav(false);
-                      }}
-                      className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
-                    >
-                      <TbTruckDelivery
-                        size={22}
-                        className="mr-4 text-orange-500"
-                      />
-                      Track Order
-                    </li>
-                    <li
-                      onClick={() => {
-                        setShowUserMenu(false);
-                      }}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition"
-                    >
-                      <MdFavorite size={18} className="text-orange-500" />
-                      Wishlist
-                    </li>
-                    <li
-                      onClick={() => {
-                        setShowUserMenu(false);
-                      }}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition"
-                    >
-                      <AiFillTag size={18} className="text-orange-500" />
-                      Deals & Offers
-                    </li>
-                  </ul>
-
-                  {/* Sign out */}
-                  <div className="border-t px-3 py-2">
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-500 font-semibold py-2 rounded-full transition text-sm"
-                    >
-                      <FaSignOutAlt size={14} />
-                      Sign Out
-                    </button>
+              {/* Dropdown */}
+              {showUserMenu && user && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setShowUserMenu(false)} />
+                  <div className="absolute right-0 top-12 bg-white rounded-2xl shadow-xl border border-gray-100 z-20 w-52 overflow-hidden">
+                    <div className="px-4 py-3 border-b bg-orange-50">
+                      <p className="font-bold text-gray-800 text-sm">{user.fullName}</p>
+                      <p className="text-gray-500 text-xs truncate">{user.email}</p>
+                    </div>
+                    <ul className="py-1">
+                      <li
+                        onClick={() => { setTrackOpen(true); setShowUserMenu(false) }}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition"
+                      >
+                        <TbTruckDelivery size={18} className="text-orange-500" />
+                        Track Order
+                      </li>
+                      <li
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition"
+                      >
+                        <MdFavorite size={18} className="text-orange-500" />
+                        Wishlist
+                      </li>
+                      <li
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition"
+                      >
+                        <AiFillTag size={18} className="text-orange-500" />
+                        Deals & Offers
+                      </li>
+                    </ul>
+                    <div className="border-t px-3 py-2">
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-500 font-semibold py-2 rounded-full transition text-sm"
+                      >
+                        <FaSignOutAlt size={14} />
+                        Sign Out
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
+                </>
+              )}
+            </div>
+
+            {/* Cart button */}
+            <button
+              onClick={() => setCartOpen(true)}
+              className="bg-black text-white flex items-center gap-2 rounded-full px-3 sm:px-5 py-2 relative transition hover:bg-gray-800"
+            >
+              <BsFillCartFill size={18} />
+              <span className="hidden sm:inline text-sm">Cart</span>
+              {cartItems.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
+                  {cartItems.reduce((acc, i) => acc + i.quantity, 0)}
+                </span>
+              )}
+            </button>
+
           </div>
-
-          {/* Cart button */}
-          <button
-            onClick={() => setCartOpen(true)}
-            className="bg-black text-white flex items-center gap-2 rounded-full px-3 sm:px-5 py-2 relative transition hover:bg-gray-800"
-          >
-            <BsFillCartFill size={18} />
-            <span className="hidden sm:inline text-sm">Cart</span>
-            {cartItems.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
-                {cartItems.reduce((acc, i) => acc + i.quantity, 0)}
-              </span>
-            )}
-          </button>
         </div>
       </div>
-      </div>
 
-      {/* Mobile Search Bar */}
+      {/* Mobile Search Bar — slides down */}
       {searchOpen && (
-        <div className="md:hidden px-4 pb-3">
+        <div className="md:hidden px-4 pb-3 bg-white shadow-sm" ref={searchRef}>
           <div className="flex items-center bg-gray-100 rounded-full px-4">
             <AiOutlineSearch size={20} className="text-gray-400" />
             <input
@@ -192,10 +266,52 @@ const Navbar = ({
               <AiOutlineClose
                 size={18}
                 className="cursor-pointer text-gray-400"
-                onClick={() => setSearchQuery("")}
+                onClick={() => {
+                  setSearchQuery("")
+                  setShowSuggestions(false)
+                }}
               />
             )}
           </div>
+
+          {/* Suggestions Dropdown — mobile */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 mt-2 overflow-hidden">
+              {suggestions.map((item) => (
+                <div
+                  key={item._id}
+                  onClick={() => {
+                    handleSelectSuggestion(item)
+                    setSearchOpen(false)
+                  }}
+                  className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 cursor-pointer transition border-b last:border-0"
+                >
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-10 h-10 object-cover rounded-lg shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm text-gray-800 truncate">{item.name}</p>
+                    <p className="text-xs text-orange-500 capitalize">{item.category}</p>
+                  </div>
+                  <p className="text-xs font-bold text-orange-500 shrink-0">
+                    ₦{item.amount.toLocaleString()}
+                  </p>
+                </div>
+              ))}
+              <div
+                onClick={() => {
+                  setShowSuggestions(false)
+                  setSearchOpen(false)
+                  document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })
+                }}
+                className="px-4 py-2.5 text-center text-sm text-orange-500 font-bold hover:bg-orange-50 cursor-pointer"
+              >
+                View all results for "{searchQuery}"
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -208,14 +324,10 @@ const Navbar = ({
       )}
 
       {/* Side drawer */}
-      <div
-        className={
-          nav
-            ? "bg-white fixed top-0 left-0 w-[280px] sm:w-[300px] h-screen z-30 duration-300 flex flex-col"
-            : "bg-white fixed top-0 left-[-100%] w-[280px] sm:w-[300px] h-screen z-30 duration-300 flex flex-col"
-        }
-      >
-        {/* Drawer Header */}
+      <div className={nav
+        ? "bg-white fixed top-0 left-0 w-[280px] sm:w-[300px] h-screen z-30 duration-300 flex flex-col"
+        : "bg-white fixed top-0 left-[-100%] w-[280px] sm:w-[300px] h-screen z-30 duration-300 flex flex-col"
+      }>
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-xl font-black">
             OBISCO <span className="text-orange-500">Gadgets</span>
@@ -227,15 +339,13 @@ const Navbar = ({
           />
         </div>
 
-        {/* User info in drawer — if logged in */}
-        {user ? (
+        {user && (
           <div className="px-4 py-3 border-b bg-orange-50">
             <p className="font-bold text-gray-800 text-sm">{user.fullName}</p>
-            <p className="text-gray-500 text-xs">{user.email}</p>
+            <p className="text-gray-500 text-xs truncate">{user.email}</p>
           </div>
-        ) : null}
+        )}
 
-        {/* Mobile Account & Cart shortcuts */}
         <div className="flex gap-2 px-4 py-3 border-b">
           {user ? (
             <button
@@ -247,10 +357,7 @@ const Navbar = ({
             </button>
           ) : (
             <button
-              onClick={() => {
-                setAuthOpen(true);
-                setNav(false);
-              }}
+              onClick={() => { setAuthOpen(true); setNav(false) }}
               className="flex-1 flex items-center justify-center gap-2 bg-gray-100 rounded-full py-2 text-sm font-semibold hover:bg-gray-200 transition"
             >
               <FaUser size={14} />
@@ -258,61 +365,50 @@ const Navbar = ({
             </button>
           )}
           <button
-            onClick={() => {
-              setCartOpen(true);
-              setNav(false);
-            }}
+            onClick={() => { setCartOpen(true); setNav(false) }}
             className="flex-1 flex items-center justify-center gap-2 bg-orange-500 text-white rounded-full py-2 text-sm font-semibold hover:bg-orange-600 transition"
           >
             <BsFillCartFill size={14} />
             Cart{" "}
-            {cartItems.length > 0 &&
-              `(${cartItems.reduce((acc, i) => acc + i.quantity, 0)})`}
+            {cartItems.length > 0 && `(${cartItems.reduce((acc, i) => acc + i.quantity, 0)})`}
           </button>
         </div>
 
-        {/* Drawer Menu */}
         <nav className="flex-1 overflow-y-auto">
           <ul className="flex flex-col p-4 text-gray-800">
             <li
-              onClick={() => {
-                setTrackOpen(true);
-                setNav(false);
-              }}
+              onClick={() => { setTrackOpen(true); setNav(false) }}
               className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
             >
               <TbTruckDelivery size={22} className="mr-4 text-orange-500" />
               Track Order
             </li>
-            <li className="text-lg py-3 flex items-center border-b border-gray-100">
+            <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
               <MdFavorite size={22} className="mr-4 text-orange-500" />
               Wishlist
             </li>
-            <li className="text-lg py-3 flex items-center border-b border-gray-100">
+            <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
               <FaWallet size={22} className="mr-4 text-orange-500" />
               Wallet
             </li>
-            <li className="text-lg py-3 flex items-center border-b border-gray-100">
+            <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
               <MdHelp size={22} className="mr-4 text-orange-500" />
               Support
             </li>
-            <li className="text-lg py-3 flex items-center border-b border-gray-100">
+            <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
               <AiFillTag size={22} className="mr-4 text-orange-500" />
               Deals & Offers
             </li>
-            <li className="text-lg py-3 flex items-center border-b border-gray-100">
+            <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
               <BsFillSaveFill size={22} className="mr-4 text-orange-500" />
               Saved Items
             </li>
-            <li className="text-lg py-3 flex items-center">
+            <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
               <FaUserFriends size={22} className="mr-4 text-orange-500" />
               Refer a Friend
             </li>
             <li
-              onClick={() => {
-                setAdminOpen(true);
-                setNav(false);
-              }}
+              onClick={() => { setAdminOpen(true); setNav(false) }}
               className="text-lg py-3 flex items-center cursor-pointer hover:text-orange-500 transition"
             >
               <AiFillTag size={22} className="mr-4 text-orange-500" />
@@ -321,11 +417,8 @@ const Navbar = ({
           </ul>
         </nav>
 
-        {/* Drawer Footer */}
         <div className="p-4 border-t">
-          <p className="text-xs text-gray-400 text-center">
-            © 2025 OBISCO Gadgets
-          </p>
+          <p className="text-xs text-gray-400 text-center">© 2025 OBISCO Gadgets</p>
         </div>
       </div>
     </>
