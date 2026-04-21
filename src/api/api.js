@@ -93,3 +93,22 @@ export const addReview = async (productId, reviewData) => {
   })
   return res.json()
 }
+
+// ─── PROMO ─────────────────────────────────────────
+export const validatePromo = async (code, orderTotal) => {
+  const res = await fetch(`${BASE_URL}/promo/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code, orderTotal }),
+  })
+  return res.json()
+}
+
+export const usePromo = async (code) => {
+  const res = await fetch(`${BASE_URL}/promo/use`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code }),
+  })
+  return res.json()
+}

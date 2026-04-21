@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { BsFillCartFill } from "react-icons/bs";
 import { AiOutlineClose } from "react-icons/ai";
-import { placeOrder } from "../api/api.js";
+import { placeOrder, validatePromo, usePromo } from "../api/api.js";
 
 const CartSidebar = ({
   cartOpen,
@@ -26,14 +26,46 @@ const CartSidebar = ({
   const [orderId, setOrderId] = useState(null);
   const [totalAmountSnapshot, setTotalAmountSnapshot] = useState(0);
 
+  // Promo code state
+  const [promoCode, setPromoCode] = useState('')
+  const [promoLoading, setPromoLoading] = useState(false)
+  const [promoResult, setPromoResult] = useState(null)
+  const [promoError, setPromoError] = useState('')
+
   const totalAmount = cartItems.reduce(
     (acc, i) => acc + i.amount * i.quantity, 0
   );
   const totalItems = cartItems.reduce((acc, i) => acc + i.quantity, 0);
 
+  // Final amount after discount
+  const discountAmount = promoResult?.discount || 0
+  const finalAmount = Math.max(0, totalAmount - discountAmount)
+
   const handleFormChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return
+    setPromoLoading(true)
+    setPromoError('')
+    setPromoResult(null)
+
+    const res = await validatePromo(promoCode, totalAmount)
+    setPromoLoading(false)
+
+    if (res.valid) {
+      setPromoResult(res)
+    } else {
+      setPromoError(res.message || 'Invalid promo code.')
+    }
+  }
+
+  const handleRemovePromo = () => {
+    setPromoCode('')
+    setPromoResult(null)
+    setPromoError('')
+  }
 
   const handlePlaceOrder = async () => {
     if (!form.fullName || !form.phone || !form.email || !form.address || !form.city || !form.state) {
@@ -44,7 +76,7 @@ const CartSidebar = ({
     setLoading(true);
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      const snapshot = totalAmount;
+      const snapshot = finalAmount;
       const res = await placeOrder({
         userId: user?._id || null,
         items: cartItems.map((item) => ({
@@ -58,13 +90,21 @@ const CartSidebar = ({
         })),
         totalAmount: snapshot,
         delivery: form,
+        promoCode: promoResult?.code || null,
+        discount: discountAmount || 0,
       });
 
       if (res.orderId) {
+        // Mark promo as used
+        if (promoResult?.code) {
+          await usePromo(promoResult.code)
+        }
         setTotalAmountSnapshot(snapshot);
         setOrderId(res.orderId);
         setOrderPlaced(true);
         setCartItems([]);
+        setPromoResult(null)
+        setPromoCode('')
       } else {
         alert(res.message || "Something went wrong. Please try again.");
       }
@@ -204,12 +244,71 @@ const CartSidebar = ({
                     </span>
                   </div>
                 ))}
-                <div className="flex justify-between mt-3 font-bold">
+
+                {/* Subtotal */}
+                <div className="flex justify-between mt-3 text-sm text-gray-500">
+                  <span>Subtotal</span>
+                  <span>₦{totalAmount.toLocaleString()}</span>
+                </div>
+
+                {/* Discount */}
+                {promoResult && (
+                  <div className="flex justify-between text-sm text-green-600 font-semibold mt-1">
+                    <span>Discount ({promoResult.code})</span>
+                    <span>-₦{discountAmount.toLocaleString()}</span>
+                  </div>
+                )}
+
+                {/* Total */}
+                <div className="flex justify-between mt-2 font-bold border-t pt-2">
                   <span className="text-sm">Total</span>
                   <span className="text-orange-500 text-base sm:text-lg">
-                    ₦{totalAmount.toLocaleString()}
+                    ₦{finalAmount.toLocaleString()}
                   </span>
                 </div>
+              </div>
+
+              {/* Promo Code */}
+              <div>
+                <p className="font-bold text-gray-700 mb-2 text-sm">🏷️ Promo Code</p>
+                {promoResult ? (
+                  <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+                    <div>
+                      <p className="text-green-600 font-bold text-sm">{promoResult.code} ✅</p>
+                      <p className="text-green-500 text-xs">{promoResult.message}</p>
+                    </div>
+                    <button
+                      onClick={handleRemovePromo}
+                      className="text-red-400 hover:text-red-600 text-xs underline transition"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      value={promoCode}
+                      onChange={(e) => {
+                        setPromoCode(e.target.value.toUpperCase())
+                        setPromoError('')
+                      }}
+                      placeholder="Enter promo code"
+                      className="flex-1 border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-orange-500 uppercase"
+                    />
+                    <button
+                      onClick={handleApplyPromo}
+                      disabled={promoLoading || !promoCode.trim()}
+                      className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition shrink-0"
+                    >
+                      {promoLoading ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : 'Apply'}
+                    </button>
+                  </div>
+                )}
+                {promoError && (
+                  <p className="text-red-500 text-xs mt-1.5">{promoError}</p>
+                )}
               </div>
 
               {/* Delivery Address */}
@@ -298,7 +397,7 @@ const CartSidebar = ({
                   <p className="text-xs text-yellow-700 font-semibold">💡 Payment Notice</p>
                   <p className="text-xs text-yellow-600 mt-1">
                     Transfer{" "}
-                    <span className="font-bold">₦{totalAmount.toLocaleString()}</span>{" "}
+                    <span className="font-bold">₦{finalAmount.toLocaleString()}</span>{" "}
                     to any account above. Order confirmed after payment verification.
                   </p>
                 </div>
@@ -388,12 +487,29 @@ const CartSidebar = ({
                     Clear All
                   </button>
                 </div>
-                <div className="flex justify-between items-center mb-3">
+                <div className="flex justify-between items-center mb-1">
                   <p className="text-gray-500 text-xs sm:text-sm">Total Amount:</p>
                   <p className="text-orange-500 font-bold text-lg sm:text-xl">
                     ₦{totalAmount.toLocaleString()}
                   </p>
                 </div>
+                {promoResult && (
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="text-green-500 text-xs sm:text-sm">Discount:</p>
+                    <p className="text-green-500 font-bold text-sm">
+                      -₦{discountAmount.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+                {promoResult && (
+                  <div className="flex justify-between items-center mb-3">
+                    <p className="text-gray-700 text-xs sm:text-sm font-bold">Final Amount:</p>
+                    <p className="text-orange-500 font-bold text-lg sm:text-xl">
+                      ₦{finalAmount.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+                {!promoResult && <div className="mb-3" />}
               </>
             )}
 

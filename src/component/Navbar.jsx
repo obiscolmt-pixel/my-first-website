@@ -88,7 +88,6 @@ const Navbar = ({
     <>
       <div className="sticky top-0 bg-white z-10 shadow-sm">
         <div className="max-w-[1640px] mx-auto flex justify-between items-center p-4">
-
           {/* Left side */}
           <div className="flex items-center gap-3">
             <div onClick={() => setNav(!nav)} className="cursor-pointer">
@@ -96,12 +95,15 @@ const Navbar = ({
             </div>
             <h1 className="text-xl sm:text-2xl lg:text-3xl">
               <span className="font-bold text-black">OBISCO</span>{" "}
-              <span className="text-orange-500">gadgets</span>
+              <span className="text-orange-500">collections</span>
             </h1>
           </div>
 
           {/* Search — desktop */}
-          <div className="hidden md:block relative w-[300px] lg:w-[500px]" ref={searchRef}>
+          <div
+            className="hidden md:block relative w-[300px] lg:w-[500px]"
+            ref={searchRef}
+          >
             <div className="flex items-center bg-gray-100 rounded-full px-4">
               <AiOutlineSearch size={22} className="text-gray-400" />
               <input
@@ -128,7 +130,8 @@ const Navbar = ({
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute top-12 left-0 right-0 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden">
                 <p className="text-xs text-gray-400 px-4 py-2 border-b">
-                  {suggestions.length} result{suggestions.length !== 1 ? "s" : ""} found
+                  {suggestions.length} result
+                  {suggestions.length !== 1 ? "s" : ""} found
                 </p>
                 {suggestions.map((item) => (
                   <div
@@ -142,8 +145,12 @@ const Navbar = ({
                       className="w-10 h-10 object-cover rounded-lg shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm text-gray-800 truncate">{item.name}</p>
-                      <p className="text-xs text-orange-500 capitalize">{item.category}</p>
+                      <p className="font-bold text-sm text-gray-800 truncate">
+                        {item.name}
+                      </p>
+                      <p className="text-xs text-orange-500 capitalize">
+                        {item.category}
+                      </p>
                     </div>
                     <p className="text-xs font-bold text-orange-500 shrink-0">
                       ₦{item.amount.toLocaleString()}
@@ -153,7 +160,9 @@ const Navbar = ({
                 <div
                   onClick={() => {
                     setShowSuggestions(false);
-                    document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+                    document
+                      .getElementById("products")
+                      ?.scrollIntoView({ behavior: "smooth" });
                   }}
                   className="px-4 py-2.5 text-center text-sm text-orange-500 font-bold hover:bg-orange-50 cursor-pointer transition"
                 >
@@ -165,7 +174,6 @@ const Navbar = ({
 
           {/* Right side */}
           <div className="flex items-center gap-2">
-
             {/* Search icon — mobile only */}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
@@ -177,7 +185,9 @@ const Navbar = ({
             {/* Account button with dropdown */}
             <div className="relative">
               <button
-                onClick={() => user ? setShowUserMenu(!showUserMenu) : setAuthOpen(true)}
+                onClick={() =>
+                  user ? setShowUserMenu(!showUserMenu) : setAuthOpen(true)
+                }
                 className="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-black rounded-full px-3 py-2 transition text-sm"
               >
                 <FaUser size={14} />
@@ -189,22 +199,38 @@ const Navbar = ({
               {/* Dropdown */}
               {showUserMenu && user && (
                 <>
-                  <div className="fixed inset-0 z-10" onClick={() => setShowUserMenu(false)} />
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setShowUserMenu(false)}
+                  />
                   <div className="absolute right-0 top-12 bg-white rounded-2xl shadow-xl border border-gray-100 z-20 w-52 overflow-hidden">
                     <div className="px-4 py-3 border-b bg-orange-50">
-                      <p className="font-bold text-gray-800 text-sm">{user.fullName}</p>
-                      <p className="text-gray-500 text-xs truncate">{user.email}</p>
+                      <p className="font-bold text-gray-800 text-sm">
+                        {user.fullName}
+                      </p>
+                      <p className="text-gray-500 text-xs truncate">
+                        {user.email}
+                      </p>
                     </div>
                     <ul className="py-1">
                       <li
-                        onClick={() => { setTrackOpen(true); setShowUserMenu(false) }}
+                        onClick={() => {
+                          setTrackOpen(true);
+                          setShowUserMenu(false);
+                        }}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition"
                       >
-                        <TbTruckDelivery size={18} className="text-orange-500" />
+                        <TbTruckDelivery
+                          size={18}
+                          className="text-orange-500"
+                        />
                         Track Order
                       </li>
                       <li
-                        onClick={() => { setWishlistOpen(true); setShowUserMenu(false) }}
+                        onClick={() => {
+                          setWishlistOpen(true);
+                          setShowUserMenu(false);
+                        }}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition"
                       >
                         <MdFavorite size={18} className="text-orange-500" />
@@ -245,7 +271,6 @@ const Navbar = ({
                 </span>
               )}
             </button>
-
           </div>
         </div>
       </div>
@@ -293,8 +318,12 @@ const Navbar = ({
                     className="w-10 h-10 object-cover rounded-lg shrink-0"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm text-gray-800 truncate">{item.name}</p>
-                    <p className="text-xs text-orange-500 capitalize">{item.category}</p>
+                    <p className="font-bold text-sm text-gray-800 truncate">
+                      {item.name}
+                    </p>
+                    <p className="text-xs text-orange-500 capitalize">
+                      {item.category}
+                    </p>
                   </div>
                   <p className="text-xs font-bold text-orange-500 shrink-0">
                     ₦{item.amount.toLocaleString()}
@@ -305,7 +334,9 @@ const Navbar = ({
                 onClick={() => {
                   setShowSuggestions(false);
                   setSearchOpen(false);
-                  document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+                  document
+                    .getElementById("products")
+                    ?.scrollIntoView({ behavior: "smooth" });
                 }}
                 className="px-4 py-2.5 text-center text-sm text-orange-500 font-bold hover:bg-orange-50 cursor-pointer"
               >
@@ -325,13 +356,16 @@ const Navbar = ({
       )}
 
       {/* Side drawer */}
-      <div className={nav
-        ? "bg-white fixed top-0 left-0 w-[280px] sm:w-[300px] h-screen z-30 duration-300 flex flex-col"
-        : "bg-white fixed top-0 left-[-100%] w-[280px] sm:w-[300px] h-screen z-30 duration-300 flex flex-col"
-      }>
+      <div
+        className={
+          nav
+            ? "bg-white fixed top-0 left-0 w-[280px] sm:w-[300px] h-screen z-30 duration-300 flex flex-col"
+            : "bg-white fixed top-0 left-[-100%] w-[280px] sm:w-[300px] h-screen z-30 duration-300 flex flex-col"
+        }
+      >
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-xl font-black">
-            OBISCO <span className="text-orange-500">Gadgets</span>
+            OBISCO <span className="text-orange-500">collections</span>
           </h2>
           <AiOutlineClose
             onClick={() => setNav(false)}
@@ -358,7 +392,10 @@ const Navbar = ({
             </button>
           ) : (
             <button
-              onClick={() => { setAuthOpen(true); setNav(false) }}
+              onClick={() => {
+                setAuthOpen(true);
+                setNav(false);
+              }}
               className="flex-1 flex items-center justify-center gap-2 bg-gray-100 rounded-full py-2 text-sm font-semibold hover:bg-gray-200 transition"
             >
               <FaUser size={14} />
@@ -366,23 +403,26 @@ const Navbar = ({
             </button>
           )}
           <button
-            onClick={() => { setCartOpen(true); setNav(false) }}
+            onClick={() => {
+              setCartOpen(true);
+              setNav(false);
+            }}
             className="flex-1 flex items-center justify-center gap-2 bg-orange-500 text-white rounded-full py-2 text-sm font-semibold hover:bg-orange-600 transition"
           >
             <BsFillCartFill size={14} />
             Cart{" "}
-            {cartItems.length > 0 && `(${cartItems.reduce((acc, i) => acc + i.quantity, 0)})`}
+            {cartItems.length > 0 &&
+              `(${cartItems.reduce((acc, i) => acc + i.quantity, 0)})`}
           </button>
         </div>
 
         <nav className="flex-1 overflow-y-auto">
           <ul className="flex flex-col p-4 text-gray-800">
-
             {/* Home */}
             <li
               onClick={() => {
-                setNav(false)
-                window.scrollTo({ top: 0, behavior: 'smooth' })
+                setNav(false);
+                window.scrollTo({ top: 0, behavior: "smooth" });
               }}
               className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
             >
@@ -392,7 +432,10 @@ const Navbar = ({
 
             {/* Track Order */}
             <li
-              onClick={() => { setTrackOpen(true); setNav(false) }}
+              onClick={() => {
+                setTrackOpen(true);
+                setNav(false);
+              }}
               className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
             >
               <TbTruckDelivery size={22} className="mr-4 text-orange-500" />
@@ -401,7 +444,10 @@ const Navbar = ({
 
             {/* Wishlist */}
             <li
-              onClick={() => { setWishlistOpen(true); setNav(false) }}
+              onClick={() => {
+                setWishlistOpen(true);
+                setNav(false);
+              }}
               className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
             >
               <MdFavorite size={22} className="mr-4 text-orange-500" />
@@ -414,49 +460,83 @@ const Navbar = ({
             </li>
 
             {/* Wallet */}
-            <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
+            <li
+              onClick={() => {
+                alert("💰 Wallet — Coming Soon!");
+                setNav(false);
+              }}
+              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
+            >
               <FaWallet size={22} className="mr-4 text-orange-500" />
               Wallet
             </li>
 
             {/* Support */}
-            <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
+            <li
+              onClick={() => {
+                alert("🛠️ Support — Coming Soon!");
+                setNav(false);
+              }}
+              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
+            >
               <MdHelp size={22} className="mr-4 text-orange-500" />
               Support
             </li>
 
             {/* Deals & Offers */}
-            <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
+            <li
+              onClick={() => {
+                alert("🏷️ Deals & Offers — Coming Soon!");
+                setNav(false);
+              }}
+              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
+            >
               <AiFillTag size={22} className="mr-4 text-orange-500" />
               Deals & Offers
             </li>
 
             {/* Saved Items */}
-            <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
+            <li
+              onClick={() => {
+                alert("🔖 Saved Items — Coming Soon!");
+                setNav(false);
+              }}
+              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
+            >
               <BsFillSaveFill size={22} className="mr-4 text-orange-500" />
               Saved Items
             </li>
 
             {/* Refer a Friend */}
-            <li className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition">
+            <li
+              onClick={() => {
+                alert("👥 Refer a Friend — Coming Soon!");
+                setNav(false);
+              }}
+              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
+            >
               <FaUserFriends size={22} className="mr-4 text-orange-500" />
               Refer a Friend
             </li>
 
             {/* Admin */}
             <li
-              onClick={() => { setAdminOpen(true); setNav(false) }}
+              onClick={() => {
+                setAdminOpen(true);
+                setNav(false);
+              }}
               className="text-lg py-3 flex items-center cursor-pointer hover:text-orange-500 transition"
             >
               <AiFillTag size={22} className="mr-4 text-orange-500" />
               ⚙️ Admin
             </li>
-
           </ul>
         </nav>
 
         <div className="p-4 border-t">
-          <p className="text-xs text-gray-400 text-center">© 2025 OBISCO Gadgets</p>
+          <p className="text-xs text-gray-400 text-center">
+            © 2025 OBISCO Gadgets
+          </p>
         </div>
       </div>
     </>
