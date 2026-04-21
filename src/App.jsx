@@ -3,15 +3,15 @@ import Navbar from "./component/Navbar";
 import Hero from "./component/Hero";
 import Headlinecards from "./component/Headlinecards";
 import Products from "./component/Products";
-import Category from "./component/Category";
-import Footer from "./component/footer";
-import CartSidebar from "./component/CartSidebar";
+import Category from "./component/category";
+import Footer from "./component/Footer";
+import CartSidebar from "./component/cartSidebar";
 import AuthModal from "./component/AuthModal";
 import TrackOrder from "./component/TrackOrder";
 import AdminDashboard from "./component/AdminDashboard";
 import WhatsAppButton from "./component/WhatsAppButton";
 import ChatBot from "./component/ChatBot";
-import WishlistSidebar from "./component/WishlistSidebar";
+import WishlistSidebar from "./component/WishListSidebar";
 import OrderHistory from "./component/OrderHistory";
 
 const App = () => {
