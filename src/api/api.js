@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:5000/api'
+const BASE_URL = 'https://obisco-gadgets-backend.onrender.com/api'
 
 // ─── AUTH ───────────────────────────────────────────
 export const registerUser = async (formData) => {
