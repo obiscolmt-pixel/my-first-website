@@ -22,6 +22,7 @@ const Navbar = ({
   setAdminOpen,
   wishlist,
   setWishlistOpen,
+  setOrderHistoryOpen,
 }) => {
   const [nav, setNav] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -95,7 +96,7 @@ const Navbar = ({
             </div>
             <h1 className="text-xl sm:text-2xl lg:text-3xl">
               <span className="font-bold text-black">OBISCO</span>{" "}
-              <span className="text-orange-500">collections</span>
+              <span className="text-orange-500 ">Store</span>
             </h1>
           </div>
 
@@ -237,11 +238,17 @@ const Navbar = ({
                         Wishlist
                       </li>
                       <li
-                        onClick={() => setShowUserMenu(false)}
+                        onClick={() => {
+                          setOrderHistoryOpen(true);
+                          setShowUserMenu(false);
+                        }}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition"
                       >
-                        <AiFillTag size={18} className="text-orange-500" />
-                        Deals & Offers
+                        <TbTruckDelivery
+                          size={18}
+                          className="text-orange-500"
+                        />
+                        My Orders
                       </li>
                     </ul>
                     <div className="border-t px-3 py-2">
@@ -440,6 +447,16 @@ const Navbar = ({
             >
               <TbTruckDelivery size={22} className="mr-4 text-orange-500" />
               Track Order
+            </li>
+            <li
+              onClick={() => {
+                setOrderHistoryOpen(true);
+                setNav(false);
+              }}
+              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
+            >
+              <TbTruckDelivery size={22} className="mr-4 text-orange-500" />
+              My Orders
             </li>
 
             {/* Wishlist */}

@@ -112,3 +112,9 @@ export const usePromo = async (code) => {
   })
   return res.json()
 }
+
+// Get orders by user
+export const getUserOrders = async (userId) => {
+  const res = await fetch(`${BASE_URL}/orders/user/${userId}`)
+  return res.json()
+}

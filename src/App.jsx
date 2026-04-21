@@ -12,6 +12,7 @@ import AdminDashboard from "./component/AdminDashboard";
 import WhatsAppButton from "./component/WhatsAppButton";
 import ChatBot from "./component/ChatBot";
 import WishlistSidebar from "./component/WishlistSidebar";
+import OrderHistory from "./component/OrderHistory";
 
 const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,6 +21,7 @@ const App = () => {
   const [authOpen, setAuthOpen] = useState(false);
   const [trackOpen, setTrackOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [orderHistoryOpen, setOrderHistoryOpen] = useState(false);
 
   const addToCart = (item) => {
     setCartItems((prev) => {
@@ -88,6 +90,7 @@ const App = () => {
         setAdminOpen={setAdminOpen}
         wishlist={wishlist}
         setWishlistOpen={setWishlistOpen}
+        setOrderHistoryOpen={setOrderHistoryOpen}
       />
       <Hero />
       <Headlinecards />
@@ -116,6 +119,10 @@ const App = () => {
         wishlist={wishlist}
         addToCart={addToCart}
         addToWishlist={addToWishlist}
+      />
+      <OrderHistory
+        orderHistoryOpen={orderHistoryOpen}
+        setOrderHistoryOpen={setOrderHistoryOpen}
       />
 
       <AuthModal authOpen={authOpen} setAuthOpen={setAuthOpen} />
