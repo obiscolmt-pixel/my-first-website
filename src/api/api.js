@@ -118,3 +118,13 @@ export const getUserOrders = async (userId) => {
   const res = await fetch(`${BASE_URL}/orders/user/${userId}`)
   return res.json()
 }
+
+// Google Sign In
+export const googleSignIn = async (token) => {
+  const res = await fetch(`${BASE_URL}/auth/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+  })
+  return res.json()
+}

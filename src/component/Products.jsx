@@ -188,7 +188,7 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
             onClick={closeProduct}
           />
 
-          <div className="fixed bottom-0 left-0 right-0 sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:bottom-auto w-full sm:max-w-3xl bg-white z-50 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col">
+          <div className="fixed bottom-0 left-0 right-0 sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:bottom-auto w-full sm:max-w-3xl bg-white z-50 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[75vh] sm:max-h-[90vh] flex flex-col">
             <button
               onClick={closeProduct}
               className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-black z-10 bg-white rounded-full p-1.5 shadow"
