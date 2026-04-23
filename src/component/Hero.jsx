@@ -9,7 +9,7 @@ const Hero = () => {
     <div className='relative overflow-hidden'>
 
       {/* Animated Background Image */}
-      <div className='w-full h-[400px] sm:h-[450px] md:h-[500px] lg:h-[600px] overflow-hidden pointer-events-none'>
+      <div className='w-full h-[400px] sm:h-[450px] md:h-[500px] lg:h-[600px] overflow-hidden'>
         <img
           src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=1920&q=100&fit=crop"
           alt="Gadgets and Accessories"
