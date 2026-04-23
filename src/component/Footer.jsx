@@ -16,7 +16,7 @@ function Footer() {
         {/* Brand */}
         <div>
           <h1 className='text-3xl font-black text-white mb-1'>
-            OBISCO <span className='text-orange-500'>gadgets</span>
+            OBISCO <span className='text-orange-500'>store</span>
           </h1>
           <p className='text-sm text-gray-400 mt-3 leading-relaxed'>
             Your one-stop shop for the latest smartphones, laptops, headphones,

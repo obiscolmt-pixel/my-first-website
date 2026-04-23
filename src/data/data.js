@@ -129,3 +129,191 @@ export const categories = [
     image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=200&q=80&fit=crop',
   },
 ];
+
+// ─── FASHION PRODUCTS ───────────────────────────────────────────
+export const fashionProducts = [
+  {
+    id: 101,
+    name: "Men's Polo Shirt",
+    category: "men",
+    department: "fashion",
+    image: "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=800&q=80&fit=crop",
+    price: "$",
+    amount: 15000,
+  },
+  {
+    id: 102,
+    name: "Women's Floral Dress",
+    category: "women",
+    department: "fashion",
+    image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=800&q=80&fit=crop",
+    price: "$$",
+    amount: 35000,
+  },
+  {
+    id: 103,
+    name: "Men's Joggers",
+    category: "men",
+    department: "fashion",
+    image: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=800&q=80&fit=crop",
+    price: "$",
+    amount: 18000,
+  },
+  {
+    id: 104,
+    name: "Women's Crop Top",
+    category: "women",
+    department: "fashion",
+    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80&fit=crop",
+    price: "$",
+    amount: 12000,
+  },
+  {
+    id: 105,
+    name: "Men's Native Agbada",
+    category: "native",
+    department: "fashion",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80&fit=crop",
+    price: "$$$",
+    amount: 75000,
+  },
+  {
+    id: 106,
+    name: "Women's Ankara Gown",
+    category: "native",
+    department: "fashion",
+    image: "https://images.unsplash.com/photo-1590735213920-68192a487bc2?w=800&q=80&fit=crop",
+    price: "$$",
+    amount: 45000,
+  },
+  {
+    id: 107,
+    name: "Kids' School Uniform",
+    category: "kids",
+    department: "fashion",
+    image: "https://images.unsplash.com/photo-1604671801908-6f0c6a092c05?w=800&q=80&fit=crop",
+    price: "$",
+    amount: 10000,
+  },
+  {
+    id: 108,
+    name: "Kids' Casual Wear",
+    category: "kids",
+    department: "fashion",
+    image: "https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=800&q=80&fit=crop",
+    price: "$",
+    amount: 9500,
+  },
+]
+
+export const fashionCategories = [
+  {
+    id: 1,
+    name: "Men",
+    image: "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=400&q=80&fit=crop",
+  },
+  {
+    id: 2,
+    name: "Women",
+    image: "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=400&q=80&fit=crop",
+  },
+  {
+    id: 3,
+    name: "Native",
+    image: "https://images.unsplash.com/photo-1590735213920-68192a487bc2?w=400&q=80&fit=crop",
+  },
+  {
+    id: 4,
+    name: "Kids",
+    image: "https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=400&q=80&fit=crop",
+  },
+]
+
+// ─── LIFESTYLE PRODUCTS ─────────────────────────────────────────
+export const lifestyleProducts = [
+  {
+    id: 201,
+    name: "Creed Aventus 100ml",
+    category: "perfumes",
+    department: "lifestyle",
+    image: "https://images.unsplash.com/photo-1541643600914-78b084683702?w=800&q=80&fit=crop",
+    price: "$$$",
+    amount: 120000,
+  },
+  {
+    id: 202,
+    name: "Dior Sauvage 200ml",
+    category: "perfumes",
+    department: "lifestyle",
+    image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800&q=80&fit=crop",
+    price: "$$",
+    amount: 85000,
+  },
+  {
+    id: 203,
+    name: "Chanel No.5 50ml",
+    category: "perfumes",
+    department: "lifestyle",
+    image: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=800&q=80&fit=crop",
+    price: "$$",
+    amount: 95000,
+  },
+  {
+    id: 204,
+    name: "Tom Ford Black Orchid",
+    category: "perfumes",
+    department: "lifestyle",
+    image: "https://images.unsplash.com/photo-1588776814546-1ffedba2a6fd?w=800&q=80&fit=crop",
+    price: "$$$",
+    amount: 145000,
+  },
+  {
+    id: 205,
+    name: "Rolex Submariner",
+    category: "watches",
+    department: "lifestyle",
+    image: "https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=800&q=80&fit=crop",
+    price: "$$$$",
+    amount: 2500000,
+  },
+  {
+    id: 206,
+    name: "Casio G-Shock GA-2100",
+    category: "watches",
+    department: "lifestyle",
+    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80&fit=crop",
+    price: "$$",
+    amount: 65000,
+  },
+  {
+    id: 207,
+    name: "Daniel Wellington Classic",
+    category: "watches",
+    department: "lifestyle",
+    image: "https://images.unsplash.com/photo-1533139502658-0198f920d8e8?w=800&q=80&fit=crop",
+    price: "$$",
+    amount: 75000,
+  },
+  {
+    id: 208,
+    name: "Apple Watch Series 10",
+    category: "watches",
+    department: "lifestyle",
+    image: "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=800&q=80&fit=crop",
+    price: "$$$",
+    amount: 380000,
+  },
+]
+
+export const lifestyleCategories = [
+  {
+    id: 1,
+    name: "Perfumes",
+    image: "https://images.unsplash.com/photo-1541643600914-78b084683702?w=400&q=80&fit=crop",
+  },
+  {
+    id: 2,
+    name: "Watches",
+    image: "https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=400&q=80&fit=crop",
+  },
+]

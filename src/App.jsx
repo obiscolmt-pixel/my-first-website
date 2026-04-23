@@ -13,9 +13,13 @@ import WhatsAppButton from "./component/WhatsAppButton";
 import ChatBot from "./component/ChatBot";
 import WishlistSidebar from "./component/WishListSidebar";
 import OrderHistory from "./component/OrderHistory";
+import FashionPage from "./component/FashionPage";
+import LifestylePage from "./component/LifestylePage";
 
 const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [activeDepartment, setActiveDepartment] = useState("gadgets");
   const [cartItems, setCartItems] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
@@ -25,10 +29,12 @@ const App = () => {
 
   const addToCart = (item) => {
     setCartItems((prev) => {
-      const existing = prev.find((i) => i._id === item._id);
+      const existing = prev.find((i) => i._id === item._id || i.id === item.id);
       if (existing) {
         return prev.map((i) =>
-          i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i,
+          i._id === item._id || i.id === item.id
+            ? { ...i, quantity: i.quantity + 1 }
+            : i
         );
       }
       return [...prev, { ...item, quantity: 1 }];
@@ -36,20 +42,24 @@ const App = () => {
   };
 
   const removeFromCart = (id) => {
-    setCartItems((prev) => prev.filter((i) => i._id !== id));
+    setCartItems((prev) => prev.filter((i) => i._id !== id && i.id !== id));
   };
 
   const increaseQty = (id) => {
     setCartItems((prev) =>
-      prev.map((i) => (i._id === id ? { ...i, quantity: i.quantity + 1 } : i)),
+      prev.map((i) =>
+        i._id === id || i.id === id ? { ...i, quantity: i.quantity + 1 } : i
+      )
     );
   };
 
   const decreaseQty = (id) => {
     setCartItems((prev) =>
       prev
-        .map((i) => (i._id === id ? { ...i, quantity: i.quantity - 1 } : i))
-        .filter((i) => i.quantity > 0),
+        .map((i) =>
+          i._id === id || i.id === id ? { ...i, quantity: i.quantity - 1 } : i
+        )
+        .filter((i) => i.quantity > 0)
     );
   };
 
@@ -64,9 +74,9 @@ const App = () => {
 
   const addToWishlist = (item) => {
     setWishlist((prev) => {
-      const exists = prev.find((i) => i._id === item._id);
+      const exists = prev.find((i) => i._id === item._id || i.id === item.id);
       if (exists) {
-        const updated = prev.filter((i) => i._id !== item._id);
+        const updated = prev.filter((i) => i._id !== item._id && i.id !== item.id);
         localStorage.setItem("obisco_wishlist", JSON.stringify(updated));
         return updated;
       }
@@ -76,7 +86,24 @@ const App = () => {
     });
   };
 
-  const isWishlisted = (id) => wishlist.some((i) => i._id === id);
+  const isWishlisted = (id) =>
+    wishlist.some((i) => i._id === id || i.id === id);
+
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category);
+    setSearchQuery("");
+    setTimeout(() => {
+      document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
+  const sharedProps = {
+    addToCart,
+    addToWishlist,
+    isWishlisted,
+    searchQuery,
+    setSearchQuery,
+  };
 
   return (
     <>
@@ -91,17 +118,37 @@ const App = () => {
         wishlist={wishlist}
         setWishlistOpen={setWishlistOpen}
         setOrderHistoryOpen={setOrderHistoryOpen}
-      />
-      <Hero />
-      <Headlinecards />
-      <Products
-        searchQuery={searchQuery}
-        addToCart={addToCart}
-        addToWishlist={addToWishlist}
-        isWishlisted={isWishlisted}
+        activeDepartment={activeDepartment}
+        setActiveDepartment={setActiveDepartment}
       />
 
-      <Category />
+      {/* ── Gadgets Department ── */}
+      {activeDepartment === "gadgets" && (
+        <>
+          <Hero />
+          <Headlinecards onCategoryClick={handleCategoryClick} />
+          <Products
+            searchQuery={searchQuery}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            addToCart={addToCart}
+            addToWishlist={addToWishlist}
+            isWishlisted={isWishlisted}
+          />
+          <Category onCategoryClick={handleCategoryClick} />
+        </>
+      )}
+
+      {/* ── Fashion Department ── */}
+      {activeDepartment === "fashion" && (
+        <FashionPage {...sharedProps} />
+      )}
+
+      {/* ── Lifestyle Department ── */}
+      {activeDepartment === "lifestyle" && (
+        <LifestylePage {...sharedProps} />
+      )}
+
       <Footer />
 
       <CartSidebar
@@ -124,11 +171,8 @@ const App = () => {
         orderHistoryOpen={orderHistoryOpen}
         setOrderHistoryOpen={setOrderHistoryOpen}
       />
-
       <AuthModal authOpen={authOpen} setAuthOpen={setAuthOpen} />
-
       <TrackOrder trackOpen={trackOpen} setTrackOpen={setTrackOpen} />
-
       <AdminDashboard adminOpen={adminOpen} setAdminOpen={setAdminOpen} />
       <WhatsAppButton />
       <ChatBot />
