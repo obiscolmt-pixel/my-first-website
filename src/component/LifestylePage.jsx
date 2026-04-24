@@ -1,6 +1,9 @@
 import React, { useState } from "react";
-import { lifestyleProducts, lifestyleCategories } from "../data/data.js";
+// import { lifestyleProducts, lifestyleCategories } from "../data/data.js";
 import { BsFillCartFill } from "react-icons/bs";
+import { lifestyleCategories } from "../data/data.js"
+import { fetchProducts } from "../api/api.js"
+
 
 const LifestylePage = ({ addToCart, addToWishlist, isWishlisted, searchQuery }) => {
   const [activeCategory, setActiveCategory] = useState("all");

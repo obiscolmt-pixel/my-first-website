@@ -20,8 +20,11 @@ export const loginUser = async (formData) => {
 }
 
 // ─── PRODUCTS ───────────────────────────────────────
-export const fetchProducts = async () => {
-  const res = await fetch(`${BASE_URL}/products`)
+export const fetchProducts = async (department = '') => {
+  const url = department
+    ? `${BASE_URL}/products?department=${department}`
+    : `${BASE_URL}/products`
+  const res = await fetch(url)
   return res.json()
 }
 

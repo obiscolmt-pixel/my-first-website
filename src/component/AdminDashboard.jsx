@@ -16,7 +16,13 @@ const statusColors = {
 }
 
 const emptyForm = {
-  name: '', category: '', price: '$', amount: '', image: '', description: ''
+  name: '',
+  category: '',
+  department: 'gadgets',
+  price: '$',
+  amount: '',
+  image: '',
+  description: '',
 }
 
 const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
@@ -39,6 +45,7 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
   const [savingProduct, setSavingProduct] = useState(false)
   const [deletingProduct, setDeletingProduct] = useState(null)
   const [productSearch, setProductSearch] = useState('')
+  const [departmentFilter, setDepartmentFilter] = useState('all')
 
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
@@ -59,17 +66,13 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
   const loadProducts = async () => {
     setProductsLoading(true)
     const data = await fetchProducts()
-    setProducts(data)
+    setProducts(Array.isArray(data) ? data : [])
     setProductsLoading(false)
   }
 
   useEffect(() => {
-    if (authenticated && activeTab === 'products') {
-      loadProducts()
-    }
-    if (authenticated && activeTab === 'orders') {
-      loadOrders()
-    }
+    if (authenticated && activeTab === 'products') loadProducts()
+    if (authenticated && activeTab === 'orders') loadOrders()
   }, [activeTab, authenticated])
 
   const handleUpdateStatus = async (orderId, status, paymentStatus) => {
@@ -89,6 +92,7 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
     setProductForm({
       name: product.name,
       category: product.category,
+      department: product.department || 'gadgets',
       price: product.price,
       amount: product.amount,
       image: product.image,
@@ -99,7 +103,7 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
 
   const handleSaveProduct = async () => {
     if (!productForm.name || !productForm.category || !productForm.amount || !productForm.image) {
-      alert('Please fill in Name, Category, Price and Image.')
+      alert('Please fill in Name, Category, Amount and Image.')
       return
     }
     setSavingProduct(true)
@@ -156,10 +160,13 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
     resetForm()
   }
 
-  const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
-    p.category.toLowerCase().includes(productSearch.toLowerCase())
-  )
+  const filteredProducts = products.filter((p) => {
+    const matchSearch =
+      p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
+      p.category.toLowerCase().includes(productSearch.toLowerCase())
+    const matchDept = departmentFilter === 'all' || p.department === departmentFilter
+    return matchSearch && matchDept
+  })
 
   if (!adminOpen) return null
 
@@ -180,9 +187,10 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
           </button>
         </div>
 
-        {/* Content */}
         <div className='flex-1 overflow-y-auto'>
           {!authenticated ? (
+
+            /* Password Gate */
             <div className='flex flex-col items-center justify-center h-full px-6 py-10'>
               <p className='text-4xl mb-4'>🔐</p>
               <h3 className='text-xl font-black text-gray-800 mb-1'>Admin Access</h3>
@@ -204,6 +212,7 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                 </button>
               </div>
             </div>
+
           ) : (
             <div className='flex flex-col h-full'>
 
@@ -224,7 +233,7 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                 ))}
               </div>
 
-              {/* Orders Tab */}
+              {/* ── ORDERS TAB ── */}
               {activeTab === 'orders' && (
                 <div className='p-4 sm:p-6'>
                   <div className='grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6'>
@@ -345,7 +354,7 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                 </div>
               )}
 
-              {/* Products Tab */}
+              {/* ── PRODUCTS TAB ── */}
               {activeTab === 'products' && (
                 <div className='p-4 sm:p-6'>
 
@@ -356,18 +365,47 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                         {editingProduct ? '✏️ Edit Product' : '➕ Add New Product'}
                       </h3>
                       <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+
+                        {/* Department */}
+                        <div className='sm:col-span-2'>
+                          <p className='text-xs font-bold text-gray-500 uppercase mb-1'>Department</p>
+                          <div className='flex gap-2'>
+                            {['gadgets', 'fashion', 'lifestyle'].map((dept) => (
+                              <button
+                                key={dept}
+                                onClick={() => setProductForm({ ...productForm, department: dept })}
+                                className={`flex-1 py-2 rounded-full text-xs font-bold capitalize border transition ${
+                                  productForm.department === dept
+                                    ? 'bg-orange-500 text-white border-orange-500'
+                                    : 'border-gray-300 text-gray-500 hover:border-orange-400'
+                                }`}
+                              >
+                                {dept === 'gadgets' ? '📱 Gadgets' : dept === 'fashion' ? '👔 Fashion' : '✨ Lifestyle'}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
                         <input
                           placeholder='Product Name'
                           value={productForm.name}
                           onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
                           className='border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white'
                         />
+
                         <input
-                          placeholder='Category (e.g. phones, laptops)'
+                          placeholder={
+                            productForm.department === 'gadgets'
+                              ? 'Category (e.g. phones, laptops)'
+                              : productForm.department === 'fashion'
+                              ? 'Category (e.g. men, women, native)'
+                              : 'Category (e.g. perfumes, watches)'
+                          }
                           value={productForm.category}
                           onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
                           className='border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white'
                         />
+
                         <input
                           placeholder='Amount in Naira (e.g. 150000)'
                           type='number'
@@ -375,6 +413,7 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                           onChange={(e) => setProductForm({ ...productForm, amount: e.target.value })}
                           className='border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white'
                         />
+
                         <select
                           value={productForm.price}
                           onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
@@ -385,12 +424,14 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                           <option value='$$$'>$$$ — ₦150k-₦500k</option>
                           <option value='$$$$'>$$$$ — ₦500k+</option>
                         </select>
+
                         <input
                           placeholder='Image URL (Cloudinary or Unsplash)'
                           value={productForm.image}
                           onChange={(e) => setProductForm({ ...productForm, image: e.target.value })}
                           className='border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white sm:col-span-2'
                         />
+
                         <textarea
                           placeholder='Description (optional)'
                           value={productForm.description}
@@ -434,11 +475,11 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                     </div>
                   )}
 
-                  {/* Header */}
+                  {/* Products Header */}
                   <div className='flex justify-between items-center mb-4 flex-wrap gap-3'>
                     <div>
                       <h3 className='font-black text-gray-800'>All Products</h3>
-                      <p className='text-xs text-gray-400'>{products.length} products in database</p>
+                      <p className='text-xs text-gray-400'>{filteredProducts.length} of {products.length} products</p>
                     </div>
                     <div className='flex gap-2'>
                       <button onClick={loadProducts} className='text-orange-500 text-sm font-semibold hover:underline'>
@@ -456,13 +497,30 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                     </div>
                   </div>
 
-                  {/* Search */}
-                  <input
-                    placeholder='Search products...'
-                    value={productSearch}
-                    onChange={(e) => setProductSearch(e.target.value)}
-                    className='w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 mb-4'
-                  />
+                  {/* Search + Department Filter */}
+                  <div className='flex flex-col sm:flex-row gap-3 mb-4'>
+                    <input
+                      placeholder='Search products...'
+                      value={productSearch}
+                      onChange={(e) => setProductSearch(e.target.value)}
+                      className='flex-1 border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500'
+                    />
+                    <div className='flex gap-2'>
+                      {['all', 'gadgets', 'fashion', 'lifestyle'].map((dept) => (
+                        <button
+                          key={dept}
+                          onClick={() => setDepartmentFilter(dept)}
+                          className={`px-3 py-2 rounded-full text-xs font-bold capitalize transition ${
+                            departmentFilter === dept
+                              ? 'bg-orange-500 text-white'
+                              : 'bg-gray-100 text-gray-500 hover:bg-orange-50 hover:text-orange-500'
+                          }`}
+                        >
+                          {dept}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
                   {productsLoading ? (
                     <div className='flex justify-center py-10'>
@@ -482,7 +540,17 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                           <div className='p-2'>
                             <p className='font-bold text-xs text-gray-800 truncate'>{product.name}</p>
                             <p className='text-orange-500 font-black text-xs mt-0.5'>₦{product.amount?.toLocaleString()}</p>
-                            <p className='text-gray-400 text-xs capitalize mt-0.5'>{product.category}</p>
+                            <div className='flex gap-1 mt-0.5'>
+                              <span className='text-gray-400 text-xs capitalize'>{product.category}</span>
+                              <span className='text-gray-300 text-xs'>•</span>
+                              <span className={`text-xs font-semibold capitalize ${
+                                product.department === 'fashion' ? 'text-pink-500' :
+                                product.department === 'lifestyle' ? 'text-purple-500' :
+                                'text-blue-500'
+                              }`}>
+                                {product.department || 'gadgets'}
+                              </span>
+                            </div>
                             <div className='flex gap-1 mt-2'>
                               <button
                                 onClick={() => handleEditProduct(product)}
@@ -505,6 +573,13 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                           </div>
                         </div>
                       ))}
+
+                      {filteredProducts.length === 0 && !productsLoading && (
+                        <div className='col-span-4 text-center py-10'>
+                          <p className='text-4xl mb-3'>📦</p>
+                          <p className='text-gray-500 text-sm'>No products found</p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
