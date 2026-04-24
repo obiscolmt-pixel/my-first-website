@@ -9,7 +9,6 @@ import CartSidebar from "./component/cartSidebar";
 import AuthModal from "./component/AuthModal";
 import TrackOrder from "./component/TrackOrder";
 import AdminDashboard from "./component/AdminDashboard";
-import WhatsAppButton from "./component/WhatsAppButton";
 import ChatBot from "./component/ChatBot";
 import WishlistSidebar from "./component/WishListSidebar";
 import OrderHistory from "./component/OrderHistory";
@@ -174,7 +173,6 @@ const App = () => {
       <AuthModal authOpen={authOpen} setAuthOpen={setAuthOpen} />
       <TrackOrder trackOpen={trackOpen} setTrackOpen={setTrackOpen} />
       <AdminDashboard adminOpen={adminOpen} setAdminOpen={setAdminOpen} />
-      <WhatsAppButton />
       <ChatBot />
     </>
   );
