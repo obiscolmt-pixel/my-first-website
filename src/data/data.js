@@ -5,7 +5,7 @@ export const data = [
     category: 'phones',
     image: 'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=1920&q=100&fit=crop',
     price: '$$$$',
-    amount: 850000,   // ← this must exist on every item
+    amount: 850000,
   },
   {
     id: 2,
@@ -95,7 +95,7 @@ export const data = [
     price: '$$$',
     amount: 480000,
   },
-];
+]
 
 export const categories = [
   {
@@ -128,19 +128,10 @@ export const categories = [
     name: 'Tablets',
     image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=200&q=80&fit=crop',
   },
-];
+]
 
-// ─── FASHION PRODUCTS ───────────────────────────────────────────
 export const fashionProducts = [
-  {
-    id: 101,
-    name: "Men's Polo Shirt",
-    category: "men",
-    department: "fashion",
-    image: "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=800&q=80&fit=crop",
-    price: "$",
-    amount: 15000,
-  },
+  // ─── WOMEN ───────────────────────────────────────────────────
   {
     id: 102,
     name: "Women's Floral Dress",
@@ -151,15 +142,6 @@ export const fashionProducts = [
     amount: 35000,
   },
   {
-    id: 103,
-    name: "Men's Joggers",
-    category: "men",
-    department: "fashion",
-    image: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=800&q=80&fit=crop",
-    price: "$",
-    amount: 18000,
-  },
-  {
     id: 104,
     name: "Women's Crop Top",
     category: "women",
@@ -168,68 +150,219 @@ export const fashionProducts = [
     price: "$",
     amount: 12000,
   },
+  // ─── MEN'S WEAR ──────────────────────────────────────────────
+  {
+    id: 101,
+    name: "Men's Classic Shirt",
+    category: "men",
+    department: "fashion",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776984411/WhatsApp_Image_2026-04-23_at_23.11.34_dcpvkd.jpg",
+    price: "$$",
+    amount: 35000,
+  },
+  {
+    id: 103,
+    name: "Men's Casual Shirt",
+    category: "men",
+    department: "fashion",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776984412/WhatsApp_Image_2026-04-23_at_23.11.42_-_Copy_2_e1ttrd.jpg",
+    price: "$$",
+    amount: 35000,
+  },
+  {
+    id: 112,
+    name: "Men's Polo Shirt",
+    category: "men",
+    department: "fashion",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776984413/WhatsApp_Image_2026-04-23_at_23.11.40_-_Copy_2_ce0gjq.jpg",
+    price: "$$",
+    amount: 35000,
+  },
+  {
+    id: 113,
+    name: "Men's Smart Shirt",
+    category: "men",
+    department: "fashion",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776984410/WhatsApp_Image_2026-04-23_at_23.11.35_1_vbv8jl.jpg",
+    price: "$$",
+    amount: 35000,
+  },
+  {
+    id: 114,
+    name: "Men's Luxury Shirt",
+    category: "men",
+    department: "fashion",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776984133/WhatsApp_Image_2026-04-23_at_23.10.36_wbqvkh.jpg",
+    price: "$$",
+    amount: 35000,
+  },
+  {
+    id: 115,
+    name: "Men's Designer Shirt",
+    category: "men",
+    department: "fashion",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776984136/WhatsApp_Image_2026-04-23_at_23.10.37_4_p1hhgi.jpg",
+    price: "$$",
+    amount: 35000,
+  },
+  {
+    id: 116,
+    name: "Men's Formal Shirt",
+    category: "men",
+    department: "fashion",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776984134/WhatsApp_Image_2026-04-23_at_23.10.37_1_ph51et.jpg",
+    price: "$$",
+    amount: 35000,
+  },
+  {
+    id: 117,
+    name: "Men's Leather Shoes",
+    category: "men",
+    department: "fashion",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776984132/WhatsApp_Image_2026-04-23_at_23.10.41_1_rfz7fd.jpg",
+    price: "$$",
+    amount: 35000,
+  },
+  {
+    id: 118,
+    name: "Men's Casual Shoes",
+    category: "men",
+    department: "fashion",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776984135/WhatsApp_Image_2026-04-23_at_23.10.37_3_rokvs7.jpg",
+    price: "$$",
+    amount: 35000,
+  },
+  {
+    id: 119,
+    name: "Men's Sneakers",
+    category: "men",
+    department: "fashion",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776984131/WhatsApp_Image_2026-04-23_at_23.10.41_xqkeuc.jpg",
+    price: "$$",
+    amount: 35000,
+  },
+  {
+    id: 120,
+    name: "Men's Designer Shoes",
+    category: "men",
+    department: "fashion",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776984130/WhatsApp_Image_2026-04-23_at_23.10.40_1_mjhj0k.jpg",
+    price: "$$",
+    amount: 35000,
+  },
+  {
+    id: 121,
+    name: "Men's Premium Shoes",
+    category: "men",
+    department: "fashion",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776984129/WhatsApp_Image_2026-04-23_at_23.10.39_fhibww.jpg",
+    price: "$$",
+    amount: 35000,
+  },
+  
+  // ─── NATIVE WEARS ─────────────────────────────────────────────
   {
     id: 105,
-    name: "Men's Native Agbada",
+    name: "White Native Senator Set",
     category: "native",
     department: "fashion",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80&fit=crop",
-    price: "$$$",
-    amount: 75000,
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/f_auto,q_auto/WhatsApp_Image_2026-04-23_at_23.11.08_sl7af7",
+    price: "$$",
+    amount: 35000,
   },
   {
     id: 106,
-    name: "Women's Ankara Gown",
+    name: "Olive Green Native Shirt",
     category: "native",
     department: "fashion",
-    image: "https://images.unsplash.com/photo-1590735213920-68192a487bc2?w=800&q=80&fit=crop",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776983335/WhatsApp_Image_2026-04-23_at_23.11.09_3_tgxztf.jpg",
     price: "$$",
-    amount: 45000,
+    amount: 35000,
   },
   {
     id: 107,
-    name: "Kids' School Uniform",
-    category: "kids",
+    name: "Blue Native Agbada",
+    category: "native",
     department: "fashion",
-    image: "https://images.unsplash.com/photo-1604671801908-6f0c6a092c05?w=800&q=80&fit=crop",
-    price: "$",
-    amount: 10000,
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776983336/WhatsApp_Image_2026-04-23_at_23.11.10_flzrjh.jpg",
+    price: "$$",
+    amount: 35000,
   },
   {
     id: 108,
-    name: "Kids' Casual Wear",
-    category: "kids",
+    name: "Royal Blue Native Set",
+    category: "native",
     department: "fashion",
-    image: "https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=800&q=80&fit=crop",
-    price: "$",
-    amount: 9500,
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776983191/WhatsApp_Image_2026-04-23_at_23.11.09_2_yb3zgd.jpg",
+    price: "$$",
+    amount: 35000,
   },
+  {
+    id: 109,
+    name: "Pink Native Senator",
+    category: "native",
+    department: "fashion",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776983170/WhatsApp_Image_2026-04-23_at_23.11.09_1_lp7gxs.jpg",
+    price: "$$",
+    amount: 35000,
+  },
+  {
+    id: 110,
+    name: "Black Native Kaftan",
+    category: "native",
+    department: "fashion",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776983152/WhatsApp_Image_2026-04-23_at_23.11.09_ihmssu.jpg",
+    price: "$$",
+    amount: 35000,
+  },
+  {
+    id: 111,
+    name: "White Linen Native Set",
+    category: "native",
+    department: "fashion",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776983333/WhatsApp_Image_2026-04-23_at_23.11.10_1_hmgoyj.jpg",
+    price: "$$",
+    amount: 35000,
+  },
+   {
+    id: 180,
+    name: "blue",
+    category: "native",
+    department: "fashion",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776985844/d8a4e021-c25d-4455-95f2-c5f1281af5db_xsi9rq.avif",
+    price: "$$",
+    amount: 35000,
+  },
+ 
+  
+  
 ]
 
 export const fashionCategories = [
   {
     id: 1,
     name: "Men",
-    image: "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=400&q=80&fit=crop",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776987162/best-all-white-outfits-men-1_kvmbpt.webp",
   },
   {
     id: 2,
     name: "Women",
     image: "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=400&q=80&fit=crop",
   },
-  {
+ {
     id: 3,
     name: "Native",
-    image: "https://images.unsplash.com/photo-1590735213920-68192a487bc2?w=400&q=80&fit=crop",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776985844/d8a4e021-c25d-4455-95f2-c5f1281af5db_xsi9rq.avif",
   },
+  
   {
     id: 4,
     name: "Kids",
     image: "https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=400&q=80&fit=crop",
+    comingSoon: true,
   },
 ]
 
-// ─── LIFESTYLE PRODUCTS ─────────────────────────────────────────
 export const lifestyleProducts = [
   {
     id: 201,

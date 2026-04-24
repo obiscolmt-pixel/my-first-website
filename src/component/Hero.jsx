@@ -6,10 +6,10 @@ const Hero = () => {
   }
 
   return (
-    <div className='relative overflow-hidden'>
+    <div className='relative h-[400px] sm:h-[450px] md:h-[500px] lg:h-[600px]'>
 
       {/* Animated Background Image */}
-      <div className='w-full h-[400px] sm:h-[450px] md:h-[500px] lg:h-[600px] overflow-hidden'>
+      <div className='absolute inset-0 overflow-hidden'>
         <img
           src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=1920&q=100&fit=crop"
           alt="Gadgets and Accessories"
@@ -17,9 +17,12 @@ const Hero = () => {
         />
       </div>
 
-      {/* Overlay */}
-      <div className='absolute top-0 left-0 w-full h-full bg-black/50 flex items-center z-20'>
-        <div className='px-6 sm:px-10 md:px-16 max-w-2xl'>
+      {/* Dark Overlay — pointer events none so it never blocks clicks */}
+      <div className='absolute inset-0 bg-black/50 pointer-events-none' />
+
+      {/* Content */}
+      <div className='relative z-10 h-full flex items-center px-6 sm:px-10 md:px-16'>
+        <div className='max-w-2xl'>
 
           <p className='text-orange-500 uppercase tracking-[0.2em] text-xs sm:text-sm font-semibold mb-2 sm:mb-3'>
             Obisco Tech Store

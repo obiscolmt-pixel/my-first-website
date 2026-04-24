@@ -128,11 +128,11 @@ const FashionPage = ({ addToCart, addToWishlist, isWishlisted, searchQuery }) =>
                 key={item.id}
                 className="shadow-md rounded-xl hover:scale-105 duration-300 overflow-hidden bg-white cursor-pointer"
               >
-                <div className="relative">
+                <div className="w-full h-[200px] bg-gray-50 flex items-center justify-center overflow-hidden">
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="w-full h-[140px] sm:h-[180px] object-cover"
+                    className="w-full h-full object-contain p-2"
                   />
                   <button
                     onClick={() => addToWishlist({ ...item, _id: item.id })}
