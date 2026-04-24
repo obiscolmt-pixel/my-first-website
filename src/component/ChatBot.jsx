@@ -7,20 +7,20 @@ const ChatBot = () => {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Hi! 👋 Welcome to OBISCO Store! I'm your virtual assistant. How can I help you today? You can ask me about our products, prices, delivery, or payment methods!"
+      content: "Hi! 👋 Welcome to OBISCO Store! I'm your virtual assistant and business companion. I can help you shop, give business ideas, financial tips and more. How can I help you today?"
     }
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef(null)
 
-  const quickQuestions = [
+ const quickQuestions = [
     "What phones do you have?",
-    "How long is delivery?",
+    "Do you sell men's clothing?",
+    "Give me a business idea",
+    "How do I make money in Nigeria?",
     "How do I pay?",
-    "Do you have MacBook?",
-    "What is your return policy?",
-    "Do you deliver outside Lagos?",
+    "Do you have perfumes?",
   ]
 
   const toggleChat = (value) => {
