@@ -73,7 +73,7 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
     setSelectedProduct(item);
     setSelectedColor(item.colors?.length > 0 ? item.colors[0].name : "");
     setSelectedImage(
-      item.colors?.length > 0 ? item.colors[0].image : item.image,
+      item.image
     );
     setQuantity(1);
     setReviews([]);
@@ -256,37 +256,7 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
                   features. Comes with full warranty and official accessories.
                   Fast delivery across Nigeria.
                 </p>
-
-                {/* Color Selection */}
-                {selectedProduct.colors &&
-                  selectedProduct.colors.length > 0 && (
-                    <div>
-                      <p className="font-bold text-gray-700 text-sm mb-2">
-                        Color:{" "}
-                        <span className="text-orange-500">{selectedColor}</span>
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedProduct.colors.map((color) => (
-                          <button
-                            key={color.name}
-                            onClick={() => {
-                              setSelectedColor(color.name);
-                              setSelectedImage(color.image);
-                            }}
-                            className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition
-                            ${
-                              selectedColor === color.name
-                                ? "bg-orange-500 text-white border-orange-500"
-                                : "bg-white text-gray-600 border-gray-300 hover:border-orange-400"
-                            }`}
-                          >
-                            {color.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
+                
                 {/* Quantity */}
                 <div>
                   <p className="font-semibold text-gray-700 text-xs mb-2">
