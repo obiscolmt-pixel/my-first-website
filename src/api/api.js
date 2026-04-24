@@ -128,3 +128,29 @@ export const googleSignIn = async (token) => {
   })
   return res.json()
 }
+
+// ─── PRODUCT MANAGEMENT (Admin) ─────────────────────
+export const createProduct = async (productData) => {
+  const res = await fetch(`${BASE_URL}/products/add`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify([productData]),
+  })
+  return res.json()
+}
+
+export const updateProduct = async (id, productData) => {
+  const res = await fetch(`${BASE_URL}/products/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(productData),
+  })
+  return res.json()
+}
+
+export const deleteProduct = async (id) => {
+  const res = await fetch(`${BASE_URL}/products/${id}`, {
+    method: 'DELETE',
+  })
+  return res.json()
+}
