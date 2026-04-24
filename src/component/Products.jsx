@@ -188,7 +188,7 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
             onClick={closeProduct}
           />
 
-          <div className="fixed bottom-0 left-0 right-0 sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:bottom-auto w-full sm:max-w-3xl bg-white z-50 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[75vh] sm:max-h-[90vh] flex flex-col">
+           <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[88%] sm:w-full sm:max-w-3xl bg-white z-50 rounded-2xl shadow-2xl overflow-hidden max-h-[65vh] sm:max-h-[90vh] flex flex-col">
             <button
               onClick={closeProduct}
               className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-black z-10 bg-white rounded-full p-1.5 shadow"
@@ -202,29 +202,29 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
 
             <div className="flex flex-col sm:flex-row overflow-y-auto">
               {/* Product Image */}
-              <div className="w-full sm:w-1/2 h-[220px] sm:h-auto shrink-0">
+              <div className="w-full sm:w-1/2 h-[180px] sm:h-auto shrink-0 bg-gray-50 flex items-center justify-center overflow-hidden">
                 <img
                   src={selectedImage || selectedProduct.image}
                   alt={selectedProduct.name}
-                  className="w-full h-full object-cover transition-all duration-300"
+                  className="w-full h-full object-contain p-3 transition-all duration-300"
                 />
               </div>
 
               {/* Product Details */}
-              <div className="w-full sm:w-1/2 p-4 sm:p-6 flex flex-col gap-3 sm:gap-4 overflow-y-auto">
+              <div className="w-full sm:w-1/2 p-3 sm:p-6 flex flex-col gap-2 sm:gap-4 overflow-y-auto">
                 {/* Category & Name */}
                 <div>
-                  <p className="text-orange-500 uppercase tracking-widest text-xs font-semibold capitalize">
+                  <p className="text-orange-500 uppercase tracking-widest text-[10px] font-semibold capitalize">
                     {selectedProduct.category}
                   </p>
-                  <h2 className="text-xl sm:text-2xl font-black text-gray-800 mt-1">
+                  <h2 className="text-base sm:text-2xl font-bold text-gray-800 mt-1">
                     {selectedProduct.name}
                   </h2>
                 </div>
 
                 {/* Price + Rating */}
                 <div className="flex items-center justify-between flex-wrap gap-2">
-                  <span className="text-2xl sm:text-3xl font-black text-orange-500">
+                  <span className="text-xl sm:text-3xl font-black text-orange-500">
                     ₦{selectedProduct.amount.toLocaleString()}
                   </span>
                   <div className="flex items-center gap-1">
@@ -241,7 +241,7 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
                 </span>
 
                 {/* Description */}
-                <p className="text-gray-500 text-xs sm:text-sm leading-relaxed">
+                <p className="text-gray-400 text-[11px] sm:text-sm leading-relaxed">
                   Premium quality {selectedProduct.name} with the latest
                   features. Comes with full warranty and official accessories.
                   Fast delivery across Nigeria.
@@ -279,7 +279,7 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
 
                 {/* Quantity */}
                 <div>
-                  <p className="font-bold text-gray-700 text-sm mb-2">
+                  <p className="font-semibold text-gray-700 text-xs mb-2">
                     Quantity
                   </p>
                   <div className="flex items-center gap-3 flex-wrap">
@@ -308,7 +308,7 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
                 </div>
 
                 {/* Delivery Info */}
-                <div className="bg-orange-50 border border-orange-100 rounded-xl p-3">
+                <div className="bg-orange-50 border border-orange-100 rounded-xl p-2">
                   <p className="text-xs text-orange-700 font-semibold mb-1">
                     🚚 Delivery Info
                   </p>
