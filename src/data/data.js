@@ -347,7 +347,7 @@ export const fashionCategories = [
   {
     id: 2,
     name: "Women",
-    image: "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=400&q=80&fit=crop",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776990682/photo-1524502397800-2eeaad7c3fe5_k7iswr.avif",
   },
  {
     id: 3,
@@ -358,7 +358,7 @@ export const fashionCategories = [
   {
     id: 4,
     name: "Kids",
-    image: "https://images.unsplash.com/photo-1519457431-44ccd64a579b?w=400&q=80&fit=crop",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1776990511/photo-1524503033411-c9566986fc8f_skeutn.avif",
     comingSoon: true,
   },
 ]

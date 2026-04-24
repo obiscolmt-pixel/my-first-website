@@ -28,7 +28,7 @@ const LifestylePage = ({ addToCart, addToWishlist, isWishlisted, searchQuery }) 
       {/* Hero Banner */}
       <div className="relative overflow-hidden h-[300px] sm:h-[400px]">
         <img
-          src="https://images.unsplash.com/photo-1541643600914-78b084683702?w=1920&q=100&fit=crop"
+          src="https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=1920&q=100&fit=crop"
           alt="Lifestyle"
           className="w-full h-full object-cover animate-kenburns"
         />
