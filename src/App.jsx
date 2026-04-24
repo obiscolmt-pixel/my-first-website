@@ -25,20 +25,22 @@ const App = () => {
   const [trackOpen, setTrackOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [orderHistoryOpen, setOrderHistoryOpen] = useState(false);
-
-  const addToCart = (item) => {
-    setCartItems((prev) => {
-      const existing = prev.find((i) => i._id === item._id || i.id === item.id);
-      if (existing) {
-        return prev.map((i) =>
-          i._id === item._id || i.id === item.id
-            ? { ...i, quantity: i.quantity + 1 }
-            : i
-        );
-      }
-      return [...prev, { ...item, quantity: 1 }];
-    });
-  };
+const addToCart = (item) => {
+  const itemId = item._id || item.id
+  setCartItems((prev) => {
+    const existing = prev.find((i) => {
+      const existingId = i._id || i.id
+      return existingId && itemId && existingId === itemId
+    })
+    if (existing) {
+      return prev.map((i) => {
+        const existingId = i._id || i.id
+        return existingId === itemId ? { ...i, quantity: i.quantity + 1 } : i
+      })
+    }
+    return [...prev, { ...item, quantity: 1 }]
+  })
+}
 
   const removeFromCart = (id) => {
     setCartItems((prev) => prev.filter((i) => i._id !== id && i.id !== id));
