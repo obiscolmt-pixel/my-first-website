@@ -1,21 +1,30 @@
-import React, { useState } from "react";
-// import { lifestyleProducts, lifestyleCategories } from "../data/data.js";
+import React, { useState, useEffect } from "react";
 import { BsFillCartFill } from "react-icons/bs";
-import { lifestyleCategories } from "../data/data.js"
-import { fetchProducts } from "../api/api.js"
-
+import { lifestyleCategories } from "../data/data.js";
+import { fetchProducts } from "../api/api.js";
 
 const LifestylePage = ({ addToCart, addToWishlist, isWishlisted, searchQuery }) => {
+  const [allProducts, setAllProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState("all");
   const [toast, setToast] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const data = await fetchProducts('lifestyle')
+      setAllProducts(Array.isArray(data) ? data : [])
+      setLoading(false)
+    }
+    load()
+  }, [])
 
   const handleAddToCart = (item) => {
-    addToCart({ ...item, _id: item.id, quantity: 1 });
+    addToCart({ ...item, quantity: 1 });
     setToast(item);
     setTimeout(() => setToast(null), 3000);
   };
 
-  const displayed = lifestyleProducts.filter((p) => {
+  const displayed = allProducts.filter((p) => {
     const matchSearch = searchQuery
       ? p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -105,8 +114,6 @@ const LifestylePage = ({ addToCart, addToWishlist, isWishlisted, searchQuery }) 
                 ? "All Lifestyle"
                 : activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)}
             </h2>
-
-            {/* Filter Tabs */}
             <div className="flex flex-wrap gap-2">
               {["all", ...lifestyleCategories.map((c) => c.name.toLowerCase())].map((cat) => (
                 <button
@@ -124,53 +131,57 @@ const LifestylePage = ({ addToCart, addToWishlist, isWishlisted, searchQuery }) 
             </div>
           </div>
 
-          {/* Product Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-            {displayed.map((item) => (
-              <div
-                key={item.id}
-                className="shadow-md rounded-xl hover:scale-105 duration-300 overflow-hidden bg-white cursor-pointer"
-              >
-                <div className="relative">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-[140px] sm:h-[180px] object-cover"
-                  />
-                  <button
-                    onClick={() => addToWishlist({ ...item, _id: item.id })}
-                    className="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow hover:scale-110 transition"
-                  >
-                    {isWishlisted(item.id) ? (
-                      <span className="text-red-500 text-base leading-none">♥</span>
-                    ) : (
-                      <span className="text-gray-400 text-base leading-none">♡</span>
-                    )}
-                  </button>
-                  <span className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full capitalize">
-                    {item.category}
-                  </span>
+          {loading ? (
+            <div className="flex justify-center py-16">
+              <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+              {displayed.map((item) => (
+                <div key={item._id} className="shadow-md rounded-xl hover:scale-105 duration-300 overflow-hidden bg-white cursor-pointer">
+                  <div className="relative">
+                    <div className="w-full h-[200px] bg-gray-50 flex items-center justify-center overflow-hidden">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-contain p-2"
+                      />
+                    </div>
+                    <button
+                      onClick={() => addToWishlist(item)}
+                      className="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow hover:scale-110 transition"
+                    >
+                      {isWishlisted(item._id) ? (
+                        <span className="text-red-500 text-base leading-none">♥</span>
+                      ) : (
+                        <span className="text-gray-400 text-base leading-none">♡</span>
+                      )}
+                    </button>
+                    <span className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full capitalize">
+                      {item.category}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center px-2 py-2 gap-1">
+                    <p className="font-bold text-xs sm:text-sm leading-tight">{item.name}</p>
+                    <span className="bg-orange-500 text-white rounded-full px-2 py-1 text-xs font-bold shrink-0">
+                      ₦{item.amount.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="px-2 pb-3">
+                    <button
+                      onClick={() => handleAddToCart(item)}
+                      className="w-full flex items-center justify-center gap-1 sm:gap-2 bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm font-semibold py-2 rounded-full transition duration-200"
+                    >
+                      <BsFillCartFill size={14} />
+                      Add to Cart
+                    </button>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center px-2 py-2 gap-1">
-                  <p className="font-bold text-xs sm:text-sm leading-tight">{item.name}</p>
-                  <span className="bg-orange-500 text-white rounded-full px-2 py-1 text-xs font-bold shrink-0">
-                    ₦{item.amount.toLocaleString()}
-                  </span>
-                </div>
-                <div className="px-2 pb-3">
-                  <button
-                    onClick={() => handleAddToCart(item)}
-                    className="w-full flex items-center justify-center gap-1 sm:gap-2 bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm font-semibold py-2 rounded-full transition duration-200"
-                  >
-                    <BsFillCartFill size={14} />
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
-          {displayed.length === 0 && (
+          {displayed.length === 0 && !loading && (
             <div className="text-center py-16">
               <p className="text-gray-400 text-lg">No items found.</p>
               <button
