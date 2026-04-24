@@ -3,7 +3,12 @@ import { BsFillCartFill } from "react-icons/bs";
 import { lifestyleCategories } from "../data/data.js";
 import { fetchProducts } from "../api/api.js";
 
-const LifestylePage = ({ addToCart, addToWishlist, isWishlisted, searchQuery }) => {
+const LifestylePage = ({
+  addToCart,
+  addToWishlist,
+  isWishlisted,
+  searchQuery,
+}) => {
   const [allProducts, setAllProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState("all");
   const [toast, setToast] = useState(null);
@@ -11,12 +16,12 @@ const LifestylePage = ({ addToCart, addToWishlist, isWishlisted, searchQuery }) 
 
   useEffect(() => {
     const load = async () => {
-      const data = await fetchProducts('lifestyle')
-      setAllProducts(Array.isArray(data) ? data : [])
-      setLoading(false)
-    }
-    load()
-  }, [])
+      const data = await fetchProducts("lifestyle");
+      setAllProducts(Array.isArray(data) ? data : []);
+      setLoading(false);
+    };
+    load();
+  }, []);
 
   const handleAddToCart = (item) => {
     addToCart({ ...item, quantity: 1 });
@@ -36,7 +41,6 @@ const LifestylePage = ({ addToCart, addToWishlist, isWishlisted, searchQuery }) 
 
   return (
     <div className="min-h-screen">
-
       {/* Hero Banner */}
       <div className="relative overflow-hidden h-[300px] sm:h-[400px]">
         <img
@@ -50,15 +54,16 @@ const LifestylePage = ({ addToCart, addToWishlist, isWishlisted, searchQuery }) 
               Obisco Store
             </p>
             <h1 className="text-4xl sm:text-6xl font-black text-white leading-tight">
-              Lifestyle &{" "}
-              <span className="text-orange-500">Luxury</span>
+              Lifestyle & <span className="text-orange-500">Luxury</span>
             </h1>
             <p className="text-gray-300 text-sm mt-3 max-w-md">
               Premium perfumes and luxury watches — smell great, look great.
             </p>
             <button
               onClick={() =>
-                document.getElementById("lifestyle-products")?.scrollIntoView({ behavior: "smooth" })
+                document
+                  .getElementById("lifestyle-products")
+                  ?.scrollIntoView({ behavior: "smooth" })
               }
               className="mt-5 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-full font-semibold transition text-sm"
             >
@@ -85,14 +90,16 @@ const LifestylePage = ({ addToCart, addToWishlist, isWishlisted, searchQuery }) 
               key={cat.id}
               onClick={() => {
                 setActiveCategory(cat.name.toLowerCase());
-                document.getElementById("lifestyle-products")?.scrollIntoView({ behavior: "smooth" });
+                document
+                  .getElementById("lifestyle-products")
+                  ?.scrollIntoView({ behavior: "smooth" });
               }}
               className="group relative overflow-hidden rounded-2xl cursor-pointer h-[200px] hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_12px_30px_rgba(249,115,22,0.25)]"
             >
               <img
                 src={cat.image}
                 alt={cat.name}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-4 text-center">
@@ -112,10 +119,14 @@ const LifestylePage = ({ addToCart, addToWishlist, isWishlisted, searchQuery }) 
             <h2 className="font-black text-2xl sm:text-3xl bg-gradient-to-r from-orange-600 to-yellow-400 bg-clip-text text-transparent">
               {activeCategory === "all"
                 ? "All Lifestyle"
-                : activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1)}
+                : activeCategory.charAt(0).toUpperCase() +
+                  activeCategory.slice(1)}
             </h2>
             <div className="flex flex-wrap gap-2">
-              {["all", ...lifestyleCategories.map((c) => c.name.toLowerCase())].map((cat) => (
+              {[
+                "all",
+                ...lifestyleCategories.map((c) => c.name.toLowerCase()),
+              ].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
@@ -138,7 +149,10 @@ const LifestylePage = ({ addToCart, addToWishlist, isWishlisted, searchQuery }) 
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
               {displayed.map((item) => (
-                <div key={item._id} className="shadow-md rounded-xl hover:scale-105 duration-300 overflow-hidden bg-white cursor-pointer">
+                <div
+                  key={item._id}
+                  className="shadow-md rounded-xl hover:scale-105 duration-300 overflow-hidden bg-white cursor-pointer"
+                >
                   <div className="relative">
                     <div className="w-full h-[200px] bg-gray-50 flex items-center justify-center overflow-hidden">
                       <img
@@ -152,9 +166,13 @@ const LifestylePage = ({ addToCart, addToWishlist, isWishlisted, searchQuery }) 
                       className="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow hover:scale-110 transition"
                     >
                       {isWishlisted(item._id) ? (
-                        <span className="text-red-500 text-base leading-none">♥</span>
+                        <span className="text-red-500 text-base leading-none">
+                          ♥
+                        </span>
                       ) : (
-                        <span className="text-gray-400 text-base leading-none">♡</span>
+                        <span className="text-gray-400 text-base leading-none">
+                          ♡
+                        </span>
                       )}
                     </button>
                     <span className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full capitalize">
@@ -162,7 +180,9 @@ const LifestylePage = ({ addToCart, addToWishlist, isWishlisted, searchQuery }) 
                     </span>
                   </div>
                   <div className="flex justify-between items-center px-2 py-2 gap-1">
-                    <p className="font-bold text-xs sm:text-sm leading-tight">{item.name}</p>
+                    <p className="font-bold text-xs sm:text-sm leading-tight">
+                      {item.name}
+                    </p>
                     <span className="bg-orange-500 text-white rounded-full px-2 py-1 text-xs font-bold shrink-0">
                       ₦{item.amount.toLocaleString()}
                     </span>

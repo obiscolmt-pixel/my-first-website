@@ -442,11 +442,11 @@ export const lifestyleCategories = [
   {
     id: 1,
     name: "Perfumes",
-    image: "https://images.unsplash.com/photo-1541643600914-78b084683702?w=400&q=80&fit=crop",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1777057793/519Xzhfah6L._SY450__sgonhk.jpg",
   },
   {
     id: 2,
     name: "Watches",
-    image: "https://images.unsplash.com/photo-1547996160-81dfa63595aa?w=400&q=80&fit=crop",
+    image: "https://res.cloudinary.com/dy6jak5pf/image/upload/v1777058305/51478LBC2rL._AC_UY327_FMwebp_QL65__z7vvve.webp",
   },
 ]
