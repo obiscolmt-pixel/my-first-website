@@ -40,6 +40,12 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
     loadProducts();
   }, []);
 
+  useEffect(() => {
+  return () => {
+    document.body.style.overflow = 'unset'
+  }
+}, [])
+
   const filterType = (category) => {
     setActiveType(category);
     setActivePrice(null);
@@ -63,6 +69,7 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
   };
 
   const openProduct = async (item) => {
+    document.body.style.overflow = 'hidden'
     setSelectedProduct(item);
     setSelectedColor(item.colors?.length > 0 ? item.colors[0].name : "");
     setSelectedImage(
@@ -88,7 +95,10 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
     }
   };
 
-  const closeProduct = () => setSelectedProduct(null);
+  const closeProduct = () => {
+  setSelectedProduct(null)
+  document.body.style.overflow = 'unset'
+}
 
   const handleSubmitReview = async () => {
     const user = JSON.parse(localStorage.getItem("user"));
