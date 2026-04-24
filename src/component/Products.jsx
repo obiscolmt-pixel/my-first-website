@@ -539,11 +539,13 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
             className="shadow-md rounded-xl hover:scale-105 duration-300 overflow-hidden bg-white cursor-pointer"
           >
             <div onClick={() => openProduct(item)} className="relative">
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-[120px] sm:h-[160px] object-cover"
-              />
+              <div className="w-full h-[160px] bg-gray-50 flex items-center justify-center overflow-hidden">
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="w-full h-full object-contain p-2"
+                />
+              </div>
               {/* Wishlist heart button */}
               {/* Wishlist heart button */}
               <button
