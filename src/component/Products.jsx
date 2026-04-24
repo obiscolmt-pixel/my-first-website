@@ -41,19 +41,23 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
   }, []);
 
   useEffect(() => {
-  return () => {
-    document.body.style.overflow = 'unset'
-  }
-}, [])
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
 
   const filterType = (category) => {
     setActiveType(category);
     setActivePrice(null);
-    setProducts(
-      category === "All"
-        ? allProducts
-        : allProducts.filter((item) => item.category === category),
-    );
+    if (category === "All") {
+      setProducts(allProducts);
+   } else if (category === "accessories") {
+      setProducts(allProducts.filter((item) =>
+        item.category === "speakers" || item.category === "chargers" || item.category === "headphones"
+      ));
+    } else {
+      setProducts(allProducts.filter((item) => item.category === category));
+    }
   };
 
   const filterPrice = (price) => {
@@ -69,12 +73,10 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
   };
 
   const openProduct = async (item) => {
-    document.body.style.overflow = 'hidden'
+    document.body.style.overflow = "hidden";
     setSelectedProduct(item);
     setSelectedColor(item.colors?.length > 0 ? item.colors[0].name : "");
-    setSelectedImage(
-      item.image
-    );
+    setSelectedImage(item.image);
     setQuantity(1);
     setReviews([]);
     setAvgRating(0);
@@ -96,9 +98,9 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
   };
 
   const closeProduct = () => {
-  setSelectedProduct(null)
-  document.body.style.overflow = 'unset'
-}
+    setSelectedProduct(null);
+    document.body.style.overflow = "unset";
+  };
 
   const handleSubmitReview = async () => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -198,7 +200,7 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
             onClick={closeProduct}
           />
 
-           <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[88%] sm:w-full sm:max-w-3xl bg-white z-50 rounded-2xl shadow-2xl overflow-hidden max-h-[65vh] sm:max-h-[90vh] flex flex-col">
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[88%] sm:w-full sm:max-w-3xl bg-white z-50 rounded-2xl shadow-2xl overflow-hidden max-h-[65vh] sm:max-h-[90vh] flex flex-col">
             <button
               onClick={closeProduct}
               className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-black z-10 bg-white rounded-full p-1.5 shadow"
@@ -256,7 +258,7 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
                   features. Comes with full warranty and official accessories.
                   Fast delivery across Nigeria.
                 </p>
-                
+
                 {/* Quantity */}
                 <div>
                   <p className="font-semibold text-gray-700 text-xs mb-2">
@@ -450,28 +452,22 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
         <div>
           <p className="font-bold text-gray-700 text-sm">Filter Type</p>
           <div className="flex flex-wrap">
-            {[
-              "All",
-              "phones",
-              "laptops",
-              "headphones",
-              "speakers",
-              "chargers",
-              "tablets",
-            ].map((cat) => (
-              <button
-                key={cat}
-                onClick={() => filterType(cat)}
-                className={`m-1 border px-3 py-1 rounded-full capitalize transition text-xs sm:text-sm
+            {["All", "phones", "laptops", "tablets", "accessories"].map(
+              (cat) => (
+                <button
+                  key={cat}
+                  onClick={() => filterType(cat)}
+                  className={`m-1 border px-3 py-1 rounded-full capitalize transition text-xs sm:text-sm
                   ${
                     activeType === cat
                       ? "bg-orange-500 text-white border-orange-500"
                       : "border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white"
                   }`}
-              >
-                {cat}
-              </button>
-            ))}
+                >
+                  {cat}
+                </button>
+              ),
+            )}
           </div>
         </div>
 
