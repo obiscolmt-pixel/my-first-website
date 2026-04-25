@@ -90,15 +90,17 @@ const Navbar = ({
   }, []);
 
   const handleSelectSuggestion = (item) => {
-    setSearchQuery(item.name)
-    setShowSuggestions(false)
+    setSearchQuery(item.name);
+    setShowSuggestions(false);
     if (item.department && item.department !== activeDepartment) {
-      setActiveDepartment(item.department)
+      setActiveDepartment(item.department);
     }
     setTimeout(() => {
-      document.getElementById("products")?.scrollIntoView({ behavior: "smooth" })
-    }, 100)
-  }
+      document
+        .getElementById("products")
+        ?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
 
   const handleSignOut = () => {
     localStorage.removeItem("user");
@@ -407,7 +409,7 @@ const Navbar = ({
       {/* Overlay */}
       {nav && (
         <div
-          className="bg-black/80 fixed w-full h-screen z-20 top-0 left-0"
+          className="bg-black/80 fixed w-full h-screen z-[70] top-0 left-0"
           onClick={() => setNav(false)}
         />
       )}
@@ -416,30 +418,30 @@ const Navbar = ({
       <div
         className={
           nav
-            ? "bg-white fixed top-0 left-0 w-[280px] sm:w-[300px] h-screen z-30 duration-300 flex flex-col"
-            : "bg-white fixed top-0 left-[-100%] w-[280px] sm:w-[300px] h-screen z-30 duration-300 flex flex-col"
+            ? "bg-white fixed top-0 left-0 w-[280px] sm:w-[300px] h-screen z-[80] duration-300 flex flex-col"
+            : "bg-white fixed top-0 left-[-100%] w-[280px] sm:w-[300px] h-screen z-[80] duration-300 flex flex-col"
         }
       >
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-xl font-black">
+        <div className="flex items-center justify-between px-4 py-3 border-b">
+          <h2 className="text-lg font-black">
             OBISCO <span className="text-orange-500">Store</span>
           </h2>
           <AiOutlineClose
             onClick={() => setNav(false)}
-            size={26}
+            size={22}
             className="cursor-pointer text-gray-500 hover:text-black"
           />
         </div>
 
         {user && (
-          <div className="px-4 py-3 border-b bg-orange-50">
+          <div className="px-4 py-2 border-b bg-orange-50">
             <p className="font-bold text-gray-800 text-sm">{user.fullName}</p>
             <p className="text-gray-500 text-xs truncate">{user.email}</p>
           </div>
         )}
 
         {/* Department switcher in drawer */}
-        <div className="px-4 py-3 border-b">
+        <div className="px-4 py-2 border-b">
           <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-2">
             Departments
           </p>
