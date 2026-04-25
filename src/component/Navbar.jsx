@@ -63,9 +63,9 @@ const Navbar = ({
     };
     loadProducts();
   }, []);
-  
+
   useEffect(() => {
-    window.addEventListener('beforeinstallprompt', (e) => {
+    window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       setInstallPrompt(e);
       setShowInstall(true);
@@ -99,12 +99,11 @@ const Navbar = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-
-   const handleInstall = async () => {
+  const handleInstall = async () => {
     if (!installPrompt) return;
     installPrompt.prompt();
     const result = await installPrompt.userChoice;
-    if (result.outcome === 'accepted') {
+    if (result.outcome === "accepted") {
       setShowInstall(false);
       setNav(false);
     }
@@ -138,10 +137,11 @@ const Navbar = ({
             <div onClick={() => setNav(!nav)} className="cursor-pointer">
               <AiOutlineMenu size={28} />
             </div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl">
-              <span className="font-bold text-black">OBISCO</span>{" "}
-              <span className="text-orange-500">Store</span>
-            </h1>
+            <img
+              src="/obisco-logo.png"
+              alt="OBISCO Store"
+              className="h-22 w-auto object-contain"
+            />
           </div>
 
           {/* Search — desktop */}
@@ -522,9 +522,7 @@ const Navbar = ({
 
         <nav className="flex-1 overflow-y-auto">
           <ul className="flex flex-col p-4 text-gray-800">
-
-
-           {/* Install App Button */}
+            {/* Install App Button */}
             {showInstall && (
               <li
                 onClick={handleInstall}
@@ -532,14 +530,14 @@ const Navbar = ({
               >
                 <span className="mr-4 text-2xl">📲</span>
                 <div>
-                  <p className="text-orange-500 font-bold text-base">Install App</p>
+                  <p className="text-orange-500 font-bold text-base">
+                    Install App
+                  </p>
                   <p className="text-xs text-gray-400">Shop D Go</p>
                 </div>
               </li>
             )}
 
-
-            
             <li
               onClick={() => {
                 setNav(false);
