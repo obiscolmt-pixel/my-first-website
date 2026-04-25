@@ -14,6 +14,7 @@ import WishlistSidebar from "./component/WishListSidebar";
 import OrderHistory from "./component/OrderHistory";
 import FashionPage from "./component/FashionPage";
 import LifestylePage from "./component/LifestylePage";
+import RegisterBusiness from "./component/RegisterBusiness";
 
 const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,23 +25,24 @@ const App = () => {
   const [authOpen, setAuthOpen] = useState(false);
   const [trackOpen, setTrackOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [registerBizOpen, setRegisterBizOpen] = useState(false);
   const [orderHistoryOpen, setOrderHistoryOpen] = useState(false);
-const addToCart = (item) => {
-  const itemId = item._id || item.id
-  setCartItems((prev) => {
-    const existing = prev.find((i) => {
-      const existingId = i._id || i.id
-      return existingId && itemId && existingId === itemId
-    })
-    if (existing) {
-      return prev.map((i) => {
-        const existingId = i._id || i.id
-        return existingId === itemId ? { ...i, quantity: i.quantity + 1 } : i
-      })
-    }
-    return [...prev, { ...item, quantity: 1 }]
-  })
-}
+  const addToCart = (item) => {
+    const itemId = item._id || item.id;
+    setCartItems((prev) => {
+      const existing = prev.find((i) => {
+        const existingId = i._id || i.id;
+        return existingId && itemId && existingId === itemId;
+      });
+      if (existing) {
+        return prev.map((i) => {
+          const existingId = i._id || i.id;
+          return existingId === itemId ? { ...i, quantity: i.quantity + 1 } : i;
+        });
+      }
+      return [...prev, { ...item, quantity: 1 }];
+    });
+  };
 
   const removeFromCart = (id) => {
     setCartItems((prev) => prev.filter((i) => i._id !== id && i.id !== id));
@@ -49,8 +51,8 @@ const addToCart = (item) => {
   const increaseQty = (id) => {
     setCartItems((prev) =>
       prev.map((i) =>
-        i._id === id || i.id === id ? { ...i, quantity: i.quantity + 1 } : i
-      )
+        i._id === id || i.id === id ? { ...i, quantity: i.quantity + 1 } : i,
+      ),
     );
   };
 
@@ -58,9 +60,9 @@ const addToCart = (item) => {
     setCartItems((prev) =>
       prev
         .map((i) =>
-          i._id === id || i.id === id ? { ...i, quantity: i.quantity - 1 } : i
+          i._id === id || i.id === id ? { ...i, quantity: i.quantity - 1 } : i,
         )
-        .filter((i) => i.quantity > 0)
+        .filter((i) => i.quantity > 0),
     );
   };
 
@@ -77,7 +79,9 @@ const addToCart = (item) => {
     setWishlist((prev) => {
       const exists = prev.find((i) => i._id === item._id || i.id === item.id);
       if (exists) {
-        const updated = prev.filter((i) => i._id !== item._id && i.id !== item.id);
+        const updated = prev.filter(
+          (i) => i._id !== item._id && i.id !== item.id,
+        );
         localStorage.setItem("obisco_wishlist", JSON.stringify(updated));
         return updated;
       }
@@ -94,7 +98,9 @@ const addToCart = (item) => {
     setSelectedCategory(category);
     setSearchQuery("");
     setTimeout(() => {
-      document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+      document
+        .getElementById("products")
+        ?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
 
@@ -121,6 +127,7 @@ const addToCart = (item) => {
         setOrderHistoryOpen={setOrderHistoryOpen}
         activeDepartment={activeDepartment}
         setActiveDepartment={setActiveDepartment}
+        setRegisterBizOpen={setRegisterBizOpen}
       />
 
       {/* ── Gadgets Department ── */}
@@ -141,14 +148,10 @@ const addToCart = (item) => {
       )}
 
       {/* ── Fashion Department ── */}
-      {activeDepartment === "fashion" && (
-        <FashionPage {...sharedProps} />
-      )}
+      {activeDepartment === "fashion" && <FashionPage {...sharedProps} />}
 
       {/* ── Lifestyle Department ── */}
-      {activeDepartment === "lifestyle" && (
-        <LifestylePage {...sharedProps} />
-      )}
+      {activeDepartment === "lifestyle" && <LifestylePage {...sharedProps} />}
 
       <Footer />
 
@@ -176,6 +179,10 @@ const addToCart = (item) => {
       <TrackOrder trackOpen={trackOpen} setTrackOpen={setTrackOpen} />
       <AdminDashboard adminOpen={adminOpen} setAdminOpen={setAdminOpen} />
       <ChatBot />
+      <RegisterBusiness
+        registerBizOpen={registerBizOpen}
+        setRegisterBizOpen={setRegisterBizOpen}
+      />
     </>
   );
 };

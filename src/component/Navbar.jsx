@@ -34,6 +34,7 @@ const Navbar = ({
   setAuthOpen,
   setTrackOpen,
   setAdminOpen,
+  setRegisterBizOpen,
   wishlist,
   setWishlistOpen,
   setOrderHistoryOpen,
@@ -131,7 +132,7 @@ const Navbar = ({
   return (
     <>
       <div className="sticky top-0 bg-white z-50 shadow-sm">
-        <div className="max-w-[1640px] mx-auto flex justify-between items-center p-4">
+        <div className="max-w-[1640px] mx-auto flex justify-between items-center px-5 py-0 pb-0">
           {/* Left */}
           <div className="flex items-center gap-3">
             <div onClick={() => setNav(!nav)} className="cursor-pointer">
@@ -336,8 +337,8 @@ const Navbar = ({
         </div>
 
         {/* ── Department Tabs ── */}
-           <div className="border-t border-gray-100 bg-orange-50">
-  <div className="max-w-[1640px] mx-auto px-4 flex gap-1 overflow-x-auto scrollbar-hide">
+        <div className="border-t border-gray-100 bg-orange-50">
+          <div className="max-w-[1640px] mx-auto px-4 flex gap-1 overflow-x-auto scrollbar-hide scroll-smooth">
             {DEPARTMENTS.map((dept) => (
               <button
                 key={dept.key}
@@ -356,6 +357,15 @@ const Navbar = ({
                 {dept.label}
               </button>
             ))}
+
+            {/* Register Your Business Button */}
+
+            <button
+              onClick={() => setRegisterBizOpen(true)}
+              className="flex items-center gap-2 px-5 py-3 text-sm font-semibold whitespace-nowrap border-b-2 border-transparent text-green-600 hover:text-green-500 hover:border-green-400 transition-all duration-200 shrink-0"
+            >
+              🏪 Register Business
+            </button>
           </div>
         </div>
       </div>
