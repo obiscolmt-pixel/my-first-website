@@ -51,10 +51,15 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
     setActivePrice(null);
     if (category === "All") {
       setProducts(allProducts);
-   } else if (category === "accessories") {
-      setProducts(allProducts.filter((item) =>
-        item.category === "speakers" || item.category === "chargers" || item.category === "headphones"
-      ));
+    } else if (category === "accessories") {
+      setProducts(
+        allProducts.filter(
+          (item) =>
+            item.category === "speakers" ||
+            item.category === "chargers" ||
+            item.category === "headphones",
+        ),
+      );
     } else {
       setProducts(allProducts.filter((item) => item.category === category));
     }
@@ -442,59 +447,84 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
       )}
 
       {/* Heading */}
-      <h1 className="font-bold text-center text-2xl sm:text-3xl md:text-4xl bg-gradient-to-r from-orange-600 to-yellow-400 bg-clip-text text-transparent mt-4 mb-2">
-        Top Rated Gadgets & Accessories
-      </h1>
+      {/* Marquee Promo Banner */}
+<div className="bg-orange-500 overflow-hidden py-2 mt-4 rounded-xl">
+  <div className="flex animate-marquee whitespace-nowrap">
+    {[...Array(2)].map((_, i) => (
+      <span key={i} className="flex items-center gap-8 text-white text-xs sm:text-sm font-semibold mx-4">
+        <span>🔥 iPhone 17 pro max</span>
+        <span>⚡ Free delivery in Lagos</span>
+        <span>💻 MacBook Pro 14</span>
+        <span>📱 Samsung S25 Ultra </span>
+        <span>🛒 Shop now & pay on delivery</span>
+        <span>💥 Flash deals every day!</span>
+      </span>
+    ))}
+  </div>
+</div>
 
-      {/* Filter Row */}
-      <div className="flex flex-col lg:flex-row justify-between mt-4 gap-4">
-        {/* Filter Type */}
-        <div>
-          <p className="font-bold text-gray-700 text-sm">Filter Type</p>
-          <div className="flex flex-wrap">
-            {["All", "phones", "laptops", "tablets", "accessories"].map(
-              (cat) => (
-                <button
-                  key={cat}
-                  onClick={() => filterType(cat)}
-                  className={`m-1 border px-3 py-1 rounded-full capitalize transition text-xs sm:text-sm
-                  ${
-                    activeType === cat
-                      ? "bg-orange-500 text-white border-orange-500"
-                      : "border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ),
-            )}
-          </div>
+{/* Section Title */}
+<h1 className="font-bold text-center text-2xl sm:text-3xl md:text-4xl bg-gradient-to-r from-orange-600 to-yellow-400 bg-clip-text text-transparent mt-4 mb-2">
+  Shop Our Gadgets
+</h1>
+
+      {/* ── Filter Bar ── */}
+      <div className="mt-4 space-y-2">
+        {/* Category Row */}
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+          {[
+            { label: "All", value: "All", icon: "🛍️" },
+            { label: "Phones", value: "phones", icon: "📱" },
+            { label: "Laptops", value: "laptops", icon: "💻" },
+            { label: "Tablets", value: "tablets", icon: "📟" },
+            { label: "Accessories", value: "accessories", icon: "🎧" },
+          ].map((cat) => (
+            <button
+              key={cat.value}
+              onClick={() => filterType(cat.value)}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 shrink-0 ${
+                activeType === cat.value
+                  ? "bg-orange-500 text-white shadow-md shadow-orange-200"
+                  : "bg-gray-100 text-gray-600 hover:bg-orange-50 hover:text-orange-500"
+              }`}
+            >
+              <span>{cat.icon}</span>
+              {cat.label}
+            </button>
+          ))}
         </div>
 
-        {/* Filter Price */}
-        <div>
-          <p className="font-bold text-gray-700 text-sm">Filter Price</p>
-          <div className="flex flex-wrap">
-            {[
-              { label: "Under ₦50k", value: "$" },
-              { label: "₦50k-₦150k", value: "$$" },
-              { label: "₦150k-₦500k", value: "$$$" },
-              { label: "₦500k+", value: "$$$$" },
-            ].map((p) => (
-              <button
-                key={p.value}
-                onClick={() => filterPrice(p.value)}
-                className={`m-1 border px-3 py-1 rounded-full transition text-xs sm:text-sm
-                  ${
-                    activePrice === p.value
-                      ? "bg-orange-500 text-white border-orange-500"
-                      : "border-orange-600 text-orange-600 hover:bg-orange-600 hover:text-white"
-                  }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
+        {/* Budget Row */}
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+          {[
+            { label: "All Prices", value: null },
+            { label: "Under ₦50k", value: "$" },
+            { label: "₦50k — ₦150k", value: "$$" },
+            { label: "₦150k — ₦500k", value: "$$$" },
+            { label: "₦500k+", value: "$$$$" },
+          ].map((p) => (
+            <button
+              key={p.label}
+              onClick={() => {
+                if (!p.value) {
+                  setActivePrice(null);
+                  setActiveType("All");
+                  setProducts(allProducts);
+                } else {
+                  filterPrice(p.value);
+                }
+              }}
+              className={`flex items-center px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 shrink-0 ${
+                activePrice === p.value && p.value !== null
+                  ? "bg-orange-500 text-white shadow-md shadow-orange-200"
+                  : !p.value && !activePrice
+                    ? "bg-orange-500 text-white shadow-md shadow-orange-200"
+                    : "bg-gray-100 text-gray-600 hover:bg-orange-50 hover:text-orange-500"
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
         </div>
       </div>
 
