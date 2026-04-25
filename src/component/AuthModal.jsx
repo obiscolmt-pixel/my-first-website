@@ -88,17 +88,33 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse) => {
-    const res = await googleSignIn(credentialResponse.credential);
-    if (res.token) {
-      localStorage.setItem("token", res.token);
-      localStorage.setItem("user", JSON.stringify(res.user));
-      setAuthOpen(false);
-      window.location.reload();
-    } else {
-      alert(res.message || "Google Sign In failed.");
+ const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true)
+    try {
+      const res = await googleSignIn(credentialResponse.credential)
+      if (res.token) {
+        localStorage.setItem("token", res.token)
+        localStorage.setItem("user", JSON.stringify(res.user))
+        setAuthOpen(false)
+        window.location.reload()
+      } else {
+        // Auto retry once if server error
+        const retry = await googleSignIn(credentialResponse.credential)
+        if (retry.token) {
+          localStorage.setItem("token", retry.token)
+          localStorage.setItem("user", JSON.stringify(retry.user))
+          setAuthOpen(false)
+          window.location.reload()
+        } else {
+          alert("Google Sign In failed. Please try again in a moment.")
+        }
+      }
+    } catch (err) {
+      alert("Connection error. Please try again.")
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
   const handleForgotPassword = async () => {
     if (!forgotEmail) {

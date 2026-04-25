@@ -124,12 +124,21 @@ export const getUserOrders = async (userId) => {
 
 // Google Sign In
 export const googleSignIn = async (token) => {
-  const res = await fetch(`${BASE_URL}/auth/google`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token }),
-  })
-  return res.json()
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 15000)
+  try {
+    const res = await fetch(`${BASE_URL}/auth/google`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+      signal: controller.signal,
+    })
+    clearTimeout(timeout)
+    return res.json()
+  } catch (err) {
+    clearTimeout(timeout)
+    return { message: 'Connection timeout. Please try again.' }
+  }
 }
 
 // ─── PRODUCT MANAGEMENT (Admin) ─────────────────────
