@@ -1,4 +1,4 @@
-const CACHE_NAME = 'obisco-store-v1'
+const CACHE_NAME = 'obisco-store-v2'
 
 const urlsToCache = [
   '/',
