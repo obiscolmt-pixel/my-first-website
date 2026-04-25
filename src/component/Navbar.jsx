@@ -47,6 +47,8 @@ const Navbar = ({
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef(null);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstall, setShowInstall] = useState(false);
 
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -60,6 +62,14 @@ const Navbar = ({
       }
     };
     loadProducts();
+  }, []);
+  
+  useEffect(() => {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstall(true);
+    });
   }, []);
 
   useEffect(() => {
@@ -88,6 +98,17 @@ const Navbar = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+
+   const handleInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const result = await installPrompt.userChoice;
+    if (result.outcome === 'accepted') {
+      setShowInstall(false);
+      setNav(false);
+    }
+  };
 
   const handleSelectSuggestion = (item) => {
     setSearchQuery(item.name);
@@ -501,6 +522,24 @@ const Navbar = ({
 
         <nav className="flex-1 overflow-y-auto">
           <ul className="flex flex-col p-4 text-gray-800">
+
+
+           {/* Install App Button */}
+            {showInstall && (
+              <li
+                onClick={handleInstall}
+                className="py-3 flex items-center border-b border-gray-100 cursor-pointer transition bg-orange-50 rounded-xl px-3 mb-2"
+              >
+                <span className="mr-4 text-2xl">📲</span>
+                <div>
+                  <p className="text-orange-500 font-bold text-base">Install App</p>
+                  <p className="text-xs text-gray-400">Shop D Go</p>
+                </div>
+              </li>
+            )}
+
+
+            
             <li
               onClick={() => {
                 setNav(false);
