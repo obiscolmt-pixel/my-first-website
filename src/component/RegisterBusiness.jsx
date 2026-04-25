@@ -12,13 +12,12 @@ const RegisterBusiness = ({ registerBizOpen, setRegisterBizOpen }) => {
     businessName: "",
     businessType: "",
     category: "",
-    phone: "",
     whatsapp: "",
     email: "",
     location: "",
     state: "",
     description: "",
-    instagram: "",
+    socials: "",
     experience: "",
   });
 
@@ -50,7 +49,6 @@ const RegisterBusiness = ({ registerBizOpen, setRegisterBizOpen }) => {
     if (
       !form.ownerName ||
       !form.businessName ||
-      !form.phone ||
       !form.email ||
       !form.category
     ) {
@@ -416,8 +414,8 @@ const RegisterBusiness = ({ registerBizOpen, setRegisterBizOpen }) => {
                         {form.category}
                       </p>
                       <p className="text-xs text-gray-600">
-                        <span className="font-semibold">Phone:</span>{" "}
-                        {form.phone}
+                        <span className="font-semibold">Whatsapp:</span>{" "}
+                        {form.whatsapp}
                       </p>
                       <p className="text-xs text-gray-600">
                         <span className="font-semibold">Email:</span>{" "}
@@ -425,7 +423,7 @@ const RegisterBusiness = ({ registerBizOpen, setRegisterBizOpen }) => {
                       </p>
                       <p className="text-xs text-gray-600">
                         <span className="font-semibold">Location:</span>{" "}
-                        {form.location}, {form.state}
+                        {form.location} {form.state}
                       </p>
                     </div>
                   </div>
