@@ -11,14 +11,14 @@ const Category = ({ onCategoryClick }) => {
   }
 
   return (
-    <div className='max-w-[1640px] mx-auto px-4 py-12 bg-[#111]'>
+    <div className='max-w-[1640px] mx-auto px-4 py-12 bg-white'>
 
       {/* Heading */}
       <div className='text-center mb-10'>
         <p className='text-orange-500 uppercase tracking-[0.3em] text-xs font-semibold mb-2'>
           Browse By Category
         </p>
-        <h1 className='font-black text-4xl text-white'>
+        <h1 className='font-black text-4xl text-black'>
           Shop Our <span className='text-orange-500'>Collections</span>
         </h1>
         <p className='text-gray-400 text-sm mt-2'>

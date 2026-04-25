@@ -140,7 +140,7 @@ const Navbar = ({
             <img
               src="/obisco-logo.png"
               alt="OBISCO Store"
-              className="h-22 w-auto object-contain cursor-pointer"
+              className="h-20 w-auto object-contain cursor-pointer"
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }}
@@ -237,7 +237,7 @@ const Navbar = ({
               onClick={() => setSearchOpen(!searchOpen)}
               className="md:hidden p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition"
             >
-              <AiOutlineSearch size={22} />
+              <AiOutlineSearch size={15} />
             </button>
 
             {/* Account */}
@@ -248,7 +248,7 @@ const Navbar = ({
                 }
                 className="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-black rounded-full px-3 py-2 transition text-sm"
               >
-                <FaUser size={14} />
+                <FaUser size={12} />
                 <span className="hidden sm:inline">
                   {user ? user.fullName.split(" ")[0] : "Account"}
                 </span>
@@ -324,7 +324,7 @@ const Navbar = ({
               onClick={() => setCartOpen(true)}
               className="bg-black text-white flex items-center gap-2 rounded-full px-3 sm:px-5 py-2 relative transition hover:bg-gray-800"
             >
-              <BsFillCartFill size={18} />
+              <BsFillCartFill size={13} />
               <span className="hidden sm:inline text-sm">Cart</span>
               {cartItems.length > 0 && (
                 <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
@@ -336,8 +336,8 @@ const Navbar = ({
         </div>
 
         {/* ── Department Tabs ── */}
-        <div className="border-t border-gray-100">
-          <div className="max-w-[1640px] mx-auto px-4 flex gap-1 overflow-x-auto scrollbar-hide">
+           <div className="border-t border-gray-100 bg-orange-50">
+  <div className="max-w-[1640px] mx-auto px-4 flex gap-1 overflow-x-auto scrollbar-hide">
             {DEPARTMENTS.map((dept) => (
               <button
                 key={dept.key}
