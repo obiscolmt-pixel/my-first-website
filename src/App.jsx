@@ -75,25 +75,30 @@ const App = () => {
   });
   const [wishlistOpen, setWishlistOpen] = useState(false);
 
-  const addToWishlist = (item) => {
+ const addToWishlist = (item) => {
+    const itemId = item._id || item.id
     setWishlist((prev) => {
-      const exists = prev.find((i) => i._id === item._id || i.id === item.id);
+      const exists = prev.find((i) => {
+        const existingId = i._id || i.id
+        return existingId && itemId && existingId === itemId
+      })
       if (exists) {
-        const updated = prev.filter(
-          (i) => i._id !== item._id && i.id !== item.id,
-        );
-        localStorage.setItem("obisco_wishlist", JSON.stringify(updated));
-        return updated;
+        const updated = prev.filter((i) => {
+          const existingId = i._id || i.id
+          return existingId !== itemId
+        })
+        localStorage.setItem("obisco_wishlist", JSON.stringify(updated))
+        return updated
       }
-      const updated = [...prev, item];
-      localStorage.setItem("obisco_wishlist", JSON.stringify(updated));
-      return updated;
-    });
-  };
+      const updated = [...prev, item]
+      localStorage.setItem("obisco_wishlist", JSON.stringify(updated))
+      return updated
+    })
+  }
 
   const isWishlisted = (id) =>
-    wishlist.some((i) => i._id === id || i.id === id);
-
+    wishlist.some((i) => (i._id || i.id) === id)
+  
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
     setSearchQuery("");
