@@ -16,6 +16,7 @@ import {
   createPromoCode,
   deletePromoCode,
   sendBroadcast,
+  getAllUsers,
 } from "../api/api.js";
 
 const ADMIN_PASSWORD = "obisco2025";
@@ -91,6 +92,11 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
   const [broadcastResult, setBroadcastResult] = useState(null);
 
+  // Customers state
+  const [customers, setCustomers] = useState([]);
+  const [customersLoading, setCustomersLoading] = useState(false);
+  const [customerSearch, setCustomerSearch] = useState("");
+
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
       setAuthenticated(true);
@@ -125,6 +131,7 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
     if (authenticated && activeTab === "products") loadProducts();
     if (authenticated && activeTab === "orders") loadOrders();
     if (authenticated && activeTab === "promos") loadPromos();
+    if (authenticated && activeTab === "customers") loadCustomers();
   }, [activeTab, authenticated]);
 
   const handleUpdateStatus = async (orderId, status, paymentStatus) => {
@@ -268,6 +275,13 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
     }
   };
 
+  const loadCustomers = async () => {
+    setCustomersLoading(true);
+    const data = await getAllUsers();
+    setCustomers(Array.isArray(data) ? data : []);
+    setCustomersLoading(false);
+  };
+
   const resetForm = () => {
     setShowProductForm(false);
     setEditingProduct(null);
@@ -349,25 +363,29 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
             <div className="flex flex-col h-full">
               {/* Tabs */}
               <div className="flex border-b px-4 shrink-0 overflow-x-auto scrollbar-hide">
-                {["orders", "products", "promos", "broadcast"].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`px-5 py-3 text-sm font-bold capitalize border-b-2 transition whitespace-nowrap ${
-                      activeTab === tab
-                        ? "border-orange-500 text-orange-500"
-                        : "border-transparent text-gray-500 hover:text-orange-400"
-                    }`}
-                  >
-                    {tab === "orders"
-                      ? "📦 Orders"
-                      : tab === "products"
-                        ? "🛍️ Products"
-                        : tab === "promos"
-                          ? "🏷️ Promos"
-                          : "📢 Broadcast"}
-                  </button>
-                ))}
+                {["orders", "products", "promos", "broadcast", "customers"].map(
+                  (tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`px-5 py-3 text-sm font-bold capitalize border-b-2 transition whitespace-nowrap ${
+                        activeTab === tab
+                          ? "border-orange-500 text-orange-500"
+                          : "border-transparent text-gray-500 hover:text-orange-400"
+                      }`}
+                    >
+                      {tab === "orders"
+                        ? "📦 Orders"
+                        : tab === "products"
+                          ? "🛍️ Products"
+                          : tab === "promos"
+                            ? "🏷️ Promos"
+                            : tab === "broadcast"
+                              ? "📢 Broadcast"
+                              : "👥 Customers"}
+                    </button>
+                  ),
+                )}
               </div>
 
               {/* ── ORDERS TAB ── */}
@@ -1278,6 +1296,155 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                       </div>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* ── CUSTOMERS TAB ── */}
+              {activeTab === "customers" && (
+                <div className="p-4 sm:p-6">
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+                    <div className="bg-blue-50 text-blue-600 rounded-xl p-4 text-center">
+                      <p className="text-2xl font-black">{customers.length}</p>
+                      <p className="text-xs font-semibold mt-1">
+                        Total Customers
+                      </p>
+                    </div>
+                    <div className="bg-green-50 text-green-600 rounded-xl p-4 text-center">
+                      <p className="text-2xl font-black">
+                        {
+                          customers.filter((c) => {
+                            const date = new Date(c.createdAt);
+                            const now = new Date();
+                            return (
+                              date.getMonth() === now.getMonth() &&
+                              date.getFullYear() === now.getFullYear()
+                            );
+                          }).length
+                        }
+                      </p>
+                      <p className="text-xs font-semibold mt-1">This Month</p>
+                    </div>
+                    <div className="bg-orange-50 text-orange-600 rounded-xl p-4 text-center">
+                      <p className="text-2xl font-black">
+                        {customers.filter((c) => c.isGoogleUser).length}
+                      </p>
+                      <p className="text-xs font-semibold mt-1">
+                        Google Signups
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Search & Refresh */}
+                  <div className="flex gap-3 mb-4">
+                    <input
+                      placeholder="Search by name or email..."
+                      value={customerSearch}
+                      onChange={(e) => setCustomerSearch(e.target.value)}
+                      className="flex-1 border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500"
+                    />
+                    <button
+                      onClick={loadCustomers}
+                      className="text-orange-500 text-sm font-semibold hover:underline shrink-0"
+                    >
+                      🔄 Refresh
+                    </button>
+                  </div>
+
+                  {customersLoading ? (
+                    <div className="flex justify-center py-10">
+                      <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  ) : customers.length === 0 ? (
+                    <div className="text-center py-10">
+                      <p className="text-4xl mb-3">👥</p>
+                      <p className="text-gray-500">No customers yet</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      <p className="text-xs text-gray-400">
+                        Showing{" "}
+                        {
+                          customers.filter(
+                            (c) =>
+                              c.fullName
+                                ?.toLowerCase()
+                                .includes(customerSearch.toLowerCase()) ||
+                              c.email
+                                ?.toLowerCase()
+                                .includes(customerSearch.toLowerCase()),
+                          ).length
+                        }{" "}
+                        of {customers.length} customers
+                      </p>
+                      {customers
+                        .filter(
+                          (c) =>
+                            c.fullName
+                              ?.toLowerCase()
+                              .includes(customerSearch.toLowerCase()) ||
+                            c.email
+                              ?.toLowerCase()
+                              .includes(customerSearch.toLowerCase()),
+                        )
+                        .map((customer) => (
+                          <div
+                            key={customer._id}
+                            className="border rounded-xl p-4 hover:border-orange-200 transition bg-white"
+                          >
+                            <div className="flex items-center gap-3">
+                              {/* Avatar */}
+                              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center shrink-0">
+                                <span className="text-orange-500 font-black text-sm">
+                                  {customer.fullName?.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                              {/* Info */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <p className="font-bold text-sm text-gray-800 truncate">
+                                    {customer.fullName}
+                                  </p>
+                                  {customer.isGoogleUser && (
+                                    <span className="text-[10px] bg-blue-100 text-blue-500 px-1.5 py-0.5 rounded-full font-semibold shrink-0">
+                                      Google
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-gray-400 truncate">
+                                  {customer.email}
+                                </p>
+                                {customer.phone && (
+                                  <p className="text-xs text-gray-400">
+                                    {customer.phone}
+                                  </p>
+                                )}
+                              </div>
+                              {/* Date */}
+                              <div className="text-right shrink-0">
+                                <p className="text-xs text-gray-400">
+                                  {new Date(
+                                    customer.createdAt,
+                                  ).toLocaleDateString("en-NG", {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  })}
+                                </p>
+                                <p className="text-[10px] text-gray-300 mt-0.5">
+                                  {new Date(
+                                    customer.createdAt,
+                                  ).toLocaleTimeString("en-NG", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

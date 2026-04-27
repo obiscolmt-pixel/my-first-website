@@ -196,3 +196,8 @@ export const sendBroadcast = async (data) => {
   })
   return res.json()
 }
+
+export const getAllUsers = async () => {
+  const res = await fetch(`${BASE_URL}/auth/users`)
+  return res.json()
+}
