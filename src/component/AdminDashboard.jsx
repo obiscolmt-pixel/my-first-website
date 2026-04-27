@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { AiOutlineClose, AiOutlinePlus, AiOutlineEdit, AiOutlineDelete } from 'react-icons/ai'
-import { getAllOrders, updateOrderStatus, fetchProducts, createProduct, updateProduct, deleteProduct } from '../api/api.js'
+import { getAllOrders, updateOrderStatus, fetchProducts, createProduct, updateProduct, deleteProduct, getPromoCodes, createPromoCode, deletePromoCode } from '../api/api.js'
 
 const ADMIN_PASSWORD = 'obisco2025'
 
@@ -47,6 +47,20 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
   const [productSearch, setProductSearch] = useState('')
   const [departmentFilter, setDepartmentFilter] = useState('all')
 
+  // Promos state
+  const [promos, setPromos] = useState([])
+  const [promosLoading, setPromosLoading] = useState(false)
+  const [promoForm, setPromoForm] = useState({
+    code: '',
+    type: 'percentage',
+    value: '',
+    minOrder: '',
+    maxUses: '',
+    expiresAt: '',
+  })
+  const [savingPromo, setSavingPromo] = useState(false)
+  const [deletingPromo, setDeletingPromo] = useState(null)
+
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
       setAuthenticated(true)
@@ -70,9 +84,17 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
     setProductsLoading(false)
   }
 
+  const loadPromos = async () => {
+    setPromosLoading(true)
+    const data = await getPromoCodes()
+    setPromos(Array.isArray(data) ? data : [])
+    setPromosLoading(false)
+  }
+
   useEffect(() => {
     if (authenticated && activeTab === 'products') loadProducts()
     if (authenticated && activeTab === 'orders') loadOrders()
+    if (authenticated && activeTab === 'promos') loadPromos()
   }, [activeTab, authenticated])
 
   const handleUpdateStatus = async (orderId, status, paymentStatus) => {
@@ -143,6 +165,41 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
       alert('Failed to delete product.')
     }
     setDeletingProduct(null)
+  }
+
+  const handleCreatePromo = async () => {
+    if (!promoForm.code || !promoForm.value) {
+      alert('Please fill in Code and Value.')
+      return
+    }
+    setSavingPromo(true)
+    const res = await createPromoCode({
+      code: promoForm.code.toUpperCase(),
+      type: promoForm.type,
+      value: Number(promoForm.value),
+      minOrder: Number(promoForm.minOrder) || 0,
+      maxUses: Number(promoForm.maxUses) || null,
+      expiresAt: promoForm.expiresAt || null,
+    })
+    setSavingPromo(false)
+    if (res.promo) {
+      setPromos((prev) => [res.promo, ...prev])
+      setPromoForm({ code: '', type: 'percentage', value: '', minOrder: '', maxUses: '', expiresAt: '' })
+    } else {
+      alert(res.message || 'Failed to create promo code.')
+    }
+  }
+
+  const handleDeletePromo = async (id) => {
+    if (!window.confirm('Delete this promo code?')) return
+    setDeletingPromo(id)
+    const res = await deletePromoCode(id)
+    if (res.message) {
+      setPromos((prev) => prev.filter((p) => p._id !== id))
+    } else {
+      alert('Failed to delete promo code.')
+    }
+    setDeletingPromo(null)
   }
 
   const resetForm = () => {
@@ -217,18 +274,18 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
             <div className='flex flex-col h-full'>
 
               {/* Tabs */}
-              <div className='flex border-b px-4 shrink-0'>
-                {['orders', 'products'].map((tab) => (
+              <div className='flex border-b px-4 shrink-0 overflow-x-auto scrollbar-hide'>
+                {['orders', 'products', 'promos'].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-5 py-3 text-sm font-bold capitalize border-b-2 transition ${
+                    className={`px-5 py-3 text-sm font-bold capitalize border-b-2 transition whitespace-nowrap ${
                       activeTab === tab
                         ? 'border-orange-500 text-orange-500'
                         : 'border-transparent text-gray-500 hover:text-orange-400'
                     }`}
                   >
-                    {tab === 'orders' ? '📦 Orders' : '🛍️ Products'}
+                    {tab === 'orders' ? '📦 Orders' : tab === 'products' ? '🛍️ Products' : '🏷️ Promos'}
                   </button>
                 ))}
               </div>
@@ -358,15 +415,12 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
               {activeTab === 'products' && (
                 <div className='p-4 sm:p-6'>
 
-                  {/* Product Form */}
                   {showProductForm && (
                     <div className='bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-6'>
                       <h3 className='font-black text-gray-800 mb-4'>
                         {editingProduct ? '✏️ Edit Product' : '➕ Add New Product'}
                       </h3>
                       <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-
-                        {/* Department */}
                         <div className='sm:col-span-2'>
                           <p className='text-xs font-bold text-gray-500 uppercase mb-1'>Department</p>
                           <div className='flex gap-2'>
@@ -441,7 +495,6 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                         />
                       </div>
 
-                      {/* Image Preview */}
                       {productForm.image && (
                         <div className='mt-3 flex items-center gap-3'>
                           <img
@@ -475,7 +528,6 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                     </div>
                   )}
 
-                  {/* Products Header */}
                   <div className='flex justify-between items-center mb-4 flex-wrap gap-3'>
                     <div>
                       <h3 className='font-black text-gray-800'>All Products</h3>
@@ -497,7 +549,6 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                     </div>
                   </div>
 
-                  {/* Search + Department Filter */}
                   <div className='flex flex-col sm:flex-row gap-3 mb-4'>
                     <input
                       placeholder='Search products...'
@@ -584,6 +635,155 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                   )}
                 </div>
               )}
+
+              {/* ── PROMOS TAB ── */}
+              {activeTab === 'promos' && (
+                <div className='p-4 sm:p-6'>
+
+                  {/* Create Promo Form */}
+                  <div className='bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-6'>
+                    <h3 className='font-black text-gray-800 mb-4'>🏷️ Create Promo Code</h3>
+                    <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                      <div>
+                        <label className='text-xs font-bold text-gray-500 uppercase mb-1 block'>Code Name *</label>
+                        <input
+                          value={promoForm.code}
+                          onChange={(e) => setPromoForm({ ...promoForm, code: e.target.value.toUpperCase() })}
+                          placeholder='e.g OBISCO10'
+                          className='w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white uppercase'
+                        />
+                      </div>
+                      <div>
+                        <label className='text-xs font-bold text-gray-500 uppercase mb-1 block'>Discount Type *</label>
+                        <select
+                          value={promoForm.type}
+                          onChange={(e) => setPromoForm({ ...promoForm, type: e.target.value })}
+                          className='w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white'
+                        >
+                          <option value='percentage'>Percentage (%) off</option>
+                          <option value='fixed'>Fixed Amount (₦) off</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className='text-xs font-bold text-gray-500 uppercase mb-1 block'>
+                          {promoForm.type === 'percentage' ? 'Percentage Value (e.g 10 for 10%)' : 'Fixed Amount (e.g 5000)'} *
+                        </label>
+                        <input
+                          value={promoForm.value}
+                          onChange={(e) => setPromoForm({ ...promoForm, value: e.target.value })}
+                          placeholder={promoForm.type === 'percentage' ? 'e.g 10' : 'e.g 5000'}
+                          type='number'
+                          className='w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white'
+                        />
+                      </div>
+                      <div>
+                        <label className='text-xs font-bold text-gray-500 uppercase mb-1 block'>Minimum Order (₦)</label>
+                        <input
+                          value={promoForm.minOrder}
+                          onChange={(e) => setPromoForm({ ...promoForm, minOrder: e.target.value })}
+                          placeholder='e.g 50000'
+                          type='number'
+                          className='w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white'
+                        />
+                      </div>
+                      <div>
+                        <label className='text-xs font-bold text-gray-500 uppercase mb-1 block'>Max Uses</label>
+                        <input
+                          value={promoForm.maxUses}
+                          onChange={(e) => setPromoForm({ ...promoForm, maxUses: e.target.value })}
+                          placeholder='Leave empty for unlimited'
+                          type='number'
+                          className='w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white'
+                        />
+                      </div>
+                      <div>
+                        <label className='text-xs font-bold text-gray-500 uppercase mb-1 block'>Expiry Date</label>
+                        <input
+                          value={promoForm.expiresAt}
+                          onChange={(e) => setPromoForm({ ...promoForm, expiresAt: e.target.value })}
+                          type='date'
+                          className='w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white'
+                        />
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleCreatePromo}
+                      disabled={savingPromo}
+                      className='mt-4 w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold py-3 rounded-full transition text-sm flex items-center justify-center gap-2'
+                    >
+                      {savingPromo ? (
+                        <div className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin' />
+                      ) : '🏷️ Create Promo Code'}
+                    </button>
+                  </div>
+
+                  {/* Promos List */}
+                  <div className='flex justify-between items-center mb-4'>
+                    <h3 className='font-black text-gray-800'>All Promo Codes</h3>
+                    <button onClick={loadPromos} className='text-orange-500 text-sm font-semibold hover:underline'>
+                      🔄 Refresh
+                    </button>
+                  </div>
+
+                  {promosLoading ? (
+                    <div className='flex justify-center py-10'>
+                      <div className='w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin' />
+                    </div>
+                  ) : promos.length === 0 ? (
+                    <div className='text-center py-10'>
+                      <p className='text-4xl mb-3'>🏷️</p>
+                      <p className='text-gray-500'>No promo codes yet. Create one above!</p>
+                    </div>
+                  ) : (
+                    <div className='flex flex-col gap-3'>
+                      {promos.map((promo) => (
+                        <div key={promo._id} className='border rounded-xl p-4 hover:border-orange-200 transition bg-white'>
+                          <div className='flex justify-between items-start'>
+                            <div>
+                              <div className='flex items-center gap-2 mb-1'>
+                                <span className='font-black text-lg text-gray-800 tracking-widest'>{promo.code}</span>
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                                  promo.isActive ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'
+                                }`}>
+                                  {promo.isActive ? 'Active' : 'Inactive'}
+                                </span>
+                              </div>
+                              <p className='text-sm text-orange-500 font-bold'>
+                                {promo.type === 'percentage' ? `${promo.value}% off` : `₦${promo.value.toLocaleString()} off`}
+                              </p>
+                              <div className='flex flex-wrap gap-3 mt-2'>
+                                <span className='text-xs text-gray-400'>
+                                  Min Order: <span className='font-semibold text-gray-600'>₦{promo.minOrder?.toLocaleString() || '0'}</span>
+                                </span>
+                                <span className='text-xs text-gray-400'>
+                                  Used: <span className='font-semibold text-gray-600'>{promo.usedCount || 0}{promo.maxUses ? `/${promo.maxUses}` : ''} times</span>
+                                </span>
+                                {promo.expiresAt && (
+                                  <span className='text-xs text-gray-400'>
+                                    Expires: <span className='font-semibold text-gray-600'>
+                                      {new Date(promo.expiresAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                    </span>
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handleDeletePromo(promo._id)}
+                              disabled={deletingPromo === promo._id}
+                              className='flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold px-3 py-1.5 rounded-full transition shrink-0'
+                            >
+                              {deletingPromo === promo._id ? (
+                                <div className='w-3 h-3 border-2 border-red-400 border-t-transparent rounded-full animate-spin' />
+                              ) : '🗑 Delete'}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
             </div>
           )}
         </div>
