@@ -19,7 +19,6 @@ import {
   getAllUsers,
 } from "../api/api.js";
 
-const ADMIN_PASSWORD = "obisco2025";
 
 const statusOptions = [
   "pending",

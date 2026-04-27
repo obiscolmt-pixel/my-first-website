@@ -15,6 +15,7 @@ import OrderHistory from "./component/OrderHistory";
 import FashionPage from "./component/FashionPage";
 import LifestylePage from "./component/LifestylePage";
 import RegisterBusiness from "./component/RegisterBusiness";
+import CookieBanner from "./component/CookieBanner";
 
 const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -188,6 +189,7 @@ const App = () => {
         registerBizOpen={registerBizOpen}
         setRegisterBizOpen={setRegisterBizOpen}
       />
+      <CookieBanner />
     </>
   );
 };
