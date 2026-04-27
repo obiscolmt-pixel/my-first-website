@@ -17,7 +17,9 @@ import {
   deletePromoCode,
   sendBroadcast,
   getAllUsers,
+  verifyAdminPassword,
 } from "../api/api.js";
+
 
 
 const statusOptions = [
@@ -96,12 +98,18 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
   const [customersLoading, setCustomersLoading] = useState(false);
   const [customerSearch, setCustomerSearch] = useState("");
 
-  const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
-      setAuthenticated(true);
-      loadOrders();
-    } else {
-      alert("Wrong password!");
+  const handleLogin = async () => {
+    if (!password) return
+    try {
+      const res = await verifyAdminPassword(password)
+      if (res.success) {
+        setAuthenticated(true)
+        loadOrders()
+      } else {
+        alert('Wrong password!')
+      }
+    } catch (err) {
+      alert('Connection error. Please try again.')
     }
   };
 
@@ -262,11 +270,13 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
       return;
     setSendingBroadcast(true);
     setBroadcastResult(null);
-    const res = await sendBroadcast({
+    
+   const res = await sendBroadcast({
       subject: broadcastForm.subject,
       message: broadcastForm.message,
-      adminPassword: "obisco2025",
+      adminPassword: password,
     });
+
     setSendingBroadcast(false);
     setBroadcastResult(res);
     if (res.sent > 0) {
@@ -295,6 +305,8 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
     setSelectedOrder(null);
     resetForm();
   };
+
+  
 
   const filteredProducts = products.filter((p) => {
     const matchSearch =
