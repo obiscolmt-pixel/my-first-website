@@ -187,3 +187,12 @@ export const deletePromoCode = async (id) => {
   })
   return res.json()
 }
+
+export const sendBroadcast = async (data) => {
+  const res = await fetch(`${BASE_URL}/broadcast/send`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+  return res.json()
+}
