@@ -201,3 +201,12 @@ export const getAllUsers = async () => {
   const res = await fetch(`${BASE_URL}/auth/users`)
   return res.json()
 }
+
+export const verifyAdminPassword = async (password) => {
+  const res = await fetch(`${BASE_URL}/admin/verify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
+  })
+  return res.json()
+}
