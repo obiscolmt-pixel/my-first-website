@@ -16,6 +16,8 @@ import FashionPage from "./component/FashionPage";
 import LifestylePage from "./component/LifestylePage";
 import RegisterBusiness from "./component/RegisterBusiness";
 import CookieBanner from "./component/CookieBanner";
+import PrivacyPolicy from "./component/PrivacyPolicy";
+import TermsConditions from "./component/TermsConditions";
 
 const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,6 +30,9 @@ const App = () => {
   const [adminOpen, setAdminOpen] = useState(false);
   const [registerBizOpen, setRegisterBizOpen] = useState(false);
   const [orderHistoryOpen, setOrderHistoryOpen] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
+
   const addToCart = (item) => {
     const itemId = item._id || item.id;
     setCartItems((prev) => {
@@ -76,30 +81,29 @@ const App = () => {
   });
   const [wishlistOpen, setWishlistOpen] = useState(false);
 
- const addToWishlist = (item) => {
-    const itemId = item._id || item.id
+  const addToWishlist = (item) => {
+    const itemId = item._id || item.id;
     setWishlist((prev) => {
       const exists = prev.find((i) => {
-        const existingId = i._id || i.id
-        return existingId && itemId && existingId === itemId
-      })
+        const existingId = i._id || i.id;
+        return existingId && itemId && existingId === itemId;
+      });
       if (exists) {
         const updated = prev.filter((i) => {
-          const existingId = i._id || i.id
-          return existingId !== itemId
-        })
-        localStorage.setItem("obisco_wishlist", JSON.stringify(updated))
-        return updated
+          const existingId = i._id || i.id;
+          return existingId !== itemId;
+        });
+        localStorage.setItem("obisco_wishlist", JSON.stringify(updated));
+        return updated;
       }
-      const updated = [...prev, item]
-      localStorage.setItem("obisco_wishlist", JSON.stringify(updated))
-      return updated
-    })
-  }
+      const updated = [...prev, item];
+      localStorage.setItem("obisco_wishlist", JSON.stringify(updated));
+      return updated;
+    });
+  };
 
-  const isWishlisted = (id) =>
-    wishlist.some((i) => (i._id || i.id) === id)
-  
+  const isWishlisted = (id) => wishlist.some((i) => (i._id || i.id) === id);
+
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
     setSearchQuery("");
@@ -159,7 +163,7 @@ const App = () => {
       {/* ── Lifestyle Department ── */}
       {activeDepartment === "lifestyle" && <LifestylePage {...sharedProps} />}
 
-      <Footer />
+      <Footer setPrivacyOpen={setPrivacyOpen} setTermsOpen={setTermsOpen} />
 
       <CartSidebar
         cartOpen={cartOpen}
@@ -190,6 +194,8 @@ const App = () => {
         setRegisterBizOpen={setRegisterBizOpen}
       />
       <CookieBanner />
+      <PrivacyPolicy open={privacyOpen} setOpen={setPrivacyOpen} />
+      <TermsConditions open={termsOpen} setOpen={setTermsOpen} />
     </>
   );
 };
