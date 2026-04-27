@@ -448,25 +448,28 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
 
       {/* Heading */}
       {/* Marquee Promo Banner */}
-<div className="bg-orange-500 overflow-hidden py-2 mt-4 rounded-xl">
-  <div className="flex animate-marquee whitespace-nowrap">
-    {[...Array(2)].map((_, i) => (
-      <span key={i} className="flex items-center gap-8 text-white text-xs sm:text-sm font-semibold mx-4">
-        <span>🔥 iPhone 17 pro max</span>
-        <span>⚡ Free delivery in Lagos</span>
-        <span>💻 MacBook Pro 14</span>
-        <span>📱 Samsung S25 Ultra </span>
-        <span>🛒 Shop now & pay on delivery</span>
-        <span>💥 Flash deals every day!</span>
-      </span>
-    ))}
-  </div>
-</div>
+      <div className="bg-orange-500 overflow-hidden py-2 mt-4 rounded-xl">
+        <div className="flex animate-marquee whitespace-nowrap">
+          {[...Array(2)].map((_, i) => (
+            <span
+              key={i}
+              className="flex items-center gap-8 text-white text-xs sm:text-sm font-semibold mx-4"
+            >
+              <span>🔥 iPhone 17 pro max</span>
+              <span>⚡ Free delivery in Lagos</span>
+              <span>💻 MacBook Pro 14</span>
+              <span>📱 Samsung S25 Ultra </span>
+              <span>🛒 Shop now & pay on delivery</span>
+              <span>💥 Flash deals every day!</span>
+            </span>
+          ))}
+        </div>
+      </div>
 
-{/* Section Title */}
-<h1 className="font-bold text-center text-2xl sm:text-3xl md:text-4xl bg-gradient-to-r from-orange-600 to-yellow-400 bg-clip-text text-transparent mt-4 mb-2">
-  Shop Our Gadgets
-</h1>
+      {/* Section Title */}
+      <h1 className="font-bold text-center text-2xl sm:text-3xl md:text-4xl bg-gradient-to-r from-orange-600 to-yellow-400 bg-clip-text text-transparent mt-4 mb-2">
+        Shop Our Gadgets
+      </h1>
 
       {/* ── Filter Bar ── */}
       <div className="mt-4 space-y-2">
@@ -576,6 +579,29 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
               </p>
               <span className="bg-orange-500 text-white rounded-full px-2 py-1 text-xs font-bold shrink-0">
                 ₦{item.amount.toLocaleString()}
+              </span>
+            </div>
+
+            {/* Star Rating on Card */}
+            <div className="flex items-center gap-1 px-2 pb-1">
+              <div className="flex">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <span
+                    key={star}
+                    className={`text-xs ${
+                      star <= Math.round(item.avgRating || 0)
+                        ? "text-yellow-400"
+                        : "text-gray-200"
+                    }`}
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
+              <span className="text-[10px] text-gray-400">
+                {item.avgRating
+                  ? `${item.avgRating} (${item.totalReviews})`
+                  : "No reviews"}
               </span>
             </div>
 
