@@ -195,21 +195,36 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
   return (
     <div className="max-w-[1640px] mx-auto px-3 sm:px-4 relative" id="products">
       {/* Toast Popup */}
+
       {toast && (
-        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-auto z-50 flex items-center gap-3 bg-gray-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-orange-500">
-          <div className="bg-orange-500 rounded-full p-1 shrink-0">
-            <AiOutlineCheck size={14} className="text-white" />
+        <div className="fixed top-4 left-0 right-0 flex justify-center z-50 animate-slideDown">
+          {" "}
+          <div className="flex items-center gap-2 bg-green-400 border-gray-100 shadow-2xl px-4 py-2.5 rounded-3xl">
+            <img
+              src={toast.image}
+              alt={toast.name}
+              className="w-6 h-6 object-contain rounded-full bg-orange-50 shrink-0"
+            />
+            <div className="min-w-0">
+              <p className="text-[12px] text-white font-semibold">Item added to cart ✓</p>
+            </div>
+            <div className="bg-orange-500 rounded-full p-1 shrink-0">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-2.5 h-2.5 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={3}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
           </div>
-          <div className="flex-1">
-            <p className="font-bold text-sm">{toast.name}</p>
-            <p className="text-gray-400 text-xs">Added to cart successfully!</p>
-          </div>
-          <button
-            onClick={() => setToast(null)}
-            className="text-gray-500 hover:text-white text-lg leading-none shrink-0"
-          >
-            ✕
-          </button>
         </div>
       )}
 
