@@ -16,6 +16,14 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
 
+  const [recentlyViewed, setRecentlyViewed] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("obisco_recently_viewed")) || [];
+    } catch {
+      return [];
+    }
+  });
+
   // Reviews state
   const [reviews, setReviews] = useState([]);
   const [avgRating, setAvgRating] = useState(0);
@@ -80,6 +88,14 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
   const openProduct = async (item) => {
     document.body.style.overflow = "hidden";
     setSelectedProduct(item);
+    // Save to recently viewed
+    setRecentlyViewed((prev) => {
+      const itemId = item._id || item.id;
+      const filtered = prev.filter((i) => (i._id || i.id) !== itemId);
+      const updated = [item, ...filtered].slice(0, 6);
+      localStorage.setItem("obisco_recently_viewed", JSON.stringify(updated));
+      return updated;
+    });
     setSelectedColor(item.colors?.length > 0 ? item.colors[0].name : "");
     setSelectedImage(item.image);
     setQuantity(1);
@@ -626,6 +642,54 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
             No products found for "
             <span className="text-orange-500">{searchQuery}</span>"
           </p>
+        </div>
+      )}
+
+      {/* Recently Viewed */}
+      {recentlyViewed.length > 0 && (
+        <div className="mt-12 mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="font-black text-xl text-gray-800">
+              👁️ Recently Viewed
+            </h2>
+            <button
+              onClick={() => {
+                setRecentlyViewed([]);
+                localStorage.removeItem("obisco_recently_viewed");
+              }}
+              className="text-xs text-gray-400 hover:text-red-400 transition underline"
+            >
+              Clear
+            </button>
+          </div>
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
+            {recentlyViewed.map((item) => (
+              <div
+                key={item._id || item.id}
+                onClick={() => openProduct(item)}
+                className="shrink-0 w-[140px] sm:w-[160px] border rounded-xl overflow-hidden bg-white cursor-pointer hover:border-orange-300 hover:shadow-md transition"
+              >
+                <div className="h-[100px] bg-gray-50 flex items-center justify-center overflow-hidden">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-full object-contain p-2"
+                  />
+                </div>
+                <div className="p-2">
+                  <p className="font-bold text-xs text-gray-800 truncate">
+                    {item.name}
+                  </p>
+                  <p className="text-orange-500 font-black text-xs mt-0.5">
+                    ₦{item.amount.toLocaleString()}
+                  </p>
+                  <p className="text-gray-400 text-[10px] capitalize mt-0.5">
+                    {item.category}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
