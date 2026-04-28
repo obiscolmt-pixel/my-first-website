@@ -17,6 +17,7 @@ import {
   FaMobileAlt,
   FaTshirt,
   FaStar,
+  FaBolt,
 } from "react-icons/fa";
 import { fetchProducts } from "../api/api.js";
 
@@ -40,6 +41,7 @@ const Navbar = ({
   setOrderHistoryOpen,
   activeDepartment,
   setActiveDepartment,
+  setShowVTU,
 }) => {
   const [nav, setNav] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -358,8 +360,15 @@ const Navbar = ({
               </button>
             ))}
 
-            {/* Register Your Business Button */}
+            {/* ⚡ Pay Bills tab */}
+            <button
+              onClick={() => setShowVTU(true)}
+              className="flex items-center gap-2 px-5 py-3 text-sm font-semibold whitespace-nowrap border-b-2 border-transparent text-orange-500 hover:text-orange-400 hover:border-orange-400 transition-all duration-200 shrink-0"
+            >
+              <FaBolt size={13} /> Pay Bills
+            </button>
 
+            {/* Register Your Business Button */}
             <button
               onClick={() => setRegisterBizOpen(true)}
               className="flex items-center gap-2 px-5 py-3 text-sm font-semibold whitespace-nowrap border-b-2 border-transparent text-green-600 hover:text-green-500 hover:border-green-400 transition-all duration-200 shrink-0"
@@ -560,6 +569,22 @@ const Navbar = ({
             >
               <AiOutlineHome size={22} className="mr-4 text-orange-500" /> Home
             </li>
+
+            {/* ⚡ Pay Bills — drawer */}
+            <li
+              onClick={() => {
+                setShowVTU(true);
+                setNav(false);
+              }}
+              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
+            >
+              <FaBolt size={20} className="mr-4 text-orange-500" />
+              <div>
+                <p className="font-semibold text-orange-500">Pay Bills</p>
+                <p className="text-xs text-gray-400">Airtime • Data • Light • Cable</p>
+              </div>
+            </li>
+
             <li
               onClick={() => {
                 setTrackOpen(true);

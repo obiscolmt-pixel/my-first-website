@@ -18,6 +18,7 @@ import RegisterBusiness from "./component/RegisterBusiness";
 import CookieBanner from "./component/CookieBanner";
 import PrivacyPolicy from "./component/PrivacyPolicy";
 import TermsConditions from "./component/TermsConditions";
+import VTUPage from './component/VTUPage';
 
 const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,6 +33,7 @@ const App = () => {
   const [orderHistoryOpen, setOrderHistoryOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
+  const [showVTU, setShowVTU] = useState(false);
 
   const addToCart = (item) => {
     const itemId = item._id || item.id;
@@ -138,6 +140,7 @@ const App = () => {
         activeDepartment={activeDepartment}
         setActiveDepartment={setActiveDepartment}
         setRegisterBizOpen={setRegisterBizOpen}
+        setShowVTU={setShowVTU}
       />
 
       {/* ── Gadgets Department ── */}
@@ -196,6 +199,7 @@ const App = () => {
       <CookieBanner />
       <PrivacyPolicy open={privacyOpen} setOpen={setPrivacyOpen} />
       <TermsConditions open={termsOpen} setOpen={setTermsOpen} />
+      {showVTU && <VTUPage onClose={() => setShowVTU(false)} />}
     </>
   );
 };
