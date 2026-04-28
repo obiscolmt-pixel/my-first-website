@@ -131,7 +131,7 @@ const Navbar = ({
 
   return (
     <>
-      <div className="sticky top-0 bg-white z-50 shadow-sm">
+      <div className="sticky top-0 bg-white z-50 shadow-sm" style={{ position: '-webkit-sticky', top: 0 }}>
         <div className="max-w-[1640px] mx-auto flex justify-between items-center px-5 py-0 pb-0">
           {/* Left */}
           <div className="flex items-center gap-3">

@@ -60,3 +60,9 @@ input, textarea, select {
 .animate-slideDown {
   animation: slideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
+
+/* Fix sticky navbar on iOS Safari */
+.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+}
