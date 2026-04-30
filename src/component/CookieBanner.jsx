@@ -1,22 +1,50 @@
 import React, { useState, useEffect } from 'react'
 
+const API_BASE = import.meta.env.VITE_API_URL || 'https://obisco-gadgets-backend.onrender.com'
+
 const CookieBanner = () => {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    const accepted = localStorage.getItem('obisco_cookies_accepted')
-    if (!accepted) {
-      setTimeout(() => setVisible(true), 2000)
+    // ✅ Check consent from backend
+    const checkConsent = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/cookies/consent`, {
+          credentials: 'include' // ✅ Send cookies with request
+        })
+        const data = await res.json()
+        if (!data.hasConsent) {
+          setTimeout(() => setVisible(true), 2000)
+        }
+      } catch {
+        // If backend fails, fall back to showing banner
+        setTimeout(() => setVisible(true), 2000)
+      }
     }
+    checkConsent()
   }, [])
 
-  const handleAccept = () => {
-    localStorage.setItem('obisco_cookies_accepted', 'true')
+  const handleAccept = async () => {
+    try {
+      await fetch(`${API_BASE}/api/cookies/accept`, {
+        method: 'POST',
+        credentials: 'include' // ✅ Send cookies with request
+      })
+    } catch (err) {
+      console.log('Cookie accept failed:', err.message)
+    }
     setVisible(false)
   }
 
-  const handleDecline = () => {
-    localStorage.setItem('obisco_cookies_accepted', 'false')
+  const handleDecline = async () => {
+    try {
+      await fetch(`${API_BASE}/api/cookies/decline`, {
+        method: 'POST',
+        credentials: 'include' // ✅ Send cookies with request
+      })
+    } catch (err) {
+      console.log('Cookie decline failed:', err.message)
+    }
     setVisible(false)
   }
 
@@ -32,7 +60,9 @@ const CookieBanner = () => {
               We use Cookies
             </p>
             <p className="text-gray-400 text-xs leading-relaxed">
-              OBISCO Store uses cookies to improve your shopping experience, remember your cart and wishlist, and keep you signed in. By continuing to use our site you agree to our use of cookies.
+              OBISCO Store uses cookies to improve your shopping experience,
+              remember your cart and wishlist, and keep you signed in.
+              By continuing to use our site you agree to our use of cookies.
             </p>
             <div className="flex items-center gap-2 mt-3 flex-wrap">
               <button
@@ -47,11 +77,10 @@ const CookieBanner = () => {
               >
                 Decline
               </button>
-              
-               <a href="#"
+              <a href="#"
                 onClick={(e) => {
                   e.preventDefault()
-                  alert(`🍪 OBISCO Store Cookie Policy\n\nWe use the following cookies:\n\n• Authentication cookies — to keep you signed in\n• Wishlist cookies — to save your wishlist\n• Recently viewed — to show products you viewed\n• Cart cookies — to save your cart items\n\nWe do not sell your data to third parties.\n\nContact us: obiscostore1@gmail.com`)
+                  alert(`🍪 OBISCO Store Cookie Policy\n\nWe use the following cookies:\n\n• Authentication cookies — to keep you signed in\n• Wishlist cookies — to save your wishlist\n• Recently viewed — to show products you viewed\n• Cart cookies — to save your cart items\n\nConsent expires after 30 days.\nWe do not sell your data to third parties.\n\nContact us: obiscostore1@gmail.com`)
                 }}
                 className="text-orange-400 text-xs underline hover:text-orange-300 transition"
               >
