@@ -25,12 +25,26 @@ import { messaging, getToken } from './firebase'
 const Onboarding = ({ onDone }) => {
   const [step, setStep] = useState(0);
 
-  const requestNotification = async () => {
-    if ("Notification" in window) {
-      await Notification.requestPermission();
+  const requestNotificationToken = async () => {
+  try {
+    const token = await getToken(messaging, {
+      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
+    })
+    if (token) {
+      console.log('FCM Token:', token)
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/notifications/save-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ token })
+      })
+      const data = await response.json()
+      console.log('Save token response:', data)
     }
-    onDone();
-  };
+  } catch (err) {
+    console.log('Notification token error:', err.message)
+  }
+}
 
   return (
     <div
