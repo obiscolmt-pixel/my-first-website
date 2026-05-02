@@ -19,6 +19,7 @@ import CookieBanner from "./component/CookieBanner";
 import PrivacyPolicy from "./component/PrivacyPolicy";
 import TermsConditions from "./component/TermsConditions";
 import VTUPage from "./component/VTUPage";
+import { messaging, getToken } from './firebase'
 
 // ── Onboarding Component ──
 const Onboarding = ({ onDone }) => {
@@ -163,6 +164,27 @@ const App = () => {
   const [termsOpen, setTermsOpen] = useState(false);
   const [showVTU, setShowVTU] = useState(false);
 
+
+  const requestNotificationToken = async () => {
+  try {
+    const token = await getToken(messaging, {
+      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
+    })
+    if (token) {
+      console.log('FCM Token:', token)
+      // Send token to backend
+      await fetch(`${import.meta.env.VITE_API_URL}/api/notifications/save-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ token })
+      })
+    }
+  } catch (err) {
+    console.log('Notification token error:', err.message)
+  }
+}
+
   // Check if first time opening
   useEffect(() => {
     const hasOnboarded = localStorage.getItem("obisco_onboarded");
@@ -172,9 +194,10 @@ const App = () => {
   }, []);
 
   const handleOnboardingDone = () => {
-    localStorage.setItem("obisco_onboarded", "true");
-    setShowOnboarding(false);
-  };
+  localStorage.setItem("obisco_onboarded", "true")
+  setShowOnboarding(false)
+  requestNotificationToken()
+}
 
   const addToCart = (item) => {
     const itemId = item._id || item.id;
