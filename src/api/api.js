@@ -1,5 +1,4 @@
-const BASE_URL = 'https://obisco-gadgets-backend.onrender.com/api'
-
+const BASE_URL = 'https://api.obisco.store/api'
 // ─── AUTH ───────────────────────────────────────────
 export const registerUser = async (formData) => {
   const res = await fetch(`${BASE_URL}/auth/register`, {
