@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "./component/Navbar";
 import Hero from "./component/Hero";
 import Headlinecards from "./component/Headlinecards";
@@ -18,9 +18,137 @@ import RegisterBusiness from "./component/RegisterBusiness";
 import CookieBanner from "./component/CookieBanner";
 import PrivacyPolicy from "./component/PrivacyPolicy";
 import TermsConditions from "./component/TermsConditions";
-import VTUPage from './component/VTUPage';
+import VTUPage from "./component/VTUPage";
+
+// ── Onboarding Component ──
+const Onboarding = ({ onDone }) => {
+  const [step, setStep] = useState(0);
+
+  const requestNotification = async () => {
+    if ("Notification" in window) {
+      await Notification.requestPermission();
+    }
+    onDone();
+  };
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        backgroundColor: "#111827",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "24px",
+        textAlign: "center",
+      }}
+    >
+      {step === 0 && (
+        <>
+          {/* Splash Screen */}
+          <img
+            src="/icons/icon-512.png"
+            alt="Obisco Store"
+            style={{
+              width: 120,
+              height: 120,
+              borderRadius: 24,
+              marginBottom: 24,
+            }}
+          />
+          <h1
+            style={{
+              color: "#f97316",
+              fontSize: 32,
+              fontWeight: 900,
+              margin: 0,
+            }}
+          >
+            Obisco Store
+          </h1>
+          <p style={{ color: "#9ca3af", fontSize: 15, marginTop: 8 }}>
+            Your one-stop shop in Nigeria
+          </p>
+          <button
+            onClick={() => setStep(1)}
+            style={{
+              marginTop: 40,
+              backgroundColor: "#f97316",
+              color: "white",
+              border: "none",
+              borderRadius: 50,
+              padding: "14px 40px",
+              fontSize: 16,
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            Get Started
+          </button>
+        </>
+      )}
+
+      {step === 1 && (
+        <>
+          {/* Notification Permission */}
+          <div style={{ fontSize: 64, marginBottom: 16 }}>🔔</div>
+          <h2
+            style={{ color: "white", fontSize: 24, fontWeight: 800, margin: 0 }}
+          >
+            Stay Updated!
+          </h2>
+          <p
+            style={{
+              color: "#9ca3af",
+              fontSize: 15,
+              marginTop: 12,
+              maxWidth: 300,
+              lineHeight: 1.6,
+            }}
+          >
+            Get notified about new deals, order updates and exclusive offers
+            from Obisco Store.
+          </p>
+          <button
+            onClick={requestNotification}
+            style={{
+              marginTop: 32,
+              backgroundColor: "#f97316",
+              color: "white",
+              border: "none",
+              borderRadius: 50,
+              padding: "14px 40px",
+              fontSize: 16,
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            Allow Notifications
+          </button>
+          <button
+            onClick={onDone}
+            style={{
+              marginTop: 12,
+              backgroundColor: "transparent",
+              color: "#6b7280",
+              border: "none",
+              fontSize: 14,
+              cursor: "pointer",
+            }}
+          >
+            Skip for now
+          </button>
+        </>
+      )}
+    </div>
+  );
+};
 
 const App = () => {
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [activeDepartment, setActiveDepartment] = useState("gadgets");
@@ -34,6 +162,19 @@ const App = () => {
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
   const [showVTU, setShowVTU] = useState(false);
+
+  // Check if first time opening
+  useEffect(() => {
+    const hasOnboarded = localStorage.getItem("obisco_onboarded");
+    if (!hasOnboarded) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const handleOnboardingDone = () => {
+    localStorage.setItem("obisco_onboarded", "true");
+    setShowOnboarding(false);
+  };
 
   const addToCart = (item) => {
     const itemId = item._id || item.id;
@@ -126,6 +267,8 @@ const App = () => {
 
   return (
     <>
+      {showOnboarding && <Onboarding onDone={handleOnboardingDone} />}
+
       <Navbar
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -143,7 +286,6 @@ const App = () => {
         setShowVTU={setShowVTU}
       />
 
-      {/* ── Gadgets Department ── */}
       {activeDepartment === "gadgets" && (
         <>
           <Hero />
@@ -160,10 +302,7 @@ const App = () => {
         </>
       )}
 
-      {/* ── Fashion Department ── */}
       {activeDepartment === "fashion" && <FashionPage {...sharedProps} />}
-
-      {/* ── Lifestyle Department ── */}
       {activeDepartment === "lifestyle" && <LifestylePage {...sharedProps} />}
 
       <Footer setPrivacyOpen={setPrivacyOpen} setTermsOpen={setTermsOpen} />
