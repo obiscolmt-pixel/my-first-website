@@ -20,8 +20,6 @@ import {
   verifyAdminPassword,
 } from "../api/api.js";
 
-
-
 const statusOptions = [
   "pending",
   "confirmed",
@@ -90,6 +88,12 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
     subject: "",
     message: "",
   });
+
+  // Notifications state
+  const [notifForm, setNotifForm] = useState({ title: "", body: "" });
+  const [sendingNotif, setSendingNotif] = useState(false);
+  const [notifResult, setNotifResult] = useState(null);
+
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
   const [broadcastResult, setBroadcastResult] = useState(null);
 
@@ -99,17 +103,17 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
   const [customerSearch, setCustomerSearch] = useState("");
 
   const handleLogin = async () => {
-    if (!password) return
+    if (!password) return;
     try {
-      const res = await verifyAdminPassword(password)
+      const res = await verifyAdminPassword(password);
       if (res.success) {
-        setAuthenticated(true)
-        loadOrders()
+        setAuthenticated(true);
+        loadOrders();
       } else {
-        alert('Wrong password!')
+        alert("Wrong password!");
       }
     } catch (err) {
-      alert('Connection error. Please try again.')
+      alert("Connection error. Please try again.");
     }
   };
 
@@ -270,8 +274,8 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
       return;
     setSendingBroadcast(true);
     setBroadcastResult(null);
-    
-   const res = await sendBroadcast({
+
+    const res = await sendBroadcast({
       subject: broadcastForm.subject,
       message: broadcastForm.message,
       adminPassword: password,
@@ -282,6 +286,37 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
     if (res.sent > 0) {
       setBroadcastForm({ subject: "", message: "" });
     }
+  };
+
+  const handleSendNotification = async () => {
+    if (!notifForm.title || !notifForm.body) {
+      alert("Please fill in Title and Message.");
+      return;
+    }
+    if (!window.confirm("Send push notification to ALL users and guests?"))
+      return;
+    setSendingNotif(true);
+    setNotifResult(null);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/notifications/send`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: notifForm.title,
+            body: notifForm.body,
+            adminPassword: password,
+          }),
+        },
+      );
+      const data = await res.json();
+      setNotifResult(data);
+      if (data.successCount > 0) setNotifForm({ title: "", body: "" });
+    } catch (err) {
+      setNotifResult({ message: "Failed to send notifications." });
+    }
+    setSendingNotif(false);
   };
 
   const loadCustomers = async () => {
@@ -305,8 +340,6 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
     setSelectedOrder(null);
     resetForm();
   };
-
-  
 
   const filteredProducts = products.filter((p) => {
     const matchSearch =
@@ -393,7 +426,9 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                             ? "🏷️ Promos"
                             : tab === "broadcast"
                               ? "📢 Broadcast"
-                              : "👥 Customers"}
+                              : tab === "notifications"
+                                ? "🔔 Notifications"
+                                : "👥 Customers"}
                     </button>
                   ),
                 )}
@@ -1303,6 +1338,167 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                         </p>
                         <p className="text-xs text-gray-500">
                           ⚠️ Make sure every message adds value to customers
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── NOTIFICATIONS TAB ── */}
+              {activeTab === "notifications" && (
+                <div className="p-4 sm:p-6">
+                  <div className="max-w-2xl mx-auto">
+                    {/* Info Banner */}
+                    <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-6 flex gap-3">
+                      <p className="text-2xl">🔔</p>
+                      <div>
+                        <p className="font-bold text-orange-700 text-sm">
+                          Push Notifications
+                        </p>
+                        <p className="text-xs text-orange-500 mt-0.5">
+                          Send instant push notifications to ALL users and
+                          guests who allowed notifications.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Form */}
+                    <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 mb-6">
+                      <h3 className="font-black text-gray-800 mb-4">
+                        ✍️ Compose Notification
+                      </h3>
+                      <div className="flex flex-col gap-3">
+                        <div>
+                          <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
+                            Title *
+                          </label>
+                          <input
+                            value={notifForm.title}
+                            onChange={(e) =>
+                              setNotifForm({
+                                ...notifForm,
+                                title: e.target.value,
+                              })
+                            }
+                            placeholder="e.g 🔥 Flash Sale — Today Only!"
+                            className="w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
+                            Message *
+                          </label>
+                          <textarea
+                            value={notifForm.body}
+                            onChange={(e) =>
+                              setNotifForm({
+                                ...notifForm,
+                                body: e.target.value,
+                              })
+                            }
+                            placeholder="e.g Get 20% off all gadgets today. Shop now at obisco.store!"
+                            rows={4}
+                            className="w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white resize-none"
+                          />
+                        </div>
+
+                        {/* Preview */}
+                        {(notifForm.title || notifForm.body) && (
+                          <div className="bg-white border border-gray-200 rounded-xl p-4">
+                            <p className="text-xs font-bold text-gray-400 uppercase mb-3">
+                              📱 Preview
+                            </p>
+                            <div className="bg-gray-900 rounded-2xl p-4 flex gap-3 items-start">
+                              <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center shrink-0">
+                                <span className="text-white text-lg">🛍️</span>
+                              </div>
+                              <div>
+                                <p className="text-white font-bold text-sm">
+                                  {notifForm.title || "Notification Title"}
+                                </p>
+                                <p className="text-gray-400 text-xs mt-0.5">
+                                  {notifForm.body || "Notification message..."}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <button
+                          onClick={handleSendNotification}
+                          disabled={sendingNotif}
+                          className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold py-3 rounded-full transition text-sm flex items-center justify-center gap-2"
+                        >
+                          {sendingNotif ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              Sending notifications...
+                            </>
+                          ) : (
+                            "🔔 Send Push Notification"
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Result */}
+                    {notifResult && (
+                      <div
+                        className={`rounded-2xl p-4 border mb-6 ${
+                          notifResult.successCount > 0
+                            ? "bg-green-50 border-green-100"
+                            : "bg-red-50 border-red-100"
+                        }`}
+                      >
+                        <p
+                          className={`font-black text-lg mb-2 ${
+                            notifResult.successCount > 0
+                              ? "text-green-600"
+                              : "text-red-500"
+                          }`}
+                        >
+                          {notifResult.successCount > 0
+                            ? "✅ Notifications Sent!"
+                            : "❌ Send Failed"}
+                        </p>
+                        <div className="flex gap-4">
+                          <div className="text-center">
+                            <p className="text-2xl font-black text-green-600">
+                              {notifResult.successCount || 0}
+                            </p>
+                            <p className="text-xs text-gray-500">Delivered</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-2xl font-black text-red-500">
+                              {notifResult.failureCount || 0}
+                            </p>
+                            <p className="text-xs text-gray-500">Failed</p>
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">
+                          {notifResult.message}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Tips */}
+                    <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">
+                      <p className="font-bold text-gray-700 text-sm mb-3">
+                        💡 Notification Tips
+                      </p>
+                      <div className="flex flex-col gap-2">
+                        <p className="text-xs text-gray-500">
+                          ✅ Keep titles short and punchy
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          ✅ Use for flash sales, restocks and order updates
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          ✅ Include a clear action in the message
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          ⚠️ Don't send more than 1-2 notifications per day
                         </p>
                       </div>
                     </div>
