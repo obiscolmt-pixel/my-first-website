@@ -1,50 +1,56 @@
-const CACHE_NAME = 'obisco-store-v4'
+const CACHE_NAME = 'obisco-store-v5'
 
-// Install - skip waiting immediately
 self.addEventListener('install', (event) => {
   self.skipWaiting()
-})
-
-// Activate - delete old caches immediately
-self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName)
-          }
-        })
-      ).then(() => self.clients.claim())
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.add('/index.html')
     })
   )
 })
 
-// Fetch - network first always, no caching of HTML
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => caches.delete(name))
+      )
+    }).then(() => self.clients.claim())
+  )
+})
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return
   if (event.request.url.includes('/api/')) return
 
-  // Never cache HTML — always fetch fresh
-  if (event.request.headers.get('accept')?.includes('text/html')) {
+  // For navigation requests (page loads/refreshes) — always try network first
+  if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match('/'))
+      fetch(event.request)
+        .then((response) => {
+          const clone = response.clone()
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, clone)
+          })
+          return response
+        })
+        .catch(() => caches.match('/index.html'))
     )
     return
   }
 
-  // For JS/CSS/images — network first, cache as fallback
+  // For assets — cache first, network fallback
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        if (response && response.status === 200) {
-          const responseClone = response.clone()
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone)
-          })
-        }
+    caches.match(event.request).then((cached) => {
+      return cached || fetch(event.request).then((response) => {
+        const clone = response.clone()
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, clone)
+        })
         return response
       })
-      .catch(() => caches.match(event.request))
+    })
   )
 })
