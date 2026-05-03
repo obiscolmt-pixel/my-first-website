@@ -19,20 +19,20 @@ import CookieBanner from "./component/CookieBanner";
 import PrivacyPolicy from "./component/PrivacyPolicy";
 import TermsConditions from "./component/TermsConditions";
 import VTUPage from "./component/VTUPage";
-import { messaging, getToken } from './firebase'
+import { messaging, getToken } from "./firebase";
 
 // ── Onboarding Component ──
 const Onboarding = ({ onDone }) => {
   const [step, setStep] = useState(0);
 
   const requestNotification = async () => {
-  let granted = false;
-  if ("Notification" in window) {
-    const permission = await Notification.requestPermission();
-    granted = permission === "granted";
-  }
-  onDone(granted);
-};
+    let granted = false;
+    if ("Notification" in window) {
+      const permission = await Notification.requestPermission();
+      granted = permission === "granted";
+    }
+    onDone(granted);
+  };
 
   return (
     <div
@@ -131,7 +131,8 @@ const Onboarding = ({ onDone }) => {
           >
             Allow Notifications
           </button>
-         <button onClick={() => onDone(false)}
+          <button
+            onClick={() => onDone(false)}
             style={{
               marginTop: 12,
               backgroundColor: "transparent",
@@ -165,26 +166,28 @@ const App = () => {
   const [termsOpen, setTermsOpen] = useState(false);
   const [showVTU, setShowVTU] = useState(false);
 
-
   const requestNotificationToken = async () => {
-  try {
-    const token = await getToken(messaging, {
-      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
-    })
-    if (token) {
-      console.log('FCM Token:', token)
-      // Send token to backend
-      await fetch(`${import.meta.env.VITE_API_URL}/api/notifications/save-token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ token })
-      })
+    try {
+      const token = await getToken(messaging, {
+        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+      });
+      if (token) {
+        console.log("FCM Token:", token);
+        // Send token to backend
+        await fetch(
+          `${import.meta.env.VITE_API_URL}/api/notifications/save-token`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ token }),
+          },
+        );
+      }
+    } catch (err) {
+      console.log("Notification token error:", err.message);
     }
-  } catch (err) {
-    console.log('Notification token error:', err.message)
-  }
-}
+  };
 
   // Check if first time opening
   useEffect(() => {
@@ -194,13 +197,21 @@ const App = () => {
     }
   }, []);
 
+  // Auto-save FCM token for returning users who already granted permission
+  useEffect(() => {
+    const hasOnboarded = localStorage.getItem("obisco_onboarded");
+    if (hasOnboarded && Notification.permission === "granted") {
+      requestNotificationToken();
+    }
+  }, []);
+
   const handleOnboardingDone = (permissionGranted = false) => {
-  localStorage.setItem("obisco_onboarded", "true")
-  setShowOnboarding(false)
-  if (permissionGranted) {
-    requestNotificationToken()
-  }
-}
+    localStorage.setItem("obisco_onboarded", "true");
+    setShowOnboarding(false);
+    if (permissionGranted) {
+      requestNotificationToken();
+    }
+  };
 
   const addToCart = (item) => {
     const itemId = item._id || item.id;

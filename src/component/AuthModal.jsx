@@ -10,6 +10,29 @@ import {
 import { GoogleLogin } from "@react-oauth/google";
 import { googleSignIn } from "../api/api.js";
 
+const saveFCMToken = async () => {
+  if (Notification.permission !== "granted") return;
+  try {
+    const { messaging, getToken } = await import("../firebase");
+    const fcmToken = await getToken(messaging, {
+      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+    });
+    if (fcmToken) {
+      await fetch(
+        `${import.meta.env.VITE_API_URL}/api/notifications/save-token`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ token: fcmToken }),
+        },
+      );
+    }
+  } catch (e) {
+    console.log("FCM token save error:", e.message);
+  }
+};
+
 const AuthModal = ({ authOpen, setAuthOpen }) => {
   const [isSignIn, setIsSignIn] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -51,6 +74,7 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
         localStorage.setItem("user", JSON.stringify(res.user));
         setLoggedInUser(res.user);
         setSuccess(true);
+        await saveFCMToken();
       } else {
         alert(res.message || "Login failed. Please try again.");
       }
@@ -82,39 +106,41 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
         localStorage.setItem("user", JSON.stringify(res.user));
         setLoggedInUser(res.user);
         setSuccess(true);
+        await saveFCMToken();
       } else {
         alert(res.message || "Registration failed. Please try again.");
       }
     }
   };
-
- const handleGoogleSuccess = async (credentialResponse) => {
-    setLoading(true)
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
     try {
-      const res = await googleSignIn(credentialResponse.credential)
+      const res = await googleSignIn(credentialResponse.credential);
       if (res.token) {
-        localStorage.setItem("token", res.token)
-        localStorage.setItem("user", JSON.stringify(res.user))
-        setAuthOpen(false)
-        window.location.reload()
+        localStorage.setItem("token", res.token);
+        localStorage.setItem("user", JSON.stringify(res.user));
+        await saveFCMToken();
+        setAuthOpen(false);
+        window.location.reload();
       } else {
         // Auto retry once if server error
-        const retry = await googleSignIn(credentialResponse.credential)
+        const retry = await googleSignIn(credentialResponse.credential);
         if (retry.token) {
-          localStorage.setItem("token", retry.token)
-          localStorage.setItem("user", JSON.stringify(retry.user))
-          setAuthOpen(false)
-          window.location.reload()
+          localStorage.setItem("token", retry.token);
+          localStorage.setItem("user", JSON.stringify(retry.user));
+          await saveFCMToken();
+          setAuthOpen(false);
+          window.location.reload();
         } else {
-          alert("Google Sign In failed. Please try again in a moment.")
+          alert("Google Sign In failed. Please try again in a moment.");
         }
       }
     } catch (err) {
-      alert("Connection error. Please try again.")
+      alert("Connection error. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleForgotPassword = async () => {
     if (!forgotEmail) {
