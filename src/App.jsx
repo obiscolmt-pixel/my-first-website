@@ -26,11 +26,13 @@ const Onboarding = ({ onDone }) => {
   const [step, setStep] = useState(0);
 
   const requestNotification = async () => {
-    if ("Notification" in window) {
-      await Notification.requestPermission();
-    }
-    onDone();
-  };
+  let granted = false;
+  if ("Notification" in window) {
+    const permission = await Notification.requestPermission();
+    granted = permission === "granted";
+  }
+  onDone(granted);
+};
 
   return (
     <div
@@ -129,8 +131,7 @@ const Onboarding = ({ onDone }) => {
           >
             Allow Notifications
           </button>
-          <button
-            onClick={onDone}
+         <button onClick={() => onDone(false)}
             style={{
               marginTop: 12,
               backgroundColor: "transparent",
@@ -193,10 +194,12 @@ const App = () => {
     }
   }, []);
 
-  const handleOnboardingDone = () => {
+  const handleOnboardingDone = (permissionGranted = false) => {
   localStorage.setItem("obisco_onboarded", "true")
   setShowOnboarding(false)
-  requestNotificationToken()
+  if (permissionGranted) {
+    requestNotificationToken()
+  }
 }
 
   const addToCart = (item) => {
