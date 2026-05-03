@@ -1,18 +1,8 @@
-const CACHE_NAME = 'obisco-store-v3'
+const CACHE_NAME = 'obisco-store-v4'
 
-const urlsToCache = [
-  '/',
-  '/index.html',
-]
-
-// Install - cache basic files
+// Install - skip waiting immediately
 self.addEventListener('install', (event) => {
   self.skipWaiting()
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache)
-    })
-  )
 })
 
 // Activate - delete old caches immediately
@@ -25,25 +15,28 @@ self.addEventListener('activate', (event) => {
             return caches.delete(cacheName)
           }
         })
-      )
-    }).then(() => self.clients.claim())
+      ).then(() => self.clients.claim())
+    })
   )
 })
 
-// Fetch - network first, cache as fallback
+// Fetch - network first always, no caching of HTML
 self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
   if (event.request.method !== 'GET') return
+  if (event.request.url.includes('/api/')) return
 
-  // Skip API calls - always fetch fresh from network
-  if (event.request.url.includes('/api/')) {
+  // Never cache HTML — always fetch fresh
+  if (event.request.headers.get('accept')?.includes('text/html')) {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('/'))
+    )
     return
   }
 
+  // For JS/CSS/images — network first, cache as fallback
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // If network succeeds, update cache and return response
         if (response && response.status === 200) {
           const responseClone = response.clone()
           caches.open(CACHE_NAME).then((cache) => {
@@ -52,9 +45,6 @@ self.addEventListener('fetch', (event) => {
         }
         return response
       })
-      .catch(() => {
-        // If network fails, try cache
-        return caches.match(event.request)
-      })
+      .catch(() => caches.match(event.request))
   )
 })
