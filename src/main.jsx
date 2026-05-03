@@ -10,21 +10,18 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   </GoogleOAuthProvider>
 )
 
-// Unregister all service workers on iOS
 if ('serviceWorker' in navigator) {
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+  
   if (isIOS) {
+    // Unregister ALL service workers on iOS immediately
     navigator.serviceWorker.getRegistrations().then((registrations) => {
       registrations.forEach((reg) => reg.unregister())
+      // Clear all caches too
+      caches.keys().then((keys) => keys.forEach((key) => caches.delete(key)))
     })
-  }
-}
-
-// Register Service Worker — skip on iOS Safari to prevent blank page bug
-if ('serviceWorker' in navigator) {
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
-  
-  if (!isIOS) {
+  } else {
+    // Non-iOS — register normally
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js')
         .then((reg) => {
