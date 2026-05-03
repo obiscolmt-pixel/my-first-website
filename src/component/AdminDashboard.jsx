@@ -407,31 +407,36 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
             <div className="flex flex-col h-full">
               {/* Tabs */}
               <div className="flex border-b px-4 shrink-0 overflow-x-auto scrollbar-hide">
-                {["orders", "products", "promos", "broadcast", "customers"].map(
-                  (tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`px-5 py-3 text-sm font-bold capitalize border-b-2 transition whitespace-nowrap ${
-                        activeTab === tab
-                          ? "border-orange-500 text-orange-500"
-                          : "border-transparent text-gray-500 hover:text-orange-400"
-                      }`}
-                    >
-                      {tab === "orders"
-                        ? "📦 Orders"
-                        : tab === "products"
-                          ? "🛍️ Products"
-                          : tab === "promos"
-                            ? "🏷️ Promos"
-                            : tab === "broadcast"
-                              ? "📢 Broadcast"
-                              : tab === "notifications"
-                                ? "🔔 Notifications"
-                                : "👥 Customers"}
-                    </button>
-                  ),
-                )}
+                {[
+                  "orders",
+                  "products",
+                  "promos",
+                  "broadcast",
+                  "notifications",
+                  "customers",
+                ].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-5 py-3 text-sm font-bold capitalize border-b-2 transition whitespace-nowrap ${
+                      activeTab === tab
+                        ? "border-orange-500 text-orange-500"
+                        : "border-transparent text-gray-500 hover:text-orange-400"
+                    }`}
+                  >
+                    {tab === "orders"
+                      ? "📦 Orders"
+                      : tab === "products"
+                        ? "🛍️ Products"
+                        : tab === "promos"
+                          ? "🏷️ Promos"
+                          : tab === "broadcast"
+                            ? "📢 Broadcast"
+                            : tab === "notifications"
+                              ? "🔔 Notifications"
+                              : "👥 Customers"}
+                  </button>
+                ))}
               </div>
 
               {/* ── ORDERS TAB ── */}
