@@ -13,9 +13,24 @@ firebase.initializeApp({
 const messaging = firebase.messaging()
 
 messaging.onBackgroundMessage((payload) => {
-  const { title, body, icon } = payload.notification
+  console.log('Background message received:', payload)
+
+  const title = payload.notification?.title || payload.data?.title || 'Obisco Store'
+  const body = payload.notification?.body || payload.data?.body || 'You have a new notification'
+  const icon = payload.notification?.icon || '/icons/icon-192.png'
+
   self.registration.showNotification(title, {
     body,
-    icon: icon || '/icons/icon-192.png'
+    icon,
+    badge: '/icons/icon-72.png',
+    vibrate: [200, 100, 200],
+    data: { url: 'https://www.obisco.store' }
   })
+})
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  event.waitUntil(
+    clients.openWindow('https://www.obisco.store')
+  )
 })
