@@ -18,8 +18,10 @@ import RegisterBusiness from "./component/RegisterBusiness";
 import CookieBanner from "./component/CookieBanner";
 import PrivacyPolicy from "./component/PrivacyPolicy";
 import TermsConditions from "./component/TermsConditions";
+import ProfilePage from "./component/ProfilePage";
 import VTUPage from "./component/VTUPage";
 import { messaging, getToken } from "./firebase";
+
 
 // ── Onboarding Component ──
 const Onboarding = ({ onDone }) => {
@@ -165,6 +167,7 @@ const App = () => {
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [termsOpen, setTermsOpen] = useState(false);
   const [showVTU, setShowVTU] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const requestNotificationToken = async () => {
     try {
@@ -321,6 +324,7 @@ const App = () => {
         setActiveDepartment={setActiveDepartment}
         setRegisterBizOpen={setRegisterBizOpen}
         setShowVTU={setShowVTU}
+        setProfileOpen={setProfileOpen}
       />
 
       {activeDepartment === "gadgets" && (
@@ -376,6 +380,11 @@ const App = () => {
       <PrivacyPolicy open={privacyOpen} setOpen={setPrivacyOpen} />
       <TermsConditions open={termsOpen} setOpen={setTermsOpen} />
       {showVTU && <VTUPage onClose={() => setShowVTU(false)} />}
+      <ProfilePage
+        profileOpen={profileOpen}
+        setProfileOpen={setProfileOpen}
+        wishlist={wishlist}
+      />
     </>
   );
 };

@@ -42,6 +42,7 @@ const Navbar = ({
   activeDepartment,
   setActiveDepartment,
   setShowVTU,
+  setProfileOpen,
 }) => {
   const [nav, setNav] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -133,7 +134,10 @@ const Navbar = ({
 
   return (
     <>
-      <div className="sticky top-0 bg-white z-50 shadow-sm" style={{ position: '-webkit-sticky', top: 0 }}>
+      <div
+        className="sticky top-0 bg-white z-50 shadow-sm"
+        style={{ position: "-webkit-sticky", top: 0 }}
+      >
         <div className="max-w-[1640px] mx-auto flex justify-between items-center px-5 py-0 pb-0">
           {/* Left */}
           <div className="flex items-center gap-3">
@@ -247,7 +251,7 @@ const Navbar = ({
             <div className="relative">
               <button
                 onClick={() =>
-                  user ? setShowUserMenu(!showUserMenu) : setAuthOpen(true)
+                  user ? setProfileOpen(true) : setAuthOpen(true)
                 }
                 className="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-black rounded-full px-3 py-2 transition text-sm"
               >
@@ -477,9 +481,18 @@ const Navbar = ({
         </div>
 
         {user && (
-          <div className="px-4 py-2 border-b bg-orange-50">
+          <div
+            className="px-4 py-2 border-b bg-orange-50 cursor-pointer hover:bg-orange-100 transition"
+            onClick={() => {
+              setProfileOpen(true);
+              setNav(false);
+            }}
+          >
             <p className="font-bold text-gray-800 text-sm">{user.fullName}</p>
             <p className="text-gray-500 text-xs truncate">{user.email}</p>
+            <p className="text-orange-500 text-xs font-semibold mt-0.5">
+              View Profile →
+            </p>
           </div>
         )}
 
@@ -581,7 +594,9 @@ const Navbar = ({
               <FaBolt size={20} className="mr-4 text-orange-500" />
               <div>
                 <p className="font-semibold text-orange-500">Pay Bills</p>
-                <p className="text-xs text-gray-400">Airtime • Data • Light • Cable</p>
+                <p className="text-xs text-gray-400">
+                  Airtime • Data • Light • Cable
+                </p>
               </div>
             </li>
 
