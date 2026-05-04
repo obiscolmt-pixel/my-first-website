@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { BsFillCartFill } from "react-icons/bs";
 import { AiOutlineClose } from "react-icons/ai";
 import { placeOrder, validatePromo, usePromo } from "../api/api.js";
-import { usePaystackPayment } from "react-paystack";
 
 const CartSidebar = ({
   cartOpen,
@@ -33,10 +32,7 @@ const CartSidebar = ({
   const [promoResult, setPromoResult] = useState(null);
   const [promoError, setPromoError] = useState("");
 
-  const totalAmount = cartItems.reduce(
-    (acc, i) => acc + i.amount * i.quantity,
-    0,
-  );
+  const totalAmount = cartItems.reduce((acc, i) => acc + i.amount * i.quantity, 0);
   const totalItems = cartItems.reduce((acc, i) => acc + i.quantity, 0);
   const discountAmount = promoResult?.discount || 0;
   const finalAmount = Math.max(0, totalAmount - discountAmount);
@@ -75,7 +71,6 @@ const CartSidebar = ({
 
   const createOrder = async (paid = false) => {
     const user = JSON.parse(localStorage.getItem("user"));
-    const snapshot = finalAmount;
     const res = await placeOrder({
       userId: user?._id || user?.id || null,
       items: cartItems.map((item) => ({
@@ -87,7 +82,7 @@ const CartSidebar = ({
         color: item.color || "Default",
         category: item.category,
       })),
-      totalAmount: snapshot,
+      totalAmount: finalAmount,
       delivery: form,
       promoCode: promoResult?.code || null,
       discount: discountAmount || 0,
@@ -95,21 +90,6 @@ const CartSidebar = ({
       paymentMethod: paid ? "paystack" : "bank_transfer",
     });
     return res;
-  };
-
-  // Paystack config
-  const paystackConfig = {
-    reference: `obisco_${Date.now()}`,
-    email: form.email,
-    amount: finalAmount * 100, // kobo
-    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
-    metadata: {
-      custom_fields: [
-        { display_name: "Customer Name", variable_name: "customer_name", value: form.fullName },
-        { display_name: "Phone", variable_name: "phone", value: form.phone },
-        { display_name: "Address", variable_name: "address", value: `${form.address}, ${form.city}, ${form.state}` },
-      ]
-    }
   };
 
   const onPaystackSuccess = async (response) => {
@@ -125,37 +105,39 @@ const CartSidebar = ({
         setPromoResult(null);
         setPromoCode("");
       } else {
-        alert(res.message || "Order failed after payment. Contact support.");
+        alert(res.message || "Order failed after payment. Contact support with ref: " + response.reference);
       }
     } catch (err) {
-      alert("Payment successful but order failed. Please contact support with reference: " + response.reference);
+      alert("Payment successful but order failed. Contact support with ref: " + response.reference);
     } finally {
       setLoading(false);
     }
   };
 
-  const onPaystackClose = () => {
-    console.log("Payment closed");
-  };
+  const handlePaystackPayment = () => {
+    if (!validateForm()) return;
 
-  const InitializePaystack = () => {
-    const initializePayment = usePaystackPayment(paystackConfig);
-    return (
-      <button
-        onClick={() => {
-          if (!validateForm()) return;
-          initializePayment({ onSuccess: onPaystackSuccess, onClose: onPaystackClose });
-        }}
-        disabled={loading}
-        className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold py-3 rounded-full transition text-sm flex items-center justify-center gap-2"
-      >
-        {loading ? (
-          <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Processing...</>
-        ) : (
-          `💳 Pay ₦${finalAmount.toLocaleString()} with Paystack`
-        )}
-      </button>
-    );
+    const handler = window.PaystackPop.setup({
+      key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+      email: form.email,
+      amount: finalAmount * 100,
+      currency: "NGN",
+      ref: `obisco_${Date.now()}`,
+      metadata: {
+        custom_fields: [
+          { display_name: "Customer Name", variable_name: "customer_name", value: form.fullName },
+          { display_name: "Phone", variable_name: "phone", value: form.phone },
+          { display_name: "Address", variable_name: "address", value: `${form.address}, ${form.city}, ${form.state}` },
+        ],
+      },
+      callback: function (response) {
+        onPaystackSuccess(response);
+      },
+      onClose: function () {
+        console.log("Payment closed");
+      },
+    });
+    handler.openIframe();
   };
 
   const handleBankTransferOrder = async () => {
@@ -198,7 +180,7 @@ const CartSidebar = ({
       )}
 
       <div className={cartOpen ? "fixed top-0 right-0 w-full sm:w-[420px] h-screen bg-white z-[70] duration-300 flex flex-col" : "fixed top-0 right-[-100%] w-full sm:w-[420px] h-screen bg-white z-[70] duration-300 flex flex-col"}>
-        
+
         {/* Header */}
         <div className="flex justify-between items-center px-4 sm:px-6 py-4 border-b shrink-0">
           <h2 className="text-xl sm:text-2xl font-bold">
@@ -214,7 +196,7 @@ const CartSidebar = ({
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
-          
+
           {/* Order Success */}
           {orderPlaced ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-2">
@@ -237,8 +219,12 @@ const CartSidebar = ({
                 </p>
               )}
 
-              {/* Show bank transfer only if paid by bank transfer */}
-              {paymentMethod === "bank_transfer" && (
+              {paymentMethod === "paystack" ? (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4 w-full text-left mb-3">
+                  <p className="text-sm font-bold text-green-600 mb-1">✅ Payment Successful!</p>
+                  <p className="text-xs text-green-500">Your payment was confirmed. We'll process your order shortly.</p>
+                </div>
+              ) : (
                 <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 w-full text-left mb-3">
                   <p className="text-sm font-bold text-orange-600 mb-2">💳 Complete Your Payment</p>
                   <p className="text-xs text-orange-600 mb-3">
@@ -257,25 +243,17 @@ const CartSidebar = ({
                 </div>
               )}
 
-              {paymentMethod === "paystack" && (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 w-full text-left mb-3">
-                  <p className="text-sm font-bold text-green-600 mb-1">✅ Payment Successful!</p>
-                  <p className="text-xs text-green-500">Your payment was confirmed. We'll process your order shortly.</p>
-                </div>
-              )}
-
               <button
                 onClick={() => {
                   const message =
-                    `🛒 *Order Confirmation Request*\n\n` +
-                    `Hi OBISCO Store! I just placed an order.\n\n` +
-                    `📋 *Order Details:*\n` +
+                    `🛒 *Order Confirmation*\n\n` +
+                    `Hi OBISCO Store!\n\n` +
                     `🆔 Order ID: ${orderId}\n` +
                     `👤 Name: ${form.fullName}\n` +
                     `📱 Phone: ${form.phone}\n` +
                     `📍 Address: ${form.address}, ${form.city}, ${form.state}\n` +
                     `💰 Total: ₦${totalAmountSnapshot.toLocaleString()}\n` +
-                    `💳 Payment: ${paymentMethod === 'paystack' ? 'Paid via Paystack ✅' : 'Bank Transfer (pending)'}\n\n` +
+                    `💳 Payment: ${paymentMethod === "paystack" ? "Paid via Paystack ✅" : "Bank Transfer (pending)"}\n\n` +
                     `Thank you! 🙏`;
                   window.open(`https://wa.me/2349049863067?text=${encodeURIComponent(message)}`, "_blank");
                 }}
@@ -294,6 +272,7 @@ const CartSidebar = ({
 
           ) : checkout ? (
             <div className="flex flex-col gap-4">
+
               {/* Order Summary */}
               <div className="bg-gray-50 rounded-xl p-3 sm:p-4 border">
                 <p className="font-bold text-sm text-gray-700 mb-2">🧾 Order Summary</p>
@@ -404,7 +383,6 @@ const CartSidebar = ({
             </div>
 
           ) : (
-            /* Cart Items */
             <>
               {cartItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center py-10">
@@ -464,7 +442,17 @@ const CartSidebar = ({
 
               {checkout ? (
                 paymentMethod === "paystack" ? (
-                  <InitializePaystack />
+                  <button
+                    onClick={handlePaystackPayment}
+                    disabled={loading}
+                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold py-3 rounded-full transition text-sm flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Processing...</>
+                    ) : (
+                      `💳 Pay ₦${finalAmount.toLocaleString()} with Paystack`
+                    )}
+                  </button>
                 ) : (
                   <button
                     onClick={handleBankTransferOrder}
@@ -477,10 +465,7 @@ const CartSidebar = ({
                   </button>
                 )
               ) : (
-                <button
-                  onClick={() => setCheckout(true)}
-                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 sm:py-3 rounded-full transition text-sm sm:text-base"
-                >
+                <button onClick={() => setCheckout(true)} className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 sm:py-3 rounded-full transition text-sm sm:text-base">
                   Checkout →
                 </button>
               )}
