@@ -68,6 +68,9 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
   const [deletingProduct, setDeletingProduct] = useState(null);
   const [productSearch, setProductSearch] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("all");
+  // VTpass wallet balance state
+  const [walletBalance, setWalletBalance] = useState(null);
+  const [walletLoading, setWalletLoading] = useState(false);
 
   // Promos state
   const [promos, setPromos] = useState([]);
@@ -109,6 +112,7 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
       if (res.success) {
         setAuthenticated(true);
         loadOrders();
+        loadWalletBalance();
       } else {
         alert("Wrong password!");
       }
@@ -326,6 +330,20 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
     setCustomersLoading(false);
   };
 
+  const loadWalletBalance = async () => {
+    setWalletLoading(true);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/vtu/balance`,
+      );
+      const data = await res.json();
+      setWalletBalance(data?.data?.balance || 0);
+    } catch (err) {
+      setWalletBalance(null);
+    }
+    setWalletLoading(false);
+  };
+
   const resetForm = () => {
     setShowProductForm(false);
     setEditingProduct(null);
@@ -437,6 +455,47 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                               : "👥 Customers"}
                   </button>
                 ))}
+              </div>
+
+              {/* ── WALLET BALANCE CARD ── */}
+              <div className="px-4 sm:px-6 py-3 border-b bg-gray-50 shrink-0">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                      <span className="text-xl">💰</span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 uppercase">
+                        VTpass Wallet
+                      </p>
+                      {walletLoading ? (
+                        <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mt-1" />
+                      ) : walletBalance === null ? (
+                        <p className="text-sm text-red-500 font-bold">
+                          Failed to load
+                        </p>
+                      ) : (
+                        <p
+                          className={`text-lg font-black ${walletBalance < 5000 ? "text-red-500" : "text-green-600"}`}
+                        >
+                          ₦{Number(walletBalance).toLocaleString()}
+                          {walletBalance < 5000 && (
+                            <span className="text-xs font-semibold text-red-400 ml-2">
+                              ⚠️ Low balance
+                            </span>
+                          )}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={loadWalletBalance}
+                    disabled={walletLoading}
+                    className="text-orange-500 text-sm font-semibold hover:underline disabled:opacity-50"
+                  >
+                    🔄 Refresh
+                  </button>
+                </div>
               </div>
 
               {/* ── ORDERS TAB ── */}
