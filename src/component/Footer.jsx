@@ -14,7 +14,7 @@ function Footer({ setPrivacyOpen, setTermsOpen }) {
         {/* Brand */}
         <div className="lg:col-span-2">
           <img
-            src="/obisco-logo.png"
+            src="/obisco-footerlogo.png"
             alt="OBISCO Store"
             className="h-30 w-auto object-contain mb-3"
           />
