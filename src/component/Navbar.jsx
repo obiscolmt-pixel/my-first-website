@@ -146,7 +146,7 @@ const Navbar = ({
             </div>
             <img
               src="/obisco-logo.PNG"
-              alt="OBISCO Store"
+              alt="obisco store"
               className="h-20 w-auto object-contain cursor-pointer"
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: "smooth" });
