@@ -145,7 +145,7 @@ const Navbar = ({
               <AiOutlineMenu size={28} />
             </div>
             <img
-              src="/obisco-logo.PNG"
+              src="/obisco-logo.png"
               alt="obisco store"
               className="h-20 w-auto object-contain cursor-pointer"
               onClick={() => {
