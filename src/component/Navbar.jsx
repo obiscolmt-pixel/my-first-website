@@ -367,17 +367,17 @@ const Navbar = ({
             {/* ⚡ Pay Bills tab */}
             <button
               onClick={() => setShowVTU(true)}
-              className="flex items-center gap-2 px-5 py-3 text-sm font-semibold whitespace-nowrap border-b-2 border-transparent text-orange-500 hover:text-orange-400 hover:border-orange-400 transition-all duration-200 shrink-0"
+              className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-all duration-200 border-transparent text-gray-500 hover:text-orange-400 hover:border-orange-300`}
             >
-              <FaBolt size={13} /> Pay Bills
+              <FaBolt size={14} /> Pay Bills
             </button>
 
-            {/* Register Your Business Button */}
+            {/* Become a Seller Button */}
             <button
               onClick={() => setRegisterBizOpen(true)}
-              className="flex items-center gap-2 px-5 py-3 text-sm font-semibold whitespace-nowrap border-b-2 border-transparent text-green-600 hover:text-green-500 hover:border-green-400 transition-all duration-200 shrink-0"
+              className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-all duration-200 border-transparent text-gray-500 hover:text-orange-400 hover:border-orange-300`}
             >
-              🏪 Register Business
+              🏪 Become a Seller
             </button>
           </div>
         </div>
@@ -469,10 +469,12 @@ const Navbar = ({
             : "bg-white fixed top-0 left-[-100%] w-[280px] sm:w-[300px] h-screen z-[80] duration-300 flex flex-col"
         }
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b">
-          <h2 className="text-lg font-black">
-            OBISCO <span className="text-orange-500">Store</span>
-          </h2>
+        <div className="flex items-center justify-between px-2  border-b">
+          <img
+            src="/obisco-logo-v2.png"
+            alt="Obisco Store"
+            className="h-20 w-auto object-contain"
+          />
           <AiOutlineClose
             onClick={() => setNav(false)}
             size={22}
@@ -573,16 +575,6 @@ const Navbar = ({
               </li>
             )}
 
-            <li
-              onClick={() => {
-                setNav(false);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
-            >
-              <AiOutlineHome size={22} className="mr-4 text-orange-500" /> Home
-            </li>
-
             {/* ⚡ Pay Bills — drawer */}
             <li
               onClick={() => {
@@ -591,13 +583,7 @@ const Navbar = ({
               }}
               className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
             >
-              <FaBolt size={20} className="mr-4 text-orange-500" />
-              <div>
-                <p className="font-semibold text-orange-500">Pay Bills</p>
-                <p className="text-xs text-gray-400">
-                  Airtime • Data • Light • Cable
-                </p>
-              </div>
+              <FaBolt size={22} className="mr-4 text-orange-500" /> Pay Bills
             </li>
 
             <li
@@ -686,7 +672,7 @@ const Navbar = ({
 
         <div className="p-4 border-t">
           <p className="text-xs text-gray-400 text-center">
-            © 2025 OBISCO Store
+            © 2026 OBISCO STORE
           </p>
         </div>
       </div>
