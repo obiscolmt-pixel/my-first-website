@@ -11,39 +11,27 @@ function Footer({ setPrivacyOpen, setTermsOpen }) {
   return (
     <div className="bg-gray-950 text-gray-300 mt-16">
       <div className="max-w-[1240px] mx-auto py-16 px-8 grid lg:grid-cols-5 md:grid-cols-2 gap-10">
+        
         {/* Brand */}
         <div className="lg:col-span-2">
-          <img
-            src="/obisco-footerlogo.png"
-            alt="OBISCO Store"
-            className="h-30 w-auto object-contain mb-3"
-          />
-          <p className="text-sm text-gray-400 mt-3 leading-relaxed">
-            OBISCO Store is a growing Nigerian marketplace connecting customers
-            with verified specialists across gadgets, fashion and lifestyle.
-            Quality products at unbeatable prices delivered across Nigeria.
-          </p>
 
-          {/* App Download */}
-          <div className="mt-5 bg-gray-900 rounded-xl p-4 border border-gray-800">
-            <p className="text-xs font-bold text-orange-500 uppercase tracking-wider mb-2">
-              📲 Get Our App
+          {/* Brand Name */}
+          <div className="mb-4">
+            <h2 className="text-2xl font-black tracking-tight">
+              <span className="text-orange-500">OBISCO</span>
+              <span className="text-white"> STORE</span>
+            </h2>
+            <p className="text-orange-500 text-xs font-semibold tracking-widest mt-1">
+              Shop Dey Go! 🛒
             </p>
-            <p className="text-xs text-gray-400 mb-2">
-              Install OBISCO Store on your phone for the best shopping
-              experience!
-            </p>
-            <div className="flex flex-col gap-1">
-              <p className="text-xs text-gray-300">
-                <span className="text-green-400">Android:</span> Open site →
-                Menu → Install App
-              </p>
-              <p className="text-xs text-gray-300">
-                <span className="text-blue-400">iPhone:</span> Safari → Share →
-                Add to Home Screen
-              </p>
-            </div>
           </div>
+
+          <p className="text-sm text-gray-400 leading-relaxed">
+            OBISCO STORE is Nigeria's growing online marketplace where you can
+            shop for anything — from everyday essentials to premium products,
+            pay your bills, and enjoy fast delivery across Nigeria. We're
+            constantly expanding our categories to serve you better.
+          </p>
 
           <div className="flex gap-4 mt-6">
             <a
@@ -81,46 +69,27 @@ function Footer({ setPrivacyOpen, setTermsOpen }) {
           </div>
         </div>
 
-        {/* Departments */}
+        {/* Shop */}
         <div>
           <h6 className="font-bold text-white text-sm uppercase tracking-widest mb-4">
-            Departments
+            Shop
           </h6>
           <ul className="flex flex-col gap-2">
-            <li className="text-xs text-orange-500 font-semibold uppercase tracking-wider mt-1">
-              📱 Gadgets
-            </li>
-            {["Phones", "Laptops", "Tablets", "Accessories"].map((item) => (
-              <li key={item}>
-                <a
-                  href="#products"
-                  className="text-sm text-gray-400 hover:text-orange-500 transition"
-                >
-                  {item}
-                </a>
-              </li>
-            ))}
-            <li className="text-xs text-orange-500 font-semibold uppercase tracking-wider mt-3">
-              👔 Fashion
-            </li>
-            {["Men's Wear", "Women's Wear", "Native Wear"].map((item) => (
+            {[
+              "Gadgets & Electronics",
+              "Fashion & Clothing",
+              "Lifestyle & Beauty",
+              "Pay Bills",
+              "More Coming Soon...",
+            ].map((item) => (
               <li key={item}>
                 <a
                   href="#"
-                  className="text-sm text-gray-400 hover:text-orange-500 transition"
-                >
-                  {item}
-                </a>
-              </li>
-            ))}
-            <li className="text-xs text-orange-500 font-semibold uppercase tracking-wider mt-3">
-              ✨ Lifestyle
-            </li>
-            {["Perfumes", "Watches"].map((item) => (
-              <li key={item}>
-                <a
-                  href="#"
-                  className="text-sm text-gray-400 hover:text-orange-500 transition"
+                  className={`text-sm transition ${
+                    item === "More Coming Soon..."
+                      ? "text-orange-500 font-semibold italic"
+                      : "text-gray-400 hover:text-orange-500"
+                  }`}
                 >
                   {item}
                 </a>
@@ -198,7 +167,7 @@ function Footer({ setPrivacyOpen, setTermsOpen }) {
       <div className="border-t border-gray-800">
         <div className="max-w-[1240px] mx-auto px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-gray-500">
-            © 2025 OBISCO Store. All rights reserved.
+            © 2026 OBISCO STORE. All rights reserved.
           </p>
           <div className="flex gap-6">
             <button
@@ -230,6 +199,9 @@ function Footer({ setPrivacyOpen, setTermsOpen }) {
             </span>
             <span className="bg-gray-800 text-xs text-gray-300 px-2 py-1 rounded">
               Transfer
+            </span>
+            <span className="bg-gray-800 text-xs text-orange-400 px-2 py-1 rounded border border-orange-500/30">
+              Paystack 🔜
             </span>
           </div>
         </div>
