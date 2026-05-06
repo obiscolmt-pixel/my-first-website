@@ -169,6 +169,41 @@ const App = () => {
   const [showVTU, setShowVTU] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
+  // Pull to Refresh
+useEffect(() => {
+  let startY = 0;
+  let isPulling = false;
+
+  const handleTouchStart = (e) => {
+    startY = e.touches[0].clientY;
+  };
+
+  const handleTouchMove = (e) => {
+    const currentY = e.touches[0].clientY;
+    const diff = currentY - startY;
+    if (diff > 100 && window.scrollY === 0) {
+      isPulling = true;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (isPulling) {
+      isPulling = false;
+      window.location.reload();
+    }
+  };
+
+  document.addEventListener('touchstart', handleTouchStart);
+  document.addEventListener('touchmove', handleTouchMove);
+  document.addEventListener('touchend', handleTouchEnd);
+
+  return () => {
+    document.removeEventListener('touchstart', handleTouchStart);
+    document.removeEventListener('touchmove', handleTouchMove);
+    document.removeEventListener('touchend', handleTouchEnd);
+  };
+}, []);
+
   const requestNotificationToken = async () => {
     try {
       const token = await getToken(messaging, {
