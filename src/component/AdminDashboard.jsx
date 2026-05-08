@@ -105,6 +105,13 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
   const [customersLoading, setCustomersLoading] = useState(false);
   const [customerSearch, setCustomerSearch] = useState("");
 
+  // Sellers state
+  const [sellers, setSellers] = useState([]);
+  const [sellersLoading, setSellersLoading] = useState(false);
+  const [sellerSearch, setSellerSearch] = useState("");
+  const [approvingSeller, setApprovingSeller] = useState(null);
+  const [rejectingSeller, setRejectingSeller] = useState(null);
+
   const handleLogin = async () => {
     if (!password) return;
     try {
@@ -147,6 +154,7 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
     if (authenticated && activeTab === "orders") loadOrders();
     if (authenticated && activeTab === "promos") loadPromos();
     if (authenticated && activeTab === "customers") loadCustomers();
+    if (authenticated && activeTab === "sellers") loadSellers();
   }, [activeTab, authenticated]);
 
   const handleUpdateStatus = async (orderId, status, paymentStatus) => {
@@ -330,6 +338,71 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
     setCustomersLoading(false);
   };
 
+  const loadSellers = async () => {
+    setSellersLoading(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/seller/all`);
+      const data = await res.json();
+      setSellers(Array.isArray(data) ? data : []);
+    } catch {
+      setSellers([]);
+    }
+    setSellersLoading(false);
+  };
+
+  const handleApproveSeller = async (id) => {
+    setApprovingSeller(id);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/seller/approve/${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ adminPassword: password }),
+        },
+      );
+      if (res.ok) {
+        setSellers((prev) =>
+          prev.map((s) =>
+            s._id === id ? { ...s, sellerStatus: "approved" } : s,
+          ),
+        );
+      } else {
+        alert("Failed to approve seller");
+      }
+    } catch {
+      alert("Connection error");
+    }
+    setApprovingSeller(null);
+  };
+
+  const handleRejectSeller = async (id) => {
+    if (!window.confirm("Reject this seller application?")) return;
+    setRejectingSeller(id);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/seller/reject/${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ adminPassword: password }),
+        },
+      );
+      if (res.ok) {
+        setSellers((prev) =>
+          prev.map((s) =>
+            s._id === id ? { ...s, sellerStatus: "rejected" } : s,
+          ),
+        );
+      } else {
+        alert("Failed to reject seller");
+      }
+    } catch {
+      alert("Connection error");
+    }
+    setRejectingSeller(null);
+  };
+
   const loadWalletBalance = async () => {
     setWalletLoading(true);
     try {
@@ -432,6 +505,7 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                   "broadcast",
                   "notifications",
                   "customers",
+                  "sellers",
                 ].map((tab) => (
                   <button
                     key={tab}
@@ -452,7 +526,9 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                             ? "📢 Broadcast"
                             : tab === "notifications"
                               ? "🔔 Notifications"
-                              : "👥 Customers"}
+                              : tab === "sellers"
+                                ? "🏪 Sellers"
+                                : "👥 Customers"}
                   </button>
                 ))}
               </div>
@@ -1711,6 +1787,189 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                                   })}
                                 </p>
                               </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── SELLERS TAB ── */}
+              {activeTab === "sellers" && (
+                <div className="p-4 sm:p-6">
+                  {/* Stats */}
+                  <div className="grid grid-cols-3 gap-3 mb-6">
+                    <div className="bg-yellow-50 text-yellow-600 rounded-xl p-4 text-center">
+                      <p className="text-2xl font-black">
+                        {
+                          sellers.filter((s) => s.sellerStatus === "pending")
+                            .length
+                        }
+                      </p>
+                      <p className="text-xs font-semibold mt-1">Pending</p>
+                    </div>
+                    <div className="bg-green-50 text-green-600 rounded-xl p-4 text-center">
+                      <p className="text-2xl font-black">
+                        {
+                          sellers.filter((s) => s.sellerStatus === "approved")
+                            .length
+                        }
+                      </p>
+                      <p className="text-xs font-semibold mt-1">Approved</p>
+                    </div>
+                    <div className="bg-red-50 text-red-500 rounded-xl p-4 text-center">
+                      <p className="text-2xl font-black">
+                        {
+                          sellers.filter((s) => s.sellerStatus === "rejected")
+                            .length
+                        }
+                      </p>
+                      <p className="text-xs font-semibold mt-1">Rejected</p>
+                    </div>
+                  </div>
+
+                  {/* Search & Refresh */}
+                  <div className="flex gap-3 mb-4">
+                    <input
+                      placeholder="Search by name or business..."
+                      value={sellerSearch}
+                      onChange={(e) => setSellerSearch(e.target.value)}
+                      className="flex-1 border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500"
+                    />
+                    <button
+                      onClick={loadSellers}
+                      className="text-orange-500 text-sm font-semibold hover:underline shrink-0"
+                    >
+                      🔄 Refresh
+                    </button>
+                  </div>
+
+                  {sellersLoading ? (
+                    <div className="flex justify-center py-10">
+                      <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  ) : sellers.length === 0 ? (
+                    <div className="text-center py-10">
+                      <p className="text-4xl mb-3">🏪</p>
+                      <p className="text-gray-500">
+                        No seller applications yet
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      {sellers
+                        .filter(
+                          (s) =>
+                            s.fullName
+                              ?.toLowerCase()
+                              .includes(sellerSearch.toLowerCase()) ||
+                            s.businessName
+                              ?.toLowerCase()
+                              .includes(sellerSearch.toLowerCase()) ||
+                            s.email
+                              ?.toLowerCase()
+                              .includes(sellerSearch.toLowerCase()),
+                        )
+                        .map((seller) => (
+                          <div
+                            key={seller._id}
+                            className="border rounded-xl p-4 hover:border-orange-200 transition bg-white"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <p className="font-bold text-sm text-gray-800">
+                                    {seller.fullName}
+                                  </p>
+                                  <span
+                                    className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                                      seller.sellerStatus === "approved"
+                                        ? "bg-green-100 text-green-600"
+                                        : seller.sellerStatus === "rejected"
+                                          ? "bg-red-100 text-red-500"
+                                          : "bg-yellow-100 text-yellow-600"
+                                    }`}
+                                  >
+                                    {seller.sellerStatus}
+                                  </span>
+                                </div>
+                                <p className="text-xs font-bold text-orange-500">
+                                  {seller.businessName}
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                  {seller.email}
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                  {seller.businessCategory}
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                  {seller.businessLocation},{" "}
+                                  {seller.businessState}
+                                </p>
+                                {seller.whatsapp && (
+                                  <p className="text-xs text-green-500">
+                                    📱 {seller.whatsapp}
+                                  </p>
+                                )}
+                                {seller.businessDescription && (
+                                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                                    {seller.businessDescription}
+                                  </p>
+                                )}
+                                <p className="text-xs text-gray-300 mt-1">
+                                  Applied:{" "}
+                                  {new Date(
+                                    seller.createdAt,
+                                  ).toLocaleDateString("en-NG", {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  })}
+                                </p>
+                              </div>
+
+                              {/* Action Buttons */}
+                              {seller.sellerStatus === "pending" && (
+                                <div className="flex flex-col gap-2 shrink-0">
+                                  <button
+                                    onClick={() =>
+                                      handleApproveSeller(seller._id)
+                                    }
+                                    disabled={approvingSeller === seller._id}
+                                    className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-full transition"
+                                  >
+                                    {approvingSeller === seller._id ? (
+                                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    ) : (
+                                      "✅ Approve"
+                                    )}
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      handleRejectSeller(seller._id)
+                                    }
+                                    disabled={rejectingSeller === seller._id}
+                                    className="flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-500 text-xs font-bold px-3 py-1.5 rounded-full transition"
+                                  >
+                                    {rejectingSeller === seller._id ? (
+                                      <div className="w-3 h-3 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
+                                    ) : (
+                                      "❌ Reject"
+                                    )}
+                                  </button>
+                                </div>
+                              )}
+                              {seller.sellerStatus === "approved" && (
+                                <span className="text-green-500 text-xs font-bold shrink-0">
+                                  ✅ Approved
+                                </span>
+                              )}
+                              {seller.sellerStatus === "rejected" && (
+                                <span className="text-red-400 text-xs font-bold shrink-0">
+                                  ❌ Rejected
+                                </span>
+                              )}
                             </div>
                           </div>
                         ))}
