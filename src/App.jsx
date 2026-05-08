@@ -21,7 +21,8 @@ import TermsConditions from "./component/TermsConditions";
 import ProfilePage from "./component/ProfilePage";
 import VTUPage from "./component/VTUPage";
 import { messaging, getToken } from "./firebase";
-
+import SellerLogin from "./component/SellerLogin";
+import SellerDashboard from "./component/SellerDashboard";
 
 // ── Onboarding Component ──
 const Onboarding = ({ onDone }) => {
@@ -168,41 +169,43 @@ const App = () => {
   const [termsOpen, setTermsOpen] = useState(false);
   const [showVTU, setShowVTU] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [sellerLoginOpen, setSellerLoginOpen] = useState(false);
+  const [sellerDashboardOpen, setSellerDashboardOpen] = useState(false);
 
   // Pull to Refresh
-useEffect(() => {
-  let startY = 0;
-  let isPulling = false;
+  useEffect(() => {
+    let startY = 0;
+    let isPulling = false;
 
-  const handleTouchStart = (e) => {
-    startY = e.touches[0].clientY;
-  };
+    const handleTouchStart = (e) => {
+      startY = e.touches[0].clientY;
+    };
 
-  const handleTouchMove = (e) => {
-    const currentY = e.touches[0].clientY;
-    const diff = currentY - startY;
-    if (diff > 100 && window.scrollY === 0) {
-      isPulling = true;
-    }
-  };
+    const handleTouchMove = (e) => {
+      const currentY = e.touches[0].clientY;
+      const diff = currentY - startY;
+      if (diff > 100 && window.scrollY === 0) {
+        isPulling = true;
+      }
+    };
 
-  const handleTouchEnd = () => {
-    if (isPulling) {
-      isPulling = false;
-      window.location.reload();
-    }
-  };
+    const handleTouchEnd = () => {
+      if (isPulling) {
+        isPulling = false;
+        window.location.reload();
+      }
+    };
 
-  document.addEventListener('touchstart', handleTouchStart);
-  document.addEventListener('touchmove', handleTouchMove);
-  document.addEventListener('touchend', handleTouchEnd);
+    document.addEventListener("touchstart", handleTouchStart);
+    document.addEventListener("touchmove", handleTouchMove);
+    document.addEventListener("touchend", handleTouchEnd);
 
-  return () => {
-    document.removeEventListener('touchstart', handleTouchStart);
-    document.removeEventListener('touchmove', handleTouchMove);
-    document.removeEventListener('touchend', handleTouchEnd);
-  };
-}, []);
+    return () => {
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, []);
 
   const requestNotificationToken = async () => {
     try {
@@ -360,6 +363,7 @@ useEffect(() => {
         setRegisterBizOpen={setRegisterBizOpen}
         setShowVTU={setShowVTU}
         setProfileOpen={setProfileOpen}
+        setSellerLoginOpen={setSellerLoginOpen}
       />
 
       {activeDepartment === "gadgets" && (
@@ -420,6 +424,18 @@ useEffect(() => {
         setProfileOpen={setProfileOpen}
         wishlist={wishlist}
       />
+      {sellerLoginOpen && (
+        <SellerLogin
+          onClose={() => setSellerLoginOpen(false)}
+          onLoginSuccess={() => {
+            setSellerLoginOpen(false);
+            setSellerDashboardOpen(true);
+          }}
+        />
+      )}
+      {sellerDashboardOpen && (
+        <SellerDashboard onClose={() => setSellerDashboardOpen(false)} />
+      )}
     </>
   );
 };

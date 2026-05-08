@@ -18,6 +18,7 @@ import {
   FaTshirt,
   FaStar,
   FaBolt,
+  FaStore,
 } from "react-icons/fa";
 import { fetchProducts } from "../api/api.js";
 
@@ -43,6 +44,7 @@ const Navbar = ({
   setActiveDepartment,
   setShowVTU,
   setProfileOpen,
+  setSellerLoginOpen,
 }) => {
   const [nav, setNav] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -658,6 +660,19 @@ const Navbar = ({
               <FaUserFriends size={22} className="mr-4 text-orange-500" /> Refer
               a Friend
             </li>
+
+            {/* Seller Dashboard */}
+            <li
+              onClick={() => {
+                setSellerLoginOpen(true);
+                setNav(false);
+              }}
+              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
+            >
+              <FaStore size={22} className="mr-4 text-orange-500" /> Seller
+              Dashboard
+            </li>
+
             <li
               onClick={() => {
                 setAdminOpen(true);
