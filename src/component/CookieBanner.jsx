@@ -1,50 +1,39 @@
 import React, { useState, useEffect } from 'react'
 
-const API_BASE = import.meta.env.VITE_API_URL || 'https://obisco-gadgets-backend.onrender.com'
-
 const CookieBanner = () => {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    // ✅ Check consent from backend
-    const checkConsent = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/cookies/consent`, {
-          credentials: 'include' // ✅ Send cookies with request
-        })
-        const data = await res.json()
-        if (!data.hasConsent) {
-          setTimeout(() => setVisible(true), 2000)
-        }
-      } catch {
-        // If backend fails, fall back to showing banner
+    const consent = localStorage.getItem('obisco_cookie_consent')
+    const consentDate = localStorage.getItem('obisco_cookie_consent_date')
+
+    if (!consent) {
+      // No consent yet — show banner
+      setTimeout(() => setVisible(true), 2000)
+      return
+    }
+
+    // Check if 30 days have passed
+    if (consentDate) {
+      const daysSince = (Date.now() - parseInt(consentDate)) / (1000 * 60 * 60 * 24)
+      if (daysSince > 30) {
+        // Consent expired — show banner again
+        localStorage.removeItem('obisco_cookie_consent')
+        localStorage.removeItem('obisco_cookie_consent_date')
         setTimeout(() => setVisible(true), 2000)
       }
     }
-    checkConsent()
   }, [])
 
-  const handleAccept = async () => {
-    try {
-      await fetch(`${API_BASE}/api/cookies/accept`, {
-        method: 'POST',
-        credentials: 'include' // ✅ Send cookies with request
-      })
-    } catch (err) {
-      console.log('Cookie accept failed:', err.message)
-    }
+  const handleAccept = () => {
+    localStorage.setItem('obisco_cookie_consent', 'accepted')
+    localStorage.setItem('obisco_cookie_consent_date', Date.now().toString())
     setVisible(false)
   }
 
-  const handleDecline = async () => {
-    try {
-      await fetch(`${API_BASE}/api/cookies/decline`, {
-        method: 'POST',
-        credentials: 'include' // ✅ Send cookies with request
-      })
-    } catch (err) {
-      console.log('Cookie decline failed:', err.message)
-    }
+  const handleDecline = () => {
+    localStorage.setItem('obisco_cookie_consent', 'declined')
+    localStorage.setItem('obisco_cookie_consent_date', Date.now().toString())
     setVisible(false)
   }
 
