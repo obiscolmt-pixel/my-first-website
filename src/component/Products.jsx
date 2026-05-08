@@ -38,7 +38,7 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
       try {
         const data = await fetchProducts();
         setAllProducts(data);
-        setProducts(data);
+        setProducts(data.filter((item) => item.featured));
       } catch (err) {
         console.error("Failed to load products:", err);
       } finally {
@@ -57,11 +57,12 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
   const filterType = (category) => {
     setActiveType(category);
     setActivePrice(null);
+    const featured = allProducts.filter((item) => item.featured);
     if (category === "All") {
-      setProducts(allProducts);
+      setProducts(featured);
     } else if (category === "accessories") {
       setProducts(
-        allProducts.filter(
+        featured.filter(
           (item) =>
             item.category === "speakers" ||
             item.category === "chargers" ||
@@ -69,14 +70,15 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
         ),
       );
     } else {
-      setProducts(allProducts.filter((item) => item.category === category));
+      setProducts(featured.filter((item) => item.category === category));
     }
   };
 
   const filterPrice = (price) => {
     setActivePrice(price);
     setActiveType(null);
-    setProducts(allProducts.filter((item) => item.price === price));
+    const featured = allProducts.filter((item) => item.featured);
+    setProducts(featured.filter((item) => item.price === price));
   };
 
   const handleAddToCart = (item, qty = 1, color = "") => {
@@ -157,13 +159,17 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
     }
   };
 
+  const featuredProducts = allProducts.filter((item) => item.featured);
+
   const displayedProducts = searchQuery
     ? allProducts.filter(
         (item) =>
           item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           item.category.toLowerCase().includes(searchQuery.toLowerCase()),
       )
-    : products;
+    : activeType !== "All" || activePrice
+      ? products.filter((item) => item.featured)
+      : featuredProducts;
 
   const StarDisplay = ({ rating, size = "text-sm" }) => (
     <div className="flex">
@@ -206,7 +212,9 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
               className="w-6 h-6 object-contain rounded-full bg-orange-50 shrink-0"
             />
             <div className="min-w-0">
-              <p className="text-[12px] text-white font-semibold">Item added to cart ✓</p>
+              <p className="text-[12px] text-white font-semibold">
+                Item added to cart ✓
+              </p>
             </div>
             <div className="bg-orange-500 rounded-full p-1 shrink-0">
               <svg
@@ -543,7 +551,7 @@ const Products = ({ searchQuery, addToCart, addToWishlist, isWishlisted }) => {
                 if (!p.value) {
                   setActivePrice(null);
                   setActiveType("All");
-                  setProducts(allProducts);
+                  setProducts(allProducts.filter((item) => item.featured));
                 } else {
                   filterPrice(p.value);
                 }

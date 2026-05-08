@@ -235,6 +235,19 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
     setDeletingProduct(null);
   };
 
+  const handleToggleFeatured = async (id, currentFeatured) => {
+    const res = await updateProduct(id, { featured: !currentFeatured });
+    if (res.product) {
+      setProducts((prev) =>
+        prev.map((p) =>
+          p._id === id ? { ...p, featured: !currentFeatured } : p,
+        ),
+      );
+    } else {
+      alert("Failed to update featured status");
+    }
+  };
+
   const handleCreatePromo = async () => {
     if (!promoForm.code || !promoForm.value) {
       alert("Please fill in Code and Value.");
@@ -455,7 +468,7 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
               ⚙️ Admin Dashboard
             </h2>
             <p className="text-xs text-gray-400 mt-0.5">
-              OBISCO Store — Management
+              OBISCO STORE — Management
             </p>
           </div>
           <button
@@ -1072,6 +1085,23 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                                 )}
                               </button>
                             </div>
+                            <button
+                              onClick={() =>
+                                handleToggleFeatured(
+                                  product._id,
+                                  product.featured,
+                                )
+                              }
+                              className={`w-full mt-1 text-xs font-bold py-1.5 rounded-full transition ${
+                                product.featured
+                                  ? "bg-yellow-100 text-yellow-600 hover:bg-yellow-200"
+                                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                              }`}
+                            >
+                              {product.featured
+                                ? "⭐ Featured"
+                                : "☆ Set Featured"}
+                            </button>
                           </div>
                         </div>
                       ))}
