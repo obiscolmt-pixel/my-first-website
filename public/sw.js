@@ -1,4 +1,4 @@
-const CACHE_NAME = 'obisco-store-v8'
+const CACHE_NAME = 'obisco-store-v9'
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
@@ -7,7 +7,6 @@ self.addEventListener('message', (event) => {
 })
 
 self.addEventListener('install', (event) => {
-  self.skipWaiting()
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.add('/index.html')
