@@ -23,6 +23,8 @@ import VTUPage from "./component/VTUPage";
 import { messaging, getToken } from "./firebase";
 import SellerLogin from "./component/SellerLogin";
 import SellerDashboard from "./component/SellerDashboard";
+import UpdateNotification from "./component/UpdateNotification";
+
 
 // ── Onboarding Component ──
 const Onboarding = ({ onDone }) => {
@@ -436,6 +438,8 @@ const App = () => {
       {sellerDashboardOpen && (
         <SellerDashboard onClose={() => setSellerDashboardOpen(false)} />
       )}
+
+      <UpdateNotification />
     </>
   );
 };
