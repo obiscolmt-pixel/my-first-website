@@ -1,10 +1,10 @@
-// Force update - v2
-importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js')
-importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js')
-
+// v3 - iOS Safe
 const isIOS = /iPad|iPhone|iPod/.test(self.navigator?.userAgent || '')
 
 if (!isIOS) {
+  importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js')
+  importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js')
+
   try {
     firebase.initializeApp({
       apiKey: "AIzaSyCXFSe0Q8O3LY1YCSykWOboi9QIV44Gxuo",
