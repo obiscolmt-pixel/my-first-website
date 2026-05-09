@@ -211,6 +211,7 @@ const App = () => {
 
   const requestNotificationToken = async () => {
     try {
+      if (!messaging) return; // Skip on iOS
       const token = await getToken(messaging, {
         vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
       });
