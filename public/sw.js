@@ -1,4 +1,4 @@
-const CACHE_NAME = 'obisco-store-v10'
+const CACHE_NAME = 'obisco-store-v11'
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
