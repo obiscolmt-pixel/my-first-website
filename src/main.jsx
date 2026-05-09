@@ -15,13 +15,11 @@ if ('serviceWorker' in navigator) {
 
   if (isIOS) {
     navigator.serviceWorker.getRegistrations().then((registrations) => {
-      if (registrations.length > 0) {
-        registrations.forEach((reg) => reg.unregister())
-        caches.keys().then((keys) => keys.forEach((key) => caches.delete(key)))
-        window.location.reload()
-      }
+      registrations.forEach((reg) => reg.unregister())
     })
-    caches.keys().then((keys) => keys.forEach((key) => caches.delete(key)))
+    caches.keys().then((keys) => {
+      keys.forEach((key) => caches.delete(key))
+    })
   } else {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js')
