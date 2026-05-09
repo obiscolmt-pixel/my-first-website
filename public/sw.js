@@ -1,4 +1,4 @@
-const CACHE_NAME = 'obisco-store-v9'
+const CACHE_NAME = 'obisco-store-v10'
 
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
@@ -30,11 +30,13 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return
   if (event.request.url.includes('/api/')) return
 
-  // For navigation requests (page loads/refreshes) — always try network first
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
+          if (!response || response.status !== 200) {
+            return caches.match('/index.html')
+          }
           const clone = response.clone()
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, clone)
@@ -46,7 +48,21 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // For assets — cache first, network fallback
+  if (event.request.url.includes('/assets/')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const clone = response.clone()
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, clone)
+          })
+          return response
+        })
+        .catch(() => caches.match(event.request))
+    )
+    return
+  }
+
   event.respondWith(
     caches.match(event.request).then((cached) => {
       return cached || fetch(event.request).then((response) => {
@@ -55,7 +71,7 @@ self.addEventListener('fetch', (event) => {
           cache.put(event.request, clone)
         })
         return response
-      })
+      }).catch(() => caches.match('/index.html'))
     })
   )
 })
