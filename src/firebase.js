@@ -12,6 +12,15 @@ const firebaseConfig = {
 }
 
 const app = initializeApp(firebaseConfig)
-const messaging = getMessaging(app)
+
+let messaging = null
+try {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+  if (!isIOS) {
+    messaging = getMessaging(app)
+  }
+} catch (err) {
+  console.log('Firebase messaging not supported:', err.message)
+}
 
 export { messaging, getToken, onMessage }
