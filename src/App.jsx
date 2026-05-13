@@ -24,6 +24,8 @@ import { messaging, getToken } from "./firebase";
 import SellerLogin from "./component/SellerLogin";
 import SellerDashboard from "./component/SellerDashboard";
 import UpdateNotification from "./component/UpdateNotification";
+import RefundPolicy from "./component/RefundPolicy";
+import ShippingPolicy from "./component/ShippingPolicy";
 
 
 // ── Onboarding Component ──
@@ -40,60 +42,13 @@ const Onboarding = ({ onDone }) => {
   };
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 9999,
-        backgroundColor: "#111827",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "24px",
-        textAlign: "center",
-      }}
-    >
+    <div style={{ position: "fixed", inset: 0, zIndex: 9999, backgroundColor: "#111827", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px", textAlign: "center" }}>
       {step === 0 && (
         <>
-          {/* Splash Screen */}
-          <img
-            src="/icons/icon-512.png"
-            alt="Obisco Store"
-            style={{
-              width: 120,
-              height: 120,
-              borderRadius: 24,
-              marginBottom: 24,
-            }}
-          />
-          <h1
-            style={{
-              color: "#f97316",
-              fontSize: 32,
-              fontWeight: 900,
-              margin: 0,
-            }}
-          >
-            Obisco Store
-          </h1>
-          <p style={{ color: "#9ca3af", fontSize: 15, marginTop: 8 }}>
-            Your one-stop shop in Nigeria
-          </p>
-          <button
-            onClick={() => setStep(1)}
-            style={{
-              marginTop: 40,
-              backgroundColor: "#f97316",
-              color: "white",
-              border: "none",
-              borderRadius: 50,
-              padding: "14px 40px",
-              fontSize: 16,
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
+          <img src="/icons/icon-512.png" alt="Obisco Store" style={{ width: 120, height: 120, borderRadius: 24, marginBottom: 24 }} />
+          <h1 style={{ color: "#f97316", fontSize: 32, fontWeight: 900, margin: 0 }}>Obisco Store</h1>
+          <p style={{ color: "#9ca3af", fontSize: 15, marginTop: 8 }}>Your one-stop shop in Nigeria</p>
+          <button onClick={() => setStep(1)} style={{ marginTop: 40, backgroundColor: "#f97316", color: "white", border: "none", borderRadius: 50, padding: "14px 40px", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>
             Get Started
           </button>
         </>
@@ -101,52 +56,15 @@ const Onboarding = ({ onDone }) => {
 
       {step === 1 && (
         <>
-          {/* Notification Permission */}
           <div style={{ fontSize: 64, marginBottom: 16 }}>🔔</div>
-          <h2
-            style={{ color: "white", fontSize: 24, fontWeight: 800, margin: 0 }}
-          >
-            Stay Updated!
-          </h2>
-          <p
-            style={{
-              color: "#9ca3af",
-              fontSize: 15,
-              marginTop: 12,
-              maxWidth: 300,
-              lineHeight: 1.6,
-            }}
-          >
-            Get notified about new deals, order updates and exclusive offers
-            from Obisco Store.
+          <h2 style={{ color: "white", fontSize: 24, fontWeight: 800, margin: 0 }}>Stay Updated!</h2>
+          <p style={{ color: "#9ca3af", fontSize: 15, marginTop: 12, maxWidth: 300, lineHeight: 1.6 }}>
+            Get notified about new deals, order updates and exclusive offers from Obisco Store.
           </p>
-          <button
-            onClick={requestNotification}
-            style={{
-              marginTop: 32,
-              backgroundColor: "#f97316",
-              color: "white",
-              border: "none",
-              borderRadius: 50,
-              padding: "14px 40px",
-              fontSize: 16,
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
+          <button onClick={requestNotification} style={{ marginTop: 32, backgroundColor: "#f97316", color: "white", border: "none", borderRadius: 50, padding: "14px 40px", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>
             Allow Notifications
           </button>
-          <button
-            onClick={() => onDone(false)}
-            style={{
-              marginTop: 12,
-              backgroundColor: "transparent",
-              color: "#6b7280",
-              border: "none",
-              fontSize: 14,
-              cursor: "pointer",
-            }}
-          >
+          <button onClick={() => onDone(false)} style={{ marginTop: 12, backgroundColor: "transparent", color: "#6b7280", border: "none", fontSize: 14, cursor: "pointer" }}>
             Skip for now
           </button>
         </>
@@ -173,35 +91,33 @@ const App = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [sellerLoginOpen, setSellerLoginOpen] = useState(false);
   const [sellerDashboardOpen, setSellerDashboardOpen] = useState(false);
+  // ✅ New policy states
+  const [refundOpen, setRefundOpen] = useState(false);
+  const [shippingOpen, setShippingOpen] = useState(false);
+
+  // Handle direct URL access for policy pages
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === '/refund-policy') setRefundOpen(true);
+    if (path === '/shipping-policy') setShippingOpen(true);
+  }, []);
 
   // Pull to Refresh
   useEffect(() => {
     let startY = 0;
     let isPulling = false;
-
-    const handleTouchStart = (e) => {
-      startY = e.touches[0].clientY;
-    };
-
+    const handleTouchStart = (e) => { startY = e.touches[0].clientY; };
     const handleTouchMove = (e) => {
       const currentY = e.touches[0].clientY;
       const diff = currentY - startY;
-      if (diff > 100 && window.scrollY === 0) {
-        isPulling = true;
-      }
+      if (diff > 100 && window.scrollY === 0) { isPulling = true; }
     };
-
     const handleTouchEnd = () => {
-      if (isPulling) {
-        isPulling = false;
-        window.location.reload();
-      }
+      if (isPulling) { isPulling = false; window.location.reload(); }
     };
-
     document.addEventListener("touchstart", handleTouchStart);
     document.addEventListener("touchmove", handleTouchMove);
     document.addEventListener("touchend", handleTouchEnd);
-
     return () => {
       document.removeEventListener("touchstart", handleTouchStart);
       document.removeEventListener("touchmove", handleTouchMove);
@@ -211,112 +127,62 @@ const App = () => {
 
   const requestNotificationToken = async () => {
     try {
-      if (!messaging) return; // Skip on iOS
-      const token = await getToken(messaging, {
-        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-      });
+      if (!messaging) return;
+      const token = await getToken(messaging, { vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY });
       if (token) {
         console.log("FCM Token:", token);
-        // Send token to backend
-        await fetch(
-          `${import.meta.env.VITE_API_URL}/api/notifications/save-token`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ token }),
-          },
-        );
+        await fetch(`${import.meta.env.VITE_API_URL}/api/notifications/save-token`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ token }),
+        });
       }
     } catch (err) {
       console.log("Notification token error:", err.message);
     }
   };
 
-  // Check if first time opening
   useEffect(() => {
     const hasOnboarded = localStorage.getItem("obisco_onboarded");
-    if (!hasOnboarded) {
-      setShowOnboarding(true);
-    }
+    if (!hasOnboarded) { setShowOnboarding(true); }
   }, []);
 
-  // Auto-save FCM token for returning users who already granted permission
   useEffect(() => {
     const hasOnboarded = localStorage.getItem("obisco_onboarded");
-    if (hasOnboarded && Notification.permission === "granted") {
-      requestNotificationToken();
-    }
+    if (hasOnboarded && Notification.permission === "granted") { requestNotificationToken(); }
   }, []);
 
   const handleOnboardingDone = (permissionGranted = false) => {
     localStorage.setItem("obisco_onboarded", "true");
     setShowOnboarding(false);
-    if (permissionGranted) {
-      requestNotificationToken();
-    }
+    if (permissionGranted) { requestNotificationToken(); }
   };
 
   const addToCart = (item) => {
     const itemId = item._id || item.id;
     setCartItems((prev) => {
-      const existing = prev.find((i) => {
-        const existingId = i._id || i.id;
-        return existingId && itemId && existingId === itemId;
-      });
-      if (existing) {
-        return prev.map((i) => {
-          const existingId = i._id || i.id;
-          return existingId === itemId ? { ...i, quantity: i.quantity + 1 } : i;
-        });
-      }
+      const existing = prev.find((i) => { const existingId = i._id || i.id; return existingId && itemId && existingId === itemId; });
+      if (existing) { return prev.map((i) => { const existingId = i._id || i.id; return existingId === itemId ? { ...i, quantity: i.quantity + 1 } : i; }); }
       return [...prev, { ...item, quantity: 1 }];
     });
   };
 
-  const removeFromCart = (id) => {
-    setCartItems((prev) => prev.filter((i) => i._id !== id && i.id !== id));
-  };
-
-  const increaseQty = (id) => {
-    setCartItems((prev) =>
-      prev.map((i) =>
-        i._id === id || i.id === id ? { ...i, quantity: i.quantity + 1 } : i,
-      ),
-    );
-  };
-
-  const decreaseQty = (id) => {
-    setCartItems((prev) =>
-      prev
-        .map((i) =>
-          i._id === id || i.id === id ? { ...i, quantity: i.quantity - 1 } : i,
-        )
-        .filter((i) => i.quantity > 0),
-    );
-  };
+  const removeFromCart = (id) => { setCartItems((prev) => prev.filter((i) => i._id !== id && i.id !== id)); };
+  const increaseQty = (id) => { setCartItems((prev) => prev.map((i) => i._id === id || i.id === id ? { ...i, quantity: i.quantity + 1 } : i)); };
+  const decreaseQty = (id) => { setCartItems((prev) => prev.map((i) => i._id === id || i.id === id ? { ...i, quantity: i.quantity - 1 } : i).filter((i) => i.quantity > 0)); };
 
   const [wishlist, setWishlist] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("obisco_wishlist")) || [];
-    } catch {
-      return [];
-    }
+    try { return JSON.parse(localStorage.getItem("obisco_wishlist")) || []; } catch { return []; }
   });
   const [wishlistOpen, setWishlistOpen] = useState(false);
 
   const addToWishlist = (item) => {
     const itemId = item._id || item.id;
     setWishlist((prev) => {
-      const exists = prev.find((i) => {
-        const existingId = i._id || i.id;
-        return existingId && itemId && existingId === itemId;
-      });
+      const exists = prev.find((i) => { const existingId = i._id || i.id; return existingId && itemId && existingId === itemId; });
       if (exists) {
-        const updated = prev.filter((i) => {
-          const existingId = i._id || i.id;
-          return existingId !== itemId;
-        });
+        const updated = prev.filter((i) => { const existingId = i._id || i.id; return existingId !== itemId; });
         localStorage.setItem("obisco_wishlist", JSON.stringify(updated));
         return updated;
       }
@@ -331,20 +197,10 @@ const App = () => {
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
     setSearchQuery("");
-    setTimeout(() => {
-      document
-        .getElementById("products")
-        ?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    setTimeout(() => { document.getElementById("products")?.scrollIntoView({ behavior: "smooth" }); }, 100);
   };
 
-  const sharedProps = {
-    addToCart,
-    addToWishlist,
-    isWishlisted,
-    searchQuery,
-    setSearchQuery,
-  };
+  const sharedProps = { addToCart, addToWishlist, isWishlisted, searchQuery, setSearchQuery };
 
   return (
     <>
@@ -388,58 +244,34 @@ const App = () => {
       {activeDepartment === "fashion" && <FashionPage {...sharedProps} />}
       {activeDepartment === "lifestyle" && <LifestylePage {...sharedProps} />}
 
-      <Footer setPrivacyOpen={setPrivacyOpen} setTermsOpen={setTermsOpen} />
+      {/* ✅ Pass refund and shipping setters to Footer */}
+      <Footer
+        setPrivacyOpen={setPrivacyOpen}
+        setTermsOpen={setTermsOpen}
+        setRefundOpen={setRefundOpen}
+        setShippingOpen={setShippingOpen}
+      />
 
-      <CartSidebar
-        cartOpen={cartOpen}
-        setCartOpen={setCartOpen}
-        cartItems={cartItems}
-        removeFromCart={removeFromCart}
-        increaseQty={increaseQty}
-        decreaseQty={decreaseQty}
-        setCartItems={setCartItems}
-      />
-      <WishlistSidebar
-        wishlistOpen={wishlistOpen}
-        setWishlistOpen={setWishlistOpen}
-        wishlist={wishlist}
-        addToCart={addToCart}
-        addToWishlist={addToWishlist}
-      />
-      <OrderHistory
-        orderHistoryOpen={orderHistoryOpen}
-        setOrderHistoryOpen={setOrderHistoryOpen}
-      />
+      <CartSidebar cartOpen={cartOpen} setCartOpen={setCartOpen} cartItems={cartItems} removeFromCart={removeFromCart} increaseQty={increaseQty} decreaseQty={decreaseQty} setCartItems={setCartItems} />
+      <WishlistSidebar wishlistOpen={wishlistOpen} setWishlistOpen={setWishlistOpen} wishlist={wishlist} addToCart={addToCart} addToWishlist={addToWishlist} />
+      <OrderHistory orderHistoryOpen={orderHistoryOpen} setOrderHistoryOpen={setOrderHistoryOpen} />
       <AuthModal authOpen={authOpen} setAuthOpen={setAuthOpen} />
       <TrackOrder trackOpen={trackOpen} setTrackOpen={setTrackOpen} />
       <AdminDashboard adminOpen={adminOpen} setAdminOpen={setAdminOpen} />
       <ChatBot />
-      <RegisterBusiness
-        registerBizOpen={registerBizOpen}
-        setRegisterBizOpen={setRegisterBizOpen}
-      />
+      <RegisterBusiness registerBizOpen={registerBizOpen} setRegisterBizOpen={setRegisterBizOpen} />
       <CookieBanner />
       <PrivacyPolicy open={privacyOpen} setOpen={setPrivacyOpen} />
       <TermsConditions open={termsOpen} setOpen={setTermsOpen} />
-      {showVTU && <VTUPage onClose={() => setShowVTU(false)} />}
-      <ProfilePage
-        profileOpen={profileOpen}
-        setProfileOpen={setProfileOpen}
-        wishlist={wishlist}
-      />
-      {sellerLoginOpen && (
-        <SellerLogin
-          onClose={() => setSellerLoginOpen(false)}
-          onLoginSuccess={() => {
-            setSellerLoginOpen(false);
-            setSellerDashboardOpen(true);
-          }}
-        />
-      )}
-      {sellerDashboardOpen && (
-        <SellerDashboard onClose={() => setSellerDashboardOpen(false)} />
-      )}
 
+      {/* ✅ New Policy Modals */}
+      <RefundPolicy open={refundOpen} setOpen={setRefundOpen} />
+      <ShippingPolicy open={shippingOpen} setOpen={setShippingOpen} />
+
+      {showVTU && <VTUPage onClose={() => setShowVTU(false)} />}
+      <ProfilePage profileOpen={profileOpen} setProfileOpen={setProfileOpen} wishlist={wishlist} />
+      {sellerLoginOpen && <SellerLogin onClose={() => setSellerLoginOpen(false)} onLoginSuccess={() => { setSellerLoginOpen(false); setSellerDashboardOpen(true); }} />}
+      {sellerDashboardOpen && <SellerDashboard onClose={() => setSellerDashboardOpen(false)} />}
       <UpdateNotification />
     </>
   );
