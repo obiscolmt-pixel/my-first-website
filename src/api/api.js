@@ -210,3 +210,26 @@ export const verifyAdminPassword = async (password) => {
   })
   return res.json()
 }
+
+
+// ─── WALLET ─────────────────────────────────────────
+export const getWallet = async () => {
+  const token = localStorage.getItem('token')
+  const res = await fetch(`${BASE_URL}/wallet`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  return res.json()
+}
+
+export const fundWallet = async ({ amount, email }) => {
+  const token = localStorage.getItem('token')
+  const res = await fetch(`${BASE_URL}/wallet/fund`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ amount, email }),
+  })
+  return res.json()
+}

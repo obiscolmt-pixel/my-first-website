@@ -11,6 +11,8 @@ const CartSidebar = ({
   increaseQty,
   decreaseQty,
   setCartItems,
+  walletBalance = 0,
+  onWalletUpdated,
 }) => {
   const [checkout, setCheckout] = useState(false);
   const [form, setForm] = useState({
@@ -69,8 +71,9 @@ const CartSidebar = ({
     return true;
   };
 
-  const createOrder = async (paid = false) => {
+  const createOrder = async (paid = false, method = null) => {
     const user = JSON.parse(localStorage.getItem("user"));
+    const resolvedMethod = method || paymentMethod;
     const res = await placeOrder({
       userId: user?._id || user?.id || null,
       items: cartItems.map((item) => ({
@@ -87,7 +90,7 @@ const CartSidebar = ({
       promoCode: promoResult?.code || null,
       discount: discountAmount || 0,
       paymentStatus: paid ? "paid" : "unpaid",
-      paymentMethod: paid ? "paystack" : "bank_transfer",
+      paymentMethod: resolvedMethod,
     });
     return res;
   };
@@ -95,7 +98,7 @@ const CartSidebar = ({
   const onPaystackSuccess = async (response) => {
     setLoading(true);
     try {
-      const res = await createOrder(true);
+      const res = await createOrder(true, "paystack");
       if (res.orderId) {
         if (promoResult?.code) await usePromo(promoResult.code);
         setTotalAmountSnapshot(finalAmount);
@@ -107,7 +110,7 @@ const CartSidebar = ({
       } else {
         alert(res.message || "Order failed after payment. Contact support with ref: " + response.reference);
       }
-    } catch (err) {
+    } catch {
       alert("Payment successful but order failed. Contact support with ref: " + response.reference);
     } finally {
       setLoading(false);
@@ -116,7 +119,6 @@ const CartSidebar = ({
 
   const handlePaystackPayment = () => {
     if (!validateForm()) return;
-
     const handler = window.PaystackPop.setup({
       key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
       email: form.email,
@@ -140,11 +142,15 @@ const CartSidebar = ({
     handler.openIframe();
   };
 
-  const handleBankTransferOrder = async () => {
+  const handleWalletPayment = async () => {
     if (!validateForm()) return;
+    if (walletBalance < finalAmount) {
+      alert(`Insufficient wallet balance. Your balance is ₦${walletBalance.toLocaleString()}. Please fund your wallet first.`);
+      return;
+    }
     setLoading(true);
     try {
-      const res = await createOrder(false);
+      const res = await createOrder(true, "wallet");
       if (res.orderId) {
         if (promoResult?.code) await usePromo(promoResult.code);
         setTotalAmountSnapshot(finalAmount);
@@ -153,10 +159,11 @@ const CartSidebar = ({
         setCartItems([]);
         setPromoResult(null);
         setPromoCode("");
+        if (onWalletUpdated) onWalletUpdated();
       } else {
         alert(res.message || "Something went wrong. Please try again.");
       }
-    } catch (err) {
+    } catch {
       alert("Failed to place order. Please check your connection.");
     } finally {
       setLoading(false);
@@ -179,7 +186,10 @@ const CartSidebar = ({
         <div className="bg-black/60 fixed w-full h-screen z-[60] top-0 left-0" onClick={handleClose} />
       )}
 
-      <div className={cartOpen ? "fixed top-0 right-0 w-full sm:w-[420px] h-screen bg-white z-[70] duration-300 flex flex-col" : "fixed top-0 right-[-100%] w-full sm:w-[420px] h-screen bg-white z-[70] duration-300 flex flex-col"}>
+      <div className={cartOpen
+        ? "fixed top-0 right-0 w-full sm:w-[420px] h-screen bg-white z-[70] duration-300 flex flex-col"
+        : "fixed top-0 right-[-100%] w-full sm:w-[420px] h-screen bg-white z-[70] duration-300 flex flex-col"
+      }>
 
         {/* Header */}
         <div className="flex justify-between items-center px-4 sm:px-6 py-4 border-b shrink-0">
@@ -197,7 +207,7 @@ const CartSidebar = ({
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
 
-          {/* Order Success */}
+          {/* ── ORDER SUCCESS ── */}
           {orderPlaced ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-2">
               <p className="text-5xl sm:text-6xl mb-4">🎉</p>
@@ -219,29 +229,17 @@ const CartSidebar = ({
                 </p>
               )}
 
-              {paymentMethod === "paystack" ? (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 w-full text-left mb-3">
-                  <p className="text-sm font-bold text-green-600 mb-1">✅ Payment Successful!</p>
-                  <p className="text-xs text-green-500">Your payment was confirmed. We'll process your order shortly.</p>
-                </div>
-              ) : (
-                <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 w-full text-left mb-3">
-                  <p className="text-sm font-bold text-orange-600 mb-2">💳 Complete Your Payment</p>
-                  <p className="text-xs text-orange-600 mb-3">
-                    Transfer <span className="font-black text-orange-500">₦{totalAmountSnapshot.toLocaleString()}</span> to:
-                  </p>
-                  <div className="bg-white rounded-lg p-3 mb-2 border border-orange-100">
-                    <p className="text-xs font-bold text-orange-500 uppercase">Fidelity Bank</p>
-                    <p className="text-lg sm:text-xl font-black tracking-widest text-gray-800">6315564573</p>
-                    <p className="text-xs text-gray-500">Ariogba Patrick Obinna</p>
-                  </div>
-                  <div className="bg-white rounded-lg p-3 border border-green-100">
-                    <p className="text-xs font-bold text-green-500 uppercase">OPay</p>
-                    <p className="text-lg sm:text-xl font-black tracking-widest text-gray-800">9049863067</p>
-                    <p className="text-xs text-gray-500">Ariogba Patrick Obinna</p>
-                  </div>
-                </div>
-              )}
+              {/* Payment success message */}
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 w-full text-left mb-3">
+                <p className="text-sm font-bold text-green-600 mb-1">
+                  {paymentMethod === "wallet" ? "💰 Paid with Wallet ✅" : "💳 Payment Successful ✅"}
+                </p>
+                <p className="text-xs text-green-500">
+                  {paymentMethod === "wallet"
+                    ? `₦${totalAmountSnapshot.toLocaleString()} deducted from your wallet. We'll process your order shortly.`
+                    : "Your card payment was confirmed. We'll process your order shortly."}
+                </p>
+              </div>
 
               <button
                 onClick={() => {
@@ -253,7 +251,7 @@ const CartSidebar = ({
                     `📱 Phone: ${form.phone}\n` +
                     `📍 Address: ${form.address}, ${form.city}, ${form.state}\n` +
                     `💰 Total: ₦${totalAmountSnapshot.toLocaleString()}\n` +
-                    `💳 Payment: ${paymentMethod === "paystack" ? "Paid via Paystack ✅" : "Bank Transfer (pending)"}\n\n` +
+                    `💳 Payment: ${paymentMethod === "wallet" ? "Wallet ✅" : "Paystack Card ✅"}\n\n` +
                     `Thank you! 🙏`;
                   window.open(`https://wa.me/2349049863067?text=${encodeURIComponent(message)}`, "_blank");
                 }}
@@ -347,36 +345,75 @@ const CartSidebar = ({
               {/* Payment Method */}
               <div>
                 <p className="font-bold text-gray-700 mb-3 text-sm">💳 Payment Method</p>
-                <div className="flex gap-2 mb-4">
+                <div className="flex flex-col gap-2 mb-3">
+
+                  {/* Paystack */}
                   <button
                     onClick={() => setPaymentMethod("paystack")}
-                    className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition ${paymentMethod === "paystack" ? "bg-orange-500 text-white border-orange-500" : "border-gray-300 text-gray-500"}`}
+                    className={`w-full py-3 px-4 rounded-xl text-sm font-bold border-2 transition flex items-center justify-between ${
+                      paymentMethod === "paystack"
+                        ? "bg-orange-500 text-white border-orange-500"
+                        : "border-gray-200 text-gray-600 hover:border-orange-300 bg-white"
+                    }`}
                   >
-                    💳 Pay with Card
+                    <span className="flex items-center gap-2">
+                      <span className="text-base">💳</span>
+                      <span>Pay with Card</span>
+                    </span>
+                    <span className={`text-xs font-normal ${paymentMethod === "paystack" ? "text-orange-100" : "text-gray-400"}`}>
+                      Visa • Verve • Mastercard
+                    </span>
                   </button>
+
+                  {/* Wallet */}
                   <button
-                    onClick={() => setPaymentMethod("bank_transfer")}
-                    className={`flex-1 py-2.5 rounded-xl text-sm font-bold border transition ${paymentMethod === "bank_transfer" ? "bg-orange-500 text-white border-orange-500" : "border-gray-300 text-gray-500"}`}
+                    onClick={() => setPaymentMethod("wallet")}
+                    className={`w-full py-3 px-4 rounded-xl text-sm font-bold border-2 transition flex items-center justify-between ${
+                      paymentMethod === "wallet"
+                        ? "bg-orange-500 text-white border-orange-500"
+                        : "border-gray-200 text-gray-600 hover:border-orange-300 bg-white"
+                    }`}
                   >
-                    🏦 Bank Transfer
+                    <span className="flex items-center gap-2">
+                      <span className="text-base">💰</span>
+                      <span>Pay with Wallet</span>
+                    </span>
+                    <span className={`text-xs font-semibold ${paymentMethod === "wallet" ? "text-orange-100" : "text-gray-500"}`}>
+                      ₦{walletBalance.toLocaleString()} available
+                    </span>
                   </button>
                 </div>
 
-                {paymentMethod === "bank_transfer" && (
-                  <div>
-                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 sm:p-4 mb-3">
-                      <p className="text-xs font-bold text-orange-500 uppercase">Fidelity Bank</p>
-                      <p className="text-xl font-black tracking-widest text-gray-800">6315564573</p>
-                      <p className="text-xs text-gray-500">Ariogba Patrick Obinna</p>
-                    </div>
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-3 sm:p-4 mb-3">
-                      <p className="text-xs font-bold text-green-500 uppercase">OPay</p>
-                      <p className="text-xl font-black tracking-widest text-gray-800">9049863067</p>
-                      <p className="text-xs text-gray-500">Ariogba Patrick Obinna</p>
-                    </div>
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3">
-                      <p className="text-xs text-yellow-700 font-semibold">💡 Transfer ₦{finalAmount.toLocaleString()} to any account above</p>
-                    </div>
+                {/* Wallet balance feedback */}
+                {paymentMethod === "wallet" && (
+                  <div className={`rounded-xl p-3 border ${
+                    walletBalance >= finalAmount
+                      ? "bg-green-50 border-green-200"
+                      : "bg-red-50 border-red-200"
+                  }`}>
+                    {walletBalance >= finalAmount ? (
+                      <p className="text-xs font-semibold text-green-700">
+                        ✅ You have sufficient balance to complete this order
+                      </p>
+                    ) : (
+                      <div>
+                        <p className="text-xs font-semibold text-red-600 mb-1">
+                          ❌ Insufficient wallet balance
+                        </p>
+                        <p className="text-xs text-red-500">
+                          You need ₦{(finalAmount - walletBalance).toLocaleString()} more. Fund your wallet and try again.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Paystack note */}
+                {paymentMethod === "paystack" && (
+                  <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
+                    <p className="text-xs text-blue-600 font-medium">
+                      🔒 Secured by Paystack — your card details are never stored
+                    </p>
                   </div>
                 )}
               </div>
@@ -389,7 +426,9 @@ const CartSidebar = ({
                   <BsFillCartFill size={50} className="text-gray-200 mb-4" />
                   <p className="text-gray-500 text-base sm:text-lg font-semibold">Your cart is empty</p>
                   <p className="text-gray-400 text-xs sm:text-sm mt-1">Add some products to get started!</p>
-                  <button onClick={handleClose} className="mt-6 bg-orange-500 text-white px-6 py-2.5 rounded-full hover:bg-orange-600 transition text-sm font-semibold">Continue Shopping</button>
+                  <button onClick={handleClose} className="mt-6 bg-orange-500 text-white px-6 py-2.5 rounded-full hover:bg-orange-600 transition text-sm font-semibold">
+                    Continue Shopping
+                  </button>
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">
@@ -437,7 +476,13 @@ const CartSidebar = ({
 
             <div className="flex flex-col gap-2">
               {checkout && (
-                <button onClick={() => setCheckout(false)} disabled={loading} className="w-full border border-orange-500 text-orange-500 font-bold py-2.5 rounded-full transition hover:bg-orange-50 text-sm disabled:opacity-50">← Back</button>
+                <button
+                  onClick={() => setCheckout(false)}
+                  disabled={loading}
+                  className="w-full border border-orange-500 text-orange-500 font-bold py-2.5 rounded-full transition hover:bg-orange-50 text-sm disabled:opacity-50"
+                >
+                  ← Back
+                </button>
               )}
 
               {checkout ? (
@@ -447,25 +492,26 @@ const CartSidebar = ({
                     disabled={loading}
                     className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold py-3 rounded-full transition text-sm flex items-center justify-center gap-2"
                   >
-                    {loading ? (
-                      <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Processing...</>
-                    ) : (
-                      `💳 Pay ₦${finalAmount.toLocaleString()} with Paystack`
-                    )}
+                    {loading
+                      ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Processing...</>
+                      : `💳 Pay ₦${finalAmount.toLocaleString()} with Card`}
                   </button>
                 ) : (
                   <button
-                    onClick={handleBankTransferOrder}
-                    disabled={loading}
+                    onClick={handleWalletPayment}
+                    disabled={loading || walletBalance < finalAmount}
                     className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold py-3 rounded-full transition text-sm flex items-center justify-center gap-2"
                   >
-                    {loading ? (
-                      <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Placing Order...</>
-                    ) : "Place Order 🎉"}
+                    {loading
+                      ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Processing...</>
+                      : `💰 Pay ₦${finalAmount.toLocaleString()} with Wallet`}
                   </button>
                 )
               ) : (
-                <button onClick={() => setCheckout(true)} className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 sm:py-3 rounded-full transition text-sm sm:text-base">
+                <button
+                  onClick={() => setCheckout(true)}
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 sm:py-3 rounded-full transition text-sm sm:text-base"
+                >
                   Checkout →
                 </button>
               )}
