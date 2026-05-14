@@ -20,6 +20,7 @@ import PrivacyPolicy from "./component/PrivacyPolicy";
 import TermsConditions from "./component/TermsConditions";
 import ProfilePage from "./component/ProfilePage";
 import VTUPage from "./component/VTUPage";
+import WalletPage from "./component/WalletPage";
 import { messaging, getToken } from "./firebase";
 import SellerLogin from "./component/SellerLogin";
 import SellerDashboard from "./component/SellerDashboard";
@@ -27,6 +28,7 @@ import UpdateNotification from "./component/UpdateNotification";
 import RefundPolicy from "./component/RefundPolicy";
 import ShippingPolicy from "./component/ShippingPolicy";
 import { getWallet } from "./api/api.js";
+
 
 // ── Onboarding Component ──
 const Onboarding = ({ onDone }) => {
