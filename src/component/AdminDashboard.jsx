@@ -248,6 +248,19 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
     }
   };
 
+  const handleToggleHotDeal = async (id, currentHotDeal) => {
+    const res = await updateProduct(id, { hotDeal: !currentHotDeal });
+    if (res.product) {
+      setProducts((prev) =>
+        prev.map((p) =>
+          p._id === id ? { ...p, hotDeal: !currentHotDeal } : p,
+        ),
+      );
+    } else {
+      alert("Failed to update hot deal status");
+    }
+  };
+
   const handleCreatePromo = async () => {
     if (!promoForm.code || !promoForm.value) {
       alert("Please fill in Code and Value.");
@@ -1101,6 +1114,23 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                               {product.featured
                                 ? "⭐ Featured"
                                 : "☆ Set Featured"}
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleToggleHotDeal(
+                                  product._id,
+                                  product.hotDeal,
+                                )
+                              }
+                              className={`w-full mt-1 text-xs font-bold py-1.5 rounded-full transition ${
+                                product.hotDeal
+                                  ? "bg-red-100 text-red-500 hover:bg-red-200"
+                                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                              }`}
+                            >
+                              {product.hotDeal
+                                ? "🔥 Hot Deal"
+                                : "🔥 Set Hot Deal"}
                             </button>
                           </div>
                         </div>

@@ -21,8 +21,11 @@ import {
   FaStore,
 } from "react-icons/fa";
 import { fetchProducts } from "../api/api.js";
+import { FaHome } from "react-icons/fa";
 
 const DEPARTMENTS = [
+  { key: "home", label: "Home", icon: <FaHome size={14} /> },
+
   { key: "gadgets", label: "Gadgets", icon: <FaMobileAlt size={14} /> },
   { key: "fashion", label: "Fashion", icon: <FaTshirt size={14} /> },
   { key: "lifestyle", label: "Lifestyle", icon: <FaStar size={14} /> },
@@ -45,8 +48,8 @@ const Navbar = ({
   setShowVTU,
   setProfileOpen,
   setSellerLoginOpen,
-  setWalletOpen,      // ← new
-  walletBalance = 0,  // ← new
+  setWalletOpen, // ← new
+  walletBalance = 0, // ← new
 }) => {
   const [nav, setNav] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -124,7 +127,9 @@ const Navbar = ({
       setActiveDepartment(item.department);
     }
     setTimeout(() => {
-      document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+      document
+        .getElementById("products")
+        ?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
 
@@ -164,7 +169,10 @@ const Navbar = ({
           </div>
 
           {/* Search — desktop */}
-          <div className="hidden md:block relative w-[300px] lg:w-[500px]" ref={searchRef}>
+          <div
+            className="hidden md:block relative w-[300px] lg:w-[500px]"
+            ref={searchRef}
+          >
             <div className="flex items-center bg-gray-100 rounded-full px-4">
               <AiOutlineSearch size={22} className="text-gray-400" />
               <input
@@ -179,14 +187,18 @@ const Navbar = ({
                 <AiOutlineClose
                   size={18}
                   className="cursor-pointer text-gray-400 hover:text-black"
-                  onClick={() => { setSearchQuery(""); setShowSuggestions(false); }}
+                  onClick={() => {
+                    setSearchQuery("");
+                    setShowSuggestions(false);
+                  }}
                 />
               )}
             </div>
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute top-12 left-0 right-0 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden">
                 <p className="text-xs text-gray-400 px-4 py-2 border-b">
-                  {suggestions.length} result{suggestions.length !== 1 ? "s" : ""} found
+                  {suggestions.length} result
+                  {suggestions.length !== 1 ? "s" : ""} found
                 </p>
                 {suggestions.map((item) => (
                   <div
@@ -194,29 +206,43 @@ const Navbar = ({
                     onClick={() => handleSelectSuggestion(item)}
                     className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 cursor-pointer transition border-b last:border-0"
                   >
-                    <img src={item.image} alt={item.name} className="w-10 h-10 object-cover rounded-lg shrink-0" />
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-10 h-10 object-cover rounded-lg shrink-0"
+                    />
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm text-gray-800 truncate">{item.name}</p>
+                      <p className="font-bold text-sm text-gray-800 truncate">
+                        {item.name}
+                      </p>
                       <div className="flex items-center gap-1">
-                        <p className="text-xs text-orange-500 capitalize">{item.category}</p>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
-                          item.department === "fashion"
-                            ? "bg-pink-100 text-pink-500"
-                            : item.department === "lifestyle"
-                              ? "bg-purple-100 text-purple-500"
-                              : "bg-blue-100 text-blue-500"
-                        }`}>
+                        <p className="text-xs text-orange-500 capitalize">
+                          {item.category}
+                        </p>
+                        <span
+                          className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
+                            item.department === "fashion"
+                              ? "bg-pink-100 text-pink-500"
+                              : item.department === "lifestyle"
+                                ? "bg-purple-100 text-purple-500"
+                                : "bg-blue-100 text-blue-500"
+                          }`}
+                        >
                           {item.department || "gadgets"}
                         </span>
                       </div>
                     </div>
-                    <p className="text-xs font-bold text-orange-500 shrink-0">₦{item.amount.toLocaleString()}</p>
+                    <p className="text-xs font-bold text-orange-500 shrink-0">
+                      ₦{item.amount.toLocaleString()}
+                    </p>
                   </div>
                 ))}
                 <div
                   onClick={() => {
                     setShowSuggestions(false);
-                    document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+                    document
+                      .getElementById("products")
+                      ?.scrollIntoView({ behavior: "smooth" });
                   }}
                   className="px-4 py-2.5 text-center text-sm text-orange-500 font-bold hover:bg-orange-50 cursor-pointer transition"
                 >
@@ -249,7 +275,9 @@ const Navbar = ({
             {/* Account */}
             <div className="relative">
               <button
-                onClick={() => user ? setProfileOpen(true) : setAuthOpen(true)}
+                onClick={() =>
+                  user ? setProfileOpen(true) : setAuthOpen(true)
+                }
                 className="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-black rounded-full px-3 py-2 transition text-sm"
               >
                 <FaUser size={12} />
@@ -259,30 +287,55 @@ const Navbar = ({
               </button>
               {showUserMenu && user && (
                 <>
-                  <div className="fixed inset-0 z-10" onClick={() => setShowUserMenu(false)} />
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setShowUserMenu(false)}
+                  />
                   <div className="absolute right-0 top-12 bg-white rounded-2xl shadow-xl border border-gray-100 z-20 w-52 overflow-hidden">
                     <div className="px-4 py-3 border-b bg-orange-50">
-                      <p className="font-bold text-gray-800 text-sm">{user.fullName}</p>
-                      <p className="text-gray-500 text-xs truncate">{user.email}</p>
+                      <p className="font-bold text-gray-800 text-sm">
+                        {user.fullName}
+                      </p>
+                      <p className="text-gray-500 text-xs truncate">
+                        {user.email}
+                      </p>
                     </div>
                     <ul className="py-1">
                       <li
-                        onClick={() => { setTrackOpen(true); setShowUserMenu(false); }}
+                        onClick={() => {
+                          setTrackOpen(true);
+                          setShowUserMenu(false);
+                        }}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition"
                       >
-                        <TbTruckDelivery size={18} className="text-orange-500" /> Track Order
+                        <TbTruckDelivery
+                          size={18}
+                          className="text-orange-500"
+                        />{" "}
+                        Track Order
                       </li>
                       <li
-                        onClick={() => { setWishlistOpen(true); setShowUserMenu(false); }}
+                        onClick={() => {
+                          setWishlistOpen(true);
+                          setShowUserMenu(false);
+                        }}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition"
                       >
-                        <MdFavorite size={18} className="text-orange-500" /> Wishlist
+                        <MdFavorite size={18} className="text-orange-500" />{" "}
+                        Wishlist
                       </li>
                       <li
-                        onClick={() => { setOrderHistoryOpen(true); setShowUserMenu(false); }}
+                        onClick={() => {
+                          setOrderHistoryOpen(true);
+                          setShowUserMenu(false);
+                        }}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer transition"
                       >
-                        <TbTruckDelivery size={18} className="text-orange-500" /> My Orders
+                        <TbTruckDelivery
+                          size={18}
+                          className="text-orange-500"
+                        />{" "}
+                        My Orders
                       </li>
                     </ul>
                     <div className="border-t px-3 py-2">
@@ -381,7 +434,10 @@ const Navbar = ({
               <AiOutlineClose
                 size={18}
                 className="cursor-pointer text-gray-400"
-                onClick={() => { setSearchQuery(""); setShowSuggestions(false); }}
+                onClick={() => {
+                  setSearchQuery("");
+                  setShowSuggestions(false);
+                }}
               />
             )}
           </div>
@@ -390,22 +446,37 @@ const Navbar = ({
               {suggestions.map((item) => (
                 <div
                   key={item._id}
-                  onClick={() => { handleSelectSuggestion(item); setSearchOpen(false); }}
+                  onClick={() => {
+                    handleSelectSuggestion(item);
+                    setSearchOpen(false);
+                  }}
                   className="flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 cursor-pointer transition border-b last:border-0"
                 >
-                  <img src={item.image} alt={item.name} className="w-10 h-10 object-cover rounded-lg shrink-0" />
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-10 h-10 object-cover rounded-lg shrink-0"
+                  />
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm text-gray-800 truncate">{item.name}</p>
-                    <p className="text-xs text-orange-500 capitalize">{item.category}</p>
+                    <p className="font-bold text-sm text-gray-800 truncate">
+                      {item.name}
+                    </p>
+                    <p className="text-xs text-orange-500 capitalize">
+                      {item.category}
+                    </p>
                   </div>
-                  <p className="text-xs font-bold text-orange-500 shrink-0">₦{item.amount.toLocaleString()}</p>
+                  <p className="text-xs font-bold text-orange-500 shrink-0">
+                    ₦{item.amount.toLocaleString()}
+                  </p>
                 </div>
               ))}
               <div
                 onClick={() => {
                   setShowSuggestions(false);
                   setSearchOpen(false);
-                  document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+                  document
+                    .getElementById("products")
+                    ?.scrollIntoView({ behavior: "smooth" });
                 }}
                 className="px-4 py-2.5 text-center text-sm text-orange-500 font-bold hover:bg-orange-50 cursor-pointer"
               >
@@ -425,24 +496,39 @@ const Navbar = ({
       )}
 
       {/* Side Drawer */}
-      <div className={
-        nav
-          ? "bg-white fixed top-0 left-0 w-[280px] sm:w-[300px] h-screen z-[80] duration-300 flex flex-col"
-          : "bg-white fixed top-0 left-[-100%] w-[280px] sm:w-[300px] h-screen z-[80] duration-300 flex flex-col"
-      }>
+      <div
+        className={
+          nav
+            ? "bg-white fixed top-0 left-0 w-[280px] sm:w-[300px] h-screen z-[80] duration-300 flex flex-col"
+            : "bg-white fixed top-0 left-[-100%] w-[280px] sm:w-[300px] h-screen z-[80] duration-300 flex flex-col"
+        }
+      >
         <div className="flex items-center justify-between px-2 border-b">
-          <img src="/obisco-logo-v2.png" alt="Obisco Store" className="h-20 w-auto object-contain" />
-          <AiOutlineClose onClick={() => setNav(false)} size={22} className="cursor-pointer text-gray-500 hover:text-black" />
+          <img
+            src="/obisco-logo-v2.png"
+            alt="Obisco Store"
+            className="h-20 w-auto object-contain"
+          />
+          <AiOutlineClose
+            onClick={() => setNav(false)}
+            size={22}
+            className="cursor-pointer text-gray-500 hover:text-black"
+          />
         </div>
 
         {user && (
           <div
             className="px-4 py-2 border-b bg-orange-50 cursor-pointer hover:bg-orange-100 transition"
-            onClick={() => { setProfileOpen(true); setNav(false); }}
+            onClick={() => {
+              setProfileOpen(true);
+              setNav(false);
+            }}
           >
             <p className="font-bold text-gray-800 text-sm">{user.fullName}</p>
             <p className="text-gray-500 text-xs truncate">{user.email}</p>
-            <p className="text-orange-500 text-xs font-semibold mt-0.5">View Profile →</p>
+            <p className="text-orange-500 text-xs font-semibold mt-0.5">
+              View Profile →
+            </p>
           </div>
         )}
 
@@ -456,16 +542,22 @@ const Navbar = ({
               <FaWallet size={16} className="text-white" />
               <div>
                 <p className="text-white text-xs font-semibold">My Wallet</p>
-                <p className="text-orange-100 text-xs">Tap to fund or view transactions</p>
+                <p className="text-orange-100 text-xs">
+                  Tap to fund or view transactions
+                </p>
               </div>
             </div>
-            <p className="text-white font-black text-base">₦{walletBalance.toLocaleString()}</p>
+            <p className="text-white font-black text-base">
+              ₦{walletBalance.toLocaleString()}
+            </p>
           </div>
         )}
 
         {/* Department switcher in drawer */}
         <div className="px-4 py-2 border-b">
-          <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-2">Departments</p>
+          <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-2">
+            Departments
+          </p>
           <div className="flex flex-col gap-1">
             {DEPARTMENTS.map((dept) => (
               <button
@@ -498,24 +590,30 @@ const Navbar = ({
             </button>
           ) : (
             <button
-              onClick={() => { setAuthOpen(true); setNav(false); }}
+              onClick={() => {
+                setAuthOpen(true);
+                setNav(false);
+              }}
               className="flex-1 flex items-center justify-center gap-2 bg-gray-100 rounded-full py-2 text-sm font-semibold hover:bg-gray-200 transition"
             >
               <FaUser size={14} /> Sign In
             </button>
           )}
           <button
-            onClick={() => { setCartOpen(true); setNav(false); }}
+            onClick={() => {
+              setCartOpen(true);
+              setNav(false);
+            }}
             className="flex-1 flex items-center justify-center gap-2 bg-orange-500 text-white rounded-full py-2 text-sm font-semibold hover:bg-orange-600 transition"
           >
             <BsFillCartFill size={14} /> Cart{" "}
-            {cartItems.length > 0 && `(${cartItems.reduce((acc, i) => acc + i.quantity, 0)})`}
+            {cartItems.length > 0 &&
+              `(${cartItems.reduce((acc, i) => acc + i.quantity, 0)})`}
           </button>
         </div>
 
         <nav className="flex-1 overflow-y-auto">
           <ul className="flex flex-col p-4 text-gray-800">
-
             {/* Install App */}
             {showInstall && (
               <li
@@ -524,7 +622,9 @@ const Navbar = ({
               >
                 <span className="mr-4 text-2xl">📲</span>
                 <div>
-                  <p className="text-orange-500 font-bold text-base">Install App</p>
+                  <p className="text-orange-500 font-bold text-base">
+                    Install App
+                  </p>
                   <p className="text-xs text-gray-400">Shop D Go</p>
                 </div>
               </li>
@@ -532,7 +632,10 @@ const Navbar = ({
 
             {/* Pay Bills */}
             <li
-              onClick={() => { setShowVTU(true); setNav(false); }}
+              onClick={() => {
+                setShowVTU(true);
+                setNav(false);
+              }}
               className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
             >
               <FaBolt size={22} className="mr-4 text-orange-500" /> Pay Bills
@@ -553,19 +656,30 @@ const Navbar = ({
             </li>
 
             <li
-              onClick={() => { setTrackOpen(true); setNav(false); }}
+              onClick={() => {
+                setTrackOpen(true);
+                setNav(false);
+              }}
               className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
             >
-              <TbTruckDelivery size={22} className="mr-4 text-orange-500" /> Track Order
+              <TbTruckDelivery size={22} className="mr-4 text-orange-500" />{" "}
+              Track Order
             </li>
             <li
-              onClick={() => { setOrderHistoryOpen(true); setNav(false); }}
+              onClick={() => {
+                setOrderHistoryOpen(true);
+                setNav(false);
+              }}
               className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
             >
-              <TbTruckDelivery size={22} className="mr-4 text-orange-500" /> My Orders
+              <TbTruckDelivery size={22} className="mr-4 text-orange-500" /> My
+              Orders
             </li>
             <li
-              onClick={() => { setWishlistOpen(true); setNav(false); }}
+              onClick={() => {
+                setWishlistOpen(true);
+                setNav(false);
+              }}
               className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
             >
               <MdFavorite size={22} className="mr-4 text-orange-500" /> Wishlist
@@ -576,31 +690,49 @@ const Navbar = ({
               )}
             </li>
             <li
-              onClick={() => { alert("🛠️ Support — Coming Soon!"); setNav(false); }}
+              onClick={() => {
+                alert("🛠️ Support — Coming Soon!");
+                setNav(false);
+              }}
               className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
             >
               <MdHelp size={22} className="mr-4 text-orange-500" /> Support
             </li>
             <li
-              onClick={() => { alert("🏷️ Deals & Offers — Coming Soon!"); setNav(false); }}
+              onClick={() => {
+                alert("🏷️ Deals & Offers — Coming Soon!");
+                setNav(false);
+              }}
               className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
             >
-              <AiFillTag size={22} className="mr-4 text-orange-500" /> Deals & Offers
+              <AiFillTag size={22} className="mr-4 text-orange-500" /> Deals &
+              Offers
             </li>
             <li
-              onClick={() => { alert("👥 Refer a Friend — Coming Soon!"); setNav(false); }}
+              onClick={() => {
+                alert("👥 Refer a Friend — Coming Soon!");
+                setNav(false);
+              }}
               className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
             >
-              <FaUserFriends size={22} className="mr-4 text-orange-500" /> Refer a Friend
+              <FaUserFriends size={22} className="mr-4 text-orange-500" /> Refer
+              a Friend
             </li>
             <li
-              onClick={() => { setSellerLoginOpen(true); setNav(false); }}
+              onClick={() => {
+                setSellerLoginOpen(true);
+                setNav(false);
+              }}
               className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
             >
-              <FaStore size={22} className="mr-4 text-orange-500" /> Seller Dashboard
+              <FaStore size={22} className="mr-4 text-orange-500" /> Seller
+              Dashboard
             </li>
             <li
-              onClick={() => { setAdminOpen(true); setNav(false); }}
+              onClick={() => {
+                setAdminOpen(true);
+                setNav(false);
+              }}
               className="text-lg py-3 flex items-center cursor-pointer hover:text-orange-500 transition"
             >
               <AiFillTag size={22} className="mr-4 text-orange-500" /> ⚙️ Admin
@@ -609,7 +741,9 @@ const Navbar = ({
         </nav>
 
         <div className="p-4 border-t">
-          <p className="text-xs text-gray-400 text-center">© 2026 OBISCO STORE</p>
+          <p className="text-xs text-gray-400 text-center">
+            © 2026 OBISCO STORE
+          </p>
         </div>
       </div>
     </>

@@ -28,6 +28,7 @@ import UpdateNotification from "./component/UpdateNotification";
 import RefundPolicy from "./component/RefundPolicy";
 import ShippingPolicy from "./component/ShippingPolicy";
 import { getWallet } from "./api/api.js";
+import HomePage from "./component/HomePage";
 
 // ── Onboarding Component ──
 const Onboarding = ({ onDone }) => {
@@ -160,7 +161,7 @@ const App = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [activeDepartment, setActiveDepartment] = useState("gadgets");
+  const [activeDepartment, setActiveDepartment] = useState("home");
   const [cartItems, setCartItems] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
@@ -216,6 +217,7 @@ const App = () => {
   // Pull to Refresh
   useEffect(() => {
     let startY = 0;
+    let startX = 0;
     let isPulling = false;
     const handleTouchStart = (e) => {
       startY = e.touches[0].clientY;
@@ -403,6 +405,16 @@ const App = () => {
         setWalletOpen={setWalletOpen}
         walletBalance={walletBalance}
       />
+      {activeDepartment === "home" && (
+        <HomePage
+          addToCart={addToCart}
+          addToWishlist={addToWishlist}
+          isWishlisted={isWishlisted}
+          setActiveDepartment={setActiveDepartment}
+          setShowVTU={setShowVTU}
+          setWalletOpen={setWalletOpen}
+        />
+      )}
 
       {activeDepartment === "gadgets" && (
         <>
