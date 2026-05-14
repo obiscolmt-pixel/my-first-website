@@ -34,48 +34,46 @@ export default function WalletPage({ onClose }) {
     }
   }
 
-  const handleFundWallet = async () => {
-    const amount = Number(fundAmount)
-    if (!amount || amount < 100) return setError('Minimum funding amount is ₦100')
-    if (!user?.email) return setError('Please log in to fund your wallet')
+   const handleFundWallet = async () => {
+  const amount = Number(fundAmount)
+  if (!amount || amount < 100) return setError('Minimum funding amount is ₦100')
+  if (!user?.email) return setError('Please log in to fund your wallet')
 
-    setFunding(true)
-    setError('')
+  setFunding(true)
+  setError('')
 
-    try {
-      const data = await fundWallet({ amount, email: user.email })
+  try {
+    const data = await fundWallet({ amount, email: user.email })
 
-      if (!data?.data?.authorization_url) {
-        setError('Could not initialize payment. Please try again.')
-        setFunding(false)
-        return
-      }
-
-      // Open Paystack via popup
-      const handler = window.PaystackPop.setup({
-        key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
-        email: user.email,
-        amount: amount * 100,
-        currency: 'NGN',
-        ref: data.data.reference,
-        callback: async function () {
-          // Webhook will credit the wallet — just refresh after a short delay
-          setTimeout(async () => {
-            await fetchWallet()
-            setFundAmount('')
-            setFunding(false)
-          }, 3000)
-        },
-        onClose: function () {
-          setFunding(false)
-        },
-      })
-      handler.openIframe()
-    } catch {
-      setError('Payment initialization failed. Please try again.')
+    if (!data?.data?.reference) {
+      setError('Could not initialize payment. Please try again.')
       setFunding(false)
+      return
     }
+
+    const handler = window.PaystackPop.setup({
+      key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+      email: user.email,
+      amount: amount * 100,
+      currency: 'NGN',
+      ref: data.data.reference,
+      callback: async function () {
+        setTimeout(async () => {
+          await fetchWallet()
+          setFundAmount('')
+          setFunding(false)
+        }, 3000)
+      },
+      onClose: function () {
+        setFunding(false)
+      },
+    })
+    handler.openIframe()
+  } catch {
+    setError('Payment initialization failed. Please try again.')
+    setFunding(false)
   }
+}
 
   const formatDate = (dateStr) => {
     const d = new Date(dateStr)
