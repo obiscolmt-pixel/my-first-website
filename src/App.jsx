@@ -20,7 +20,7 @@ import PrivacyPolicy from "./component/PrivacyPolicy";
 import TermsConditions from "./component/TermsConditions";
 import ProfilePage from "./component/ProfilePage";
 import VTUPage from "./component/VTUPage";
-import WalletPage from "./component/WalletPage";
+import WalletPage from "./component/WalletPage.jsx";
 import { messaging, getToken } from "./firebase";
 import SellerLogin from "./component/SellerLogin";
 import SellerDashboard from "./component/SellerDashboard";
