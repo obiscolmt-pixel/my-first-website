@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "./component/Navbar";
-import Hero from "./component/Hero";
-import Headlinecards from "./component/Headlinecards";
 import Products from "./component/Products";
-import Category from "./component/category";
 import Footer from "./component/Footer";
 import CartSidebar from "./component/cartSidebar";
 import AuthModal from "./component/AuthModal";
@@ -417,19 +414,12 @@ const App = () => {
       )}
 
       {activeDepartment === "gadgets" && (
-        <>
-          <Hero />
-          <Headlinecards onCategoryClick={handleCategoryClick} />
-          <Products
-            searchQuery={searchQuery}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            addToCart={addToCart}
-            addToWishlist={addToWishlist}
-            isWishlisted={isWishlisted}
-          />
-          <Category onCategoryClick={handleCategoryClick} />
-        </>
+        <Products
+          searchQuery={searchQuery}
+          addToCart={addToCart}
+          addToWishlist={addToWishlist}
+          isWishlisted={isWishlisted}
+        />
       )}
 
       {activeDepartment === "fashion" && <FashionPage {...sharedProps} />}
