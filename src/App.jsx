@@ -29,7 +29,6 @@ import RefundPolicy from "./component/RefundPolicy";
 import ShippingPolicy from "./component/ShippingPolicy";
 import { getWallet } from "./api/api.js";
 
-
 // ── Onboarding Component ──
 const Onboarding = ({ onDone }) => {
   const [step, setStep] = useState(0);
@@ -220,11 +219,15 @@ const App = () => {
     let isPulling = false;
     const handleTouchStart = (e) => {
       startY = e.touches[0].clientY;
+      startX = e.touches[0].clientX;
     };
     const handleTouchMove = (e) => {
       const currentY = e.touches[0].clientY;
-      const diff = currentY - startY;
-      if (diff > 100 && window.scrollY === 0) {
+      const currentX = e.touches[0].clientX;
+      const diffY = currentY - startY;
+      const diffX = Math.abs(currentX - startX);
+      // Only trigger if pulling down more than 150px AND mostly vertical movement
+      if (diffY > 150 && diffX < 30 && window.scrollY === 0) {
         isPulling = true;
       }
     };
