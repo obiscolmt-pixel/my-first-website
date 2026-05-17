@@ -313,6 +313,9 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
                   <input
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && handleForgotPassword()
+                    }
                     placeholder="Email Address"
                     type="email"
                     className="border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full"
@@ -362,6 +365,15 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
                     onChange={(e) =>
                       setResetCode(e.target.value.replace(/\D/g, ""))
                     }
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        if (resetCode.length !== 6) {
+                          alert("Please enter the complete 6-digit code.");
+                          return;
+                        }
+                        setResetStep(3);
+                      }
+                    }}
                     placeholder="000000"
                     type="text"
                     maxLength={6}
@@ -411,6 +423,7 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
                   <input
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
+                     onKeyDown={(e) => e.key === 'Enter' && handleResetPassword()}
                     placeholder="New Password"
                     type="password"
                     className="border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full"
@@ -418,6 +431,7 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
                   <input
                     value={confirmNewPassword}
                     onChange={(e) => setConfirmNewPassword(e.target.value)}
+                     onKeyDown={(e) => e.key === 'Enter' && handleResetPassword()}
                     placeholder="Confirm New Password"
                     type="password"
                     className="border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full"
@@ -497,6 +511,7 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
                       name="fullName"
                       value={form.fullName}
                       onChange={handleChange}
+                      onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                       placeholder="Full Name"
                       className="border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full"
                     />
@@ -504,6 +519,7 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
                       name="phone"
                       value={form.phone}
                       onChange={handleChange}
+                      onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                       placeholder="Phone Number"
                       type="tel"
                       className="border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full"
@@ -516,6 +532,7 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
                   name="email"
                   value={form.email}
                   onChange={handleChange}
+                  onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                   placeholder="Email Address"
                   type="email"
                   className="border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full"
@@ -524,6 +541,7 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
                   name="password"
                   value={form.password}
                   onChange={handleChange}
+                  onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                   placeholder="Password"
                   type="password"
                   className="border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full"
@@ -535,6 +553,7 @@ const AuthModal = ({ authOpen, setAuthOpen }) => {
                     name="confirmPassword"
                     value={form.confirmPassword}
                     onChange={handleChange}
+                    onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                     placeholder="Confirm Password"
                     type="password"
                     className="border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 w-full"

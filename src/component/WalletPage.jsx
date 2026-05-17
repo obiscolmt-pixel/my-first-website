@@ -147,6 +147,7 @@ export default function WalletPage({ onClose }) {
                     setFundAmount(e.target.value);
                     setError("");
                   }}
+                   onKeyDown={(e) => e.key === 'Enter' && handleFundWallet()}
                   placeholder="Enter amount (min ₦100)"
                   className="w-full border border-gray-300 rounded-xl p-3 text-sm focus:outline-none focus:border-orange-500 mb-3"
                 />
