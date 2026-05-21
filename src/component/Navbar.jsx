@@ -570,37 +570,37 @@ const Navbar = ({
           </div>
         )}
 
-        <div className="flex gap-2 px-4 py-3 border-b">
-          {user ? (
-            <button
-              onClick={handleSignOut}
-              className="flex-1 flex items-center justify-center gap-2 bg-red-50 text-red-500 rounded-full py-2 text-sm font-semibold hover:bg-red-100 transition"
-            >
-              <FaSignOutAlt size={14} /> Sign Out
-            </button>
-          ) : (
-            <button
-              onClick={() => {
-                setAuthOpen(true);
-                setNav(false);
-              }}
-              className="flex-1 flex items-center justify-center gap-2 bg-gray-100 rounded-full py-2 text-sm font-semibold hover:bg-gray-200 transition"
-            >
-              <FaUser size={14} /> Sign In
-            </button>
-          )}
-          <button
-            onClick={() => {
-              setCartOpen(true);
-              setNav(false);
-            }}
-            className="flex-1 flex items-center justify-center gap-2 bg-orange-500 text-white rounded-full py-2 text-sm font-semibold hover:bg-orange-600 transition"
-          >
-            <BsFillCartFill size={14} /> Cart{" "}
-            {cartItems.length > 0 &&
-              `(${cartItems.reduce((acc, i) => acc + i.quantity, 0)})`}
-          </button>
-        </div>
+        <div className="flex gap-2 px-4 py-2 border-b">
+  {user ? (
+    <button
+      onClick={handleSignOut}
+      className="flex-1 flex items-center justify-center gap-1.5 bg-red-50 text-red-500 rounded-full py-1.5 text-xs font-semibold hover:bg-red-100 transition"
+    >
+      <FaSignOutAlt size={11} /> Logout
+    </button>
+  ) : (
+    <button
+      onClick={() => {
+        setAuthOpen(true);
+        setNav(false);
+      }}
+      className="flex-1 flex items-center justify-center gap-1.5 bg-gray-100 rounded-full py-1.5 text-xs font-semibold hover:bg-gray-200 transition"
+    >
+      <FaUser size={11} /> Login
+    </button>
+  )}
+  <button
+    onClick={() => {
+      setCartOpen(true);
+      setNav(false);
+    }}
+    className="flex-1 flex items-center justify-center gap-1.5 bg-orange-500 text-white rounded-full py-1.5 text-xs font-semibold hover:bg-orange-600 transition"
+  >
+    <BsFillCartFill size={11} /> Cart{" "}
+    {cartItems.length > 0 &&
+      `(${cartItems.reduce((acc, i) => acc + i.quantity, 0)})`}
+  </button>
+</div>
 
         <nav className="flex-1 overflow-y-auto">
           <ul className="flex flex-col p-4 text-gray-800">
