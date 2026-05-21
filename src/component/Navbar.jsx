@@ -570,33 +570,6 @@ const Navbar = ({
           </div>
         )}
 
-        {/* Department switcher in drawer */}
-        <div className="px-4 py-2 border-b">
-          <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-2">
-            Departments
-          </p>
-          <div className="flex flex-col gap-1">
-            {DEPARTMENTS.map((dept) => (
-              <button
-                key={dept.key}
-                onClick={() => {
-                  setActiveDepartment(dept.key);
-                  setSearchQuery("");
-                  setNav(false);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition ${
-                  activeDepartment === dept.key
-                    ? "bg-orange-500 text-white"
-                    : "text-gray-700 hover:bg-orange-50 hover:text-orange-500"
-                }`}
-              >
-                {dept.icon} {dept.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
         <div className="flex gap-2 px-4 py-3 border-b">
           {user ? (
             <button
@@ -658,6 +631,43 @@ const Navbar = ({
               <FaBolt size={22} className="mr-4 text-orange-500" /> Pay Bills
             </li>
 
+
+            <li
+              onClick={() => {
+                setActiveDepartment("gadgets");
+                setSearchQuery("");
+                setNav(false);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
+            >
+              <FaMobileAlt size={22} className="mr-4 text-orange-500" /> Gadgets
+            </li>
+
+            <li
+              onClick={() => {
+                setActiveDepartment("fashion");
+                setSearchQuery("");
+                setNav(false);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
+            >
+              <FaTshirt size={22} className="mr-4 text-orange-500" /> Fashion
+            </li>
+
+            <li
+              onClick={() => {
+                setActiveDepartment("lifestyle");
+                setSearchQuery("");
+                setNav(false);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
+            >
+              <FaStar size={22} className="mr-4 text-orange-500" /> Lifestyle
+            </li>
+
             {/* obisco library */}
             <li
               onClick={() => {
@@ -666,7 +676,7 @@ const Navbar = ({
               }}
               className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
             >
-              <span className="mr-4 text-[22px]">📚</span> OBISCO LIBRARY
+              <span className="mr-4 text-[22px]">📚</span>Obisco Library
             </li>
 
             {/* Wallet */}
