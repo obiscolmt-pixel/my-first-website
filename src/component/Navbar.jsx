@@ -658,6 +658,17 @@ const Navbar = ({
               <FaBolt size={22} className="mr-4 text-orange-500" /> Pay Bills
             </li>
 
+            {/* obisco library */}
+            <li
+              onClick={() => {
+                window.open("https://obisco-library.netlify.app", "_blank");
+                setNav(false);
+              }}
+              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
+            >
+              <span className="mr-4 text-[22px]">📚</span> OBISCO LIBRARY
+            </li>
+
             {/* Wallet */}
             <li
               onClick={handleWalletClick}
