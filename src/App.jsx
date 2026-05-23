@@ -26,6 +26,7 @@ import RefundPolicy from "./component/RefundPolicy";
 import ShippingPolicy from "./component/ShippingPolicy";
 import { getWallet } from "./api/api.js";
 import HomePage from "./component/HomePage";
+import DeleteAccount from './component/DeleteAccount'
 
 // ── Onboarding Component ──
 const Onboarding = ({ onDone }) => {
@@ -377,6 +378,11 @@ const App = () => {
     searchQuery,
     setSearchQuery,
   };
+
+  // Handle delete account page
+if (window.location.pathname === '/delete-account') {
+  return <DeleteAccount />
+}
 
   return (
     <>
