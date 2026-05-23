@@ -383,6 +383,9 @@ const App = () => {
 if (window.location.pathname === '/delete-account') {
   return <DeleteAccount />
 }
+if (window.location.pathname === '/privacy-policy') {
+  return <PrivacyPolicy open={true} setOpen={() => {}} />
+}
 
   return (
     <>
