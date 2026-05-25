@@ -35,27 +35,53 @@ const CABLE_PROVIDERS = [
 ];
 
 const HOT_PLAN_CODES = [
-  "mtn-5.5gb-2-1500",
-  "mtn-1gb-350",
-  "mtn-11gb-3500",
-  "mtn-20-5000",
-  "mtn-230mb-200",
-  "mtn-7gb-3000",
-  "mtn-3.5gb-1-1000",
-  "mtn-4gb-2-1200",
-  "mtn-7gb-1800",
-  "mtn-3.2gb-1000",
-  "airtel-500mb-200",
-  "airtel-1gb-300",
-  "airtel-2gb-1000",
-  "airtel-10gb-2000",
-  "airtel-20gb-3000",
-  "glo-1gb-300",
-  "glo-2gb-500",
-  "glo-10gb-2500",
-  "etisalat-1gb-300",
-  "etisalat-2gb-500",
-];
+  // ── MTN Hot Plans ──
+  "mtn-5.5gb-2-1500",    // 5.5GB 2 Days - ₦1,500
+  "mtn-1gb-350",          // 1GB 1 Day - ₦500
+  "mtn-11gb-3500",        // 11GB 7 Days - ₦3,500
+  "mtn-20-5000",          // 20GB Weekly - ₦5,000
+  "mtn-230mb-200",        // 230MB 1 Day - ₦200
+  "mtn-7gb-3000",         // 6GB 7 Days - ₦2,500
+  "mtn-3.5gb-1-1000",     // 3.5GB 1 Day - ₦1,000
+  "mtn-4gb-2-1200",       // 4GB 2 Days - ₦1,200
+  "mtn-7gb-1800",         // 7GB 2 Days - ₦1,800
+  "mtn-3.2gb-1000",       // 3.2GB 2 Days - ₦1,000
+
+  // ── Airtel Hot Plans ──
+  "airt-1500-2",          // 5GB Binge 2 Days - ₦1,500
+  "airt-200",             // 230MB Daily - ₦200
+  "airt-1000-2",          // 3.2GB Binge 2 Days - ₦1,000
+  "airt-3000-7",          // 10GB Weekly 7 Days - ₦3,000
+  "airt-5000-7",          // 18GB Weekly 7 Days - ₦5,000
+  "airt-750-2",           // 2GB Binge 2 Days - ₦750
+  "airt-800-7",           // 1GB Weekly 7 Days - ₦800
+  "airt-300-1",           // 300MB Daily - ₦300
+  "airt-2500-7",          // 6GB Weekly 7 Days - ₦2,500
+  "airt-350-500",         // 500MB 2 Days - ₦350
+
+  // ── Glo Hot Plans ──
+  "glo-350-special-1day", // 1GB 1 Day - ₦350
+  "glo-1000mb-300-oneoff",// 1GB 1 Day - ₦300
+  "glo-500mb-200-oneoff", // 500MB 1 Day - ₦200
+  "glo-600-special-2days",// 1.55GB 2 Days - ₦600
+  "glo-1000-special-2days",// 3.1GB 2 Days - ₦1,000
+  "glo-special-1500",     // 4GB 7 Days - ₦1,500
+  "glo-2000-7days",       // 6.5GB 7 Days - ₦2,000
+  "glo-5000-7days",       // 22GB 7 Days - ₦5,000
+  "glo-youtube-250",      // 1GB 1 Day Youtube - ₦250
+  "glo-youtube-600",      // 3GB 2 Days Youtube - ₦600
+  "glo-dg-295",           // 1GB 3 Days - ₦295
+  "glo-dg-890",           // 3GB 3 Days - ₦890
+
+  // ── 9mobile Hot Plans ──
+  "eti-150",              // 150MB + 100MB Night 1 Day - ₦150
+  "eti-500",              // 650MB 3 Days - ₦500
+  "eti-1000",             // 2GB 30 Days - ₦1,000
+  "eti-1200",             // 2.3GB 30 Days - ₦1,200
+  "eti-2000",             // 4.5GB 30 Days - ₦2,000
+  "eti-3000",             // 6.2GB 30 Days - ₦3,000
+  "t2-250mb-200",         // 250MB 7 Days - ₦200
+]
 
 const groupPlans = (plans) => {
   const groups = {
