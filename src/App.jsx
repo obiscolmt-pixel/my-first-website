@@ -26,7 +26,7 @@ import RefundPolicy from "./component/RefundPolicy";
 import ShippingPolicy from "./component/ShippingPolicy";
 import { getWallet } from "./api/api.js";
 import HomePage from "./component/HomePage";
-import DeleteAccount from './component/DeleteAccount'
+import DeleteAccount from "./component/DeleteAccount";
 
 // ── Onboarding Component ──
 const Onboarding = ({ onDone }) => {
@@ -380,12 +380,12 @@ const App = () => {
   };
 
   // Handle delete account page
-if (window.location.pathname === '/delete-account') {
-  return <DeleteAccount />
-}
-if (window.location.pathname === '/privacy-policy') {
-  return <PrivacyPolicy open={true} setOpen={() => {}} />
-}
+  if (window.location.pathname === "/delete-account") {
+    return <DeleteAccount />;
+  }
+  if (window.location.pathname === "/privacy-policy") {
+    return <PrivacyPolicy open={true} setOpen={() => {}} />;
+  }
 
   return (
     <>
@@ -479,8 +479,17 @@ if (window.location.pathname === '/privacy-policy') {
       {/* ✅ New Policy Modals */}
       <RefundPolicy open={refundOpen} setOpen={setRefundOpen} />
       <ShippingPolicy open={shippingOpen} setOpen={setShippingOpen} />
-
-      {showVTU && <VTUPage onClose={() => setShowVTU(false)} />}
+      {showVTU && (
+        <VTUPage
+          onClose={() => {
+            setShowVTU(false);
+            document.body.style.overflow = "";
+            document.body.style.position = "";
+            document.body.style.top = "";
+            document.body.style.width = "";
+          }}
+        />
+      )}
       {walletOpen && (
         <WalletPage
           onClose={() => {
