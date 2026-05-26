@@ -1529,60 +1529,167 @@ export default function VTUPage({ onClose }) {
                   </div>
                 </div>
 
-                <div>
-                  <label className="text-sm font-bold text-gray-700 mb-2 block">
-                    Data Plan
-                  </label>
-                  {!dataNetwork ? (
-                    <div className="p-5 border-2 border-dashed border-gray-200 rounded-2xl text-center text-gray-400 text-sm">
-                      Select a network first
-                    </div>
-                  ) : loadingPlans ? (
-                    <div className="p-5 rounded-2xl text-center text-orange-500 text-sm font-bold">
-                      ⏳ Loading plans...
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setShowPlanSheet(true)}
-                      className={`w-full p-4 rounded-2xl border-2 text-left transition-all ${selectedPlan ? "border-orange-500 bg-orange-50" : "border-gray-200 bg-gray-50 hover:border-orange-300"}`}
-                    >
-                      {selectedPlan ? (
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="text-sm font-black text-orange-700 leading-tight">
-                              {selectedPlan.name}
-                            </p>
-                            <p className="text-xs text-orange-400 mt-1">
-                              Tap to change plan
-                            </p>
-                          </div>
-                          <p className="text-lg font-black text-orange-600">
-                            ₦
-                            {Number(
-                              selectedPlan.variation_amount,
-                            ).toLocaleString()}
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="flex justify-between items-center">
-                          <p className="text-sm text-gray-400 font-medium">
-                            Tap to select a plan
-                          </p>
-                          <span className="text-orange-500 text-2xl">›</span>
-                        </div>
+                {/* ── Plan Grid ── */}
+                {dataNetwork && (
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 mb-3 block">
+                      Select Plan
+                    </label>
+
+                    {/* Filter tabs */}
+                    <div className="flex gap-2 overflow-x-auto pb-3 mb-3">
+                      {["Hot", "Daily", "Weekly", "Monthly", "Other"].map(
+                        (f) => (
+                          <button
+                            key={f}
+                            onClick={() => {
+                              setPlanFilter(f);
+                              setSelectedPlan(null);
+                            }}
+                            className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap flex-shrink-0 transition-all ${
+                              planFilter === f
+                                ? f === "Hot"
+                                  ? "bg-red-500 text-white"
+                                  : "bg-orange-500 text-white"
+                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            }`}
+                          >
+                            {f === "Hot" ? "🔥 Hot" : f}
+                          </button>
+                        ),
                       )}
-                    </button>
-                  )}
-                </div>
+                    </div>
+
+                    {loadingPlans ? (
+                      <div className="py-10 text-center text-orange-500 text-sm font-bold">
+                        ⏳ Loading plans...
+                      </div>
+                    ) : (
+                      (() => {
+                        const grouped = groupPlans(dataPlans);
+                        const filteredPlans =
+                          planFilter === "Hot"
+                            ? grouped.Hot
+                            : grouped[planFilter] || [];
+
+                        if (filteredPlans.length === 0) {
+                          return (
+                            <div className="py-10 text-center text-gray-400 text-sm">
+                              {planFilter === "Hot"
+                                ? "No hot plans for this network"
+                                : "No plans in this category"}
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div className="grid grid-cols-3 gap-3">
+                            {filteredPlans.map((plan) => {
+                              const isSelected =
+                                selectedPlan?.variation_code ===
+                                plan.variation_code;
+
+                              // Extract size and duration from plan name
+                              const sizeMatch = plan.name.match(
+                                /(\d+\.?\d*\s?(?:GB|MB|TB))/i,
+                              );
+                              const durationMatch = plan.name.match(
+                                /(\d+\s?(?:day|days|week|weeks|month|months))/i,
+                              );
+                              const size = sizeMatch
+                                ? sizeMatch[1].replace(" ", "")
+                                : plan.name.split(" ")[0];
+                              const duration = durationMatch
+                                ? durationMatch[1]
+                                : "";
+
+                              return (
+                                <button
+                                  key={plan.variation_code}
+                                  onClick={() =>
+                                    setSelectedPlan(isSelected ? null : plan)
+                                  }
+                                  className={`p-3 rounded-2xl border-2 text-center transition-all relative ${
+                                    isSelected
+                                      ? "border-orange-500 bg-orange-50 shadow-md"
+                                      : "border-gray-200 bg-gray-50 hover:border-orange-300 hover:bg-orange-50/50"
+                                  }`}
+                                >
+                                  {isSelected && (
+                                    <div className="absolute top-2 right-2 w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center">
+                                      <span className="text-white text-xs font-black">
+                                        ✓
+                                      </span>
+                                    </div>
+                                  )}
+                                  <p
+                                    className={`text-base leading-tight mb-1 ${isSelected ? "text-orange-600" : "text-gray-800"}`}
+                                  >
+                                    <span className="font-black">
+                                      {size.replace(/[a-zA-Z]+/, "")}
+                                    </span>
+                                    <span className="font-normal text-sm">
+                                      {size.replace(/[0-9.]+/, "")}
+                                    </span>
+                                  </p>
+                                  {duration && (
+                                    <p
+                                      className={`text-xs mb-2 leading-tight ${isSelected ? "text-orange-400" : "text-gray-400"}`}
+                                    >
+                                      {duration}
+                                    </p>
+                                  )}
+                                  <p
+                                    className={`text-sm font-normal ${isSelected ? "text-orange-500" : "text-gray-500"}`}
+                                  >
+                                    ₦
+                                    {Number(
+                                      plan.variation_amount,
+                                    ).toLocaleString()}
+                                  </p>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()
+                    )}
+                  </div>
+                )}
+
+                {!dataNetwork && (
+                  <div className="p-5 border-2 border-dashed border-gray-200 rounded-2xl text-center text-gray-400 text-sm">
+                    Select a network to see plans
+                  </div>
+                )}
+
+                {/* Selected plan summary */}
+                {selectedPlan && (
+                  <div className="p-4 bg-orange-50 border-2 border-orange-200 rounded-2xl flex justify-between items-center">
+                    <div>
+                      <p className="text-sm font-black text-orange-700 leading-tight">
+                        {selectedPlan.name}
+                      </p>
+                      <p className="text-xs text-orange-400 mt-0.5">
+                        Selected plan
+                      </p>
+                    </div>
+                    <p className="text-lg font-black text-orange-600">
+                      ₦{Number(selectedPlan.variation_amount).toLocaleString()}
+                    </p>
+                  </div>
+                )}
 
                 <PaymentToggle
                   amount={Number(selectedPlan?.variation_amount) || 0}
                 />
+
                 {error && (
                   <div className="p-4 bg-red-50 rounded-2xl text-sm text-red-600 font-medium">
                     ❌ {error}
                   </div>
                 )}
+
                 <button
                   onClick={handleData}
                   disabled={loading}
