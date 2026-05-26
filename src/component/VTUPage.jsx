@@ -267,19 +267,12 @@ const SERVICES = [
 ];
 
 // ── Saved Beneficiaries Component ──
-const BeneficiaryList = ({
-  type,
-  currentPhone,
-  onSelect,
-  onDelete,
-  onChange,
-}) => {
-  const [saved, setSaved] = useState([]);
+const BeneficiaryList = ({ type, currentPhone, onSelect, onDelete, onChange }) => {
+  const [saved, setSaved] = useState(() => getSaved(type));
   const [showDropdown, setShowDropdown] = useState(false);
 
-  useEffect(() => {
-    setSaved(getSaved(type));
-  }, [type]);
+  // Refresh saved list whenever type changes or component is told to refresh
+  const refreshSaved = () => setSaved(getSaved(type));
 
   if (saved.length === 0) {
     return (
@@ -295,78 +288,46 @@ const BeneficiaryList = ({
 
   return (
     <div className="relative">
-      {/* Input with dropdown arrow */}
-      <div
-        className={`flex items-center border-2 rounded-2xl bg-gray-50 overflow-hidden transition-all ${showDropdown ? "border-orange-500" : "border-gray-200"}`}
-      >
+      <div className={`flex items-center border-2 rounded-2xl bg-gray-50 overflow-hidden transition-all ${showDropdown ? "border-orange-500" : "border-gray-200"}`}>
         <input
           type="tel"
           value={currentPhone}
-          onChange={(e) => {
-            onChange(e.target.value);
-            setShowDropdown(false);
-          }}
+          onChange={(e) => { onChange(e.target.value); setShowDropdown(false); }}
           placeholder=""
           className="flex-1 p-4 text-sm text-gray-700 bg-transparent focus:outline-none"
         />
         <button
-          onClick={() => setShowDropdown((d) => !d)}
+          onClick={() => { refreshSaved(); setShowDropdown((d) => !d); }}
           className="px-4 py-4 text-gray-400 hover:text-orange-500 transition border-l border-gray-200 flex items-center gap-1"
         >
           <span className="text-xs text-gray-400 hidden sm:block">Recent</span>
-          <span
-            className={`text-lg transition-transform duration-200 ${showDropdown ? "rotate-180" : ""}`}
-          >
-            ▾
-          </span>
+          <span className={`text-lg transition-transform duration-200 ${showDropdown ? "rotate-180" : ""}`}>▾</span>
         </button>
       </div>
 
-      {/* Dropdown list */}
       {showDropdown && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 overflow-hidden">
-          <p className="text-xs font-bold text-gray-400 px-4 pt-3 pb-2 uppercase tracking-widest">
-            Recent Numbers
-          </p>
+          <p className="text-xs font-bold text-gray-400 px-4 pt-3 pb-2 uppercase tracking-widest">Recent Numbers</p>
           {saved.map((b, index) => (
-            <div
-              key={b.phone}
-              className={`flex items-center gap-3 px-4 py-3 hover:bg-orange-50 transition cursor-pointer ${index !== saved.length - 1 ? "border-b border-gray-100" : ""}`}
-            >
-              <button
-                className="flex items-center gap-3 flex-1 text-left"
-                onClick={() => {
-                  onSelect(b);
-                  setShowDropdown(false);
-                }}
-              >
-                <div
-                  className={`w-9 h-9 rounded-full ${networkBg(b.network)} flex items-center justify-center flex-shrink-0`}
-                >
-                  <span
-                    className={`text-xs font-black ${networkText(b.network)}`}
-                  >
-                    {networkLabel(b.network)[0]}
-                  </span>
+            <div key={b.phone} className={`flex items-center gap-3 px-4 py-3 hover:bg-orange-50 transition cursor-pointer ${index !== saved.length - 1 ? "border-b border-gray-100" : ""}`}>
+              <button className="flex items-center gap-3 flex-1 text-left" onClick={() => { onSelect(b); setShowDropdown(false); }}>
+                <div className={`w-9 h-9 rounded-full ${networkBg(b.network)} flex items-center justify-center flex-shrink-0`}>
+                  <span className={`text-xs font-black ${networkText(b.network)}`}>{networkLabel(b.network)[0]}</span>
                 </div>
                 <div>
                   <p className="text-sm font-bold text-gray-800">{b.phone}</p>
-                  <p className="text-xs text-gray-400">
-                    {networkLabel(b.network)}
-                  </p>
+                  <p className="text-xs text-gray-400">{networkLabel(b.network)}</p>
                 </div>
               </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   deleteBeneficiary(type, b.phone);
-                  setSaved(getSaved(type));
+                  refreshSaved();
                   onDelete && onDelete();
                 }}
                 className="w-7 h-7 bg-red-50 text-red-400 rounded-full flex items-center justify-center text-sm font-bold hover:bg-red-100 transition flex-shrink-0"
-              >
-                ×
-              </button>
+              >×</button>
             </div>
           ))}
         </div>
