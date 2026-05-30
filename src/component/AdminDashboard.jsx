@@ -47,6 +47,79 @@ const emptyForm = {
   description: "",
 };
 
+const API_BASE =
+  import.meta.env.VITE_API_URL || "https://obisco-gadgets-backend.onrender.com";
+
+const SMSBroadcast = ({ password }) => {
+  const [smsMessage, setSmsMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const handleSend = async () => {
+    if (!smsMessage.trim()) return alert("Please enter a message");
+    if (smsMessage.length > 160)
+      return alert("SMS must be under 160 characters");
+    if (!window.confirm("Send this SMS to ALL users with phone numbers?"))
+      return;
+    setSending(true);
+    setResult(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/broadcast-sms`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: smsMessage, adminPassword: password }),
+      });
+      const data = await res.json();
+      setResult(data);
+      if (data.message?.includes("sent")) setSmsMessage("");
+    } catch {
+      setResult({ message: "Failed to send SMS" });
+    }
+    setSending(false);
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <textarea
+        value={smsMessage}
+        onChange={(e) => setSmsMessage(e.target.value)}
+        placeholder="e.g Flash Sale! Get 20% off all gadgets today at obisco.store"
+        rows={3}
+        maxLength={160}
+        className="w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 bg-white resize-none"
+      />
+      <div className="flex justify-between items-center">
+        <span
+          className={`text-xs ${smsMessage.length > 140 ? "text-red-500" : "text-gray-400"}`}
+        >
+          {smsMessage.length}/160 characters
+        </span>
+      </div>
+      {result && (
+        <div
+          className={`p-3 rounded-xl text-sm font-medium ${result.message?.includes("Failed") ? "bg-red-50 text-red-600" : "bg-green-50 text-green-700"}`}
+        >
+          {result.message?.includes("Failed") ? "❌" : "✅"} {result.message}
+        </div>
+      )}
+      <button
+        onClick={handleSend}
+        disabled={sending || !smsMessage.trim() || smsMessage.length > 160}
+        className="w-full bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white font-bold py-3 rounded-full transition text-sm flex items-center justify-center gap-2"
+      >
+        {sending ? (
+          <>
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />{" "}
+            Sending SMS...
+          </>
+        ) : (
+          "📱 Send SMS to All Users"
+        )}
+      </button>
+    </div>
+  );
+};
+
 const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
   const [password, setPassword] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
@@ -1681,6 +1754,21 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                         </p>
                       </div>
                     )}
+
+                    {/* ── SMS Broadcast ── */}
+                    <div className="bg-green-50 border border-green-100 rounded-2xl p-4 mb-6">
+                      <h3 className="font-black text-gray-800 mb-1">
+                        📱 SMS Broadcast
+                      </h3>
+                      <p className="text-xs text-gray-400 mb-4">
+                        Send SMS to all users with a phone number (
+                        {customers.length > 0
+                          ? customers.filter((c) => c.phone).length
+                          : "..."}{" "}
+                        users)
+                      </p>
+                      <SMSBroadcast password={password} />
+                    </div>
 
                     {/* Tips */}
                     <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">
