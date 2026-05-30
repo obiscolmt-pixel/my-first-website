@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "store.obisco.twa",
+      "sha256_cert_fingerprints": [
+        "A3:C1:90:88:58:24:5B:EA:20:50:40:91:E7:12:77:F9:C5:19:66:87:4D:8B:81:BC:89:85:4F:1E:AF:37:27:1A"
+      ]
+    }
+  }
+]
