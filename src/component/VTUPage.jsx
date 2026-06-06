@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import ElectricityReceipt from "./ElectricityReceipt";
 
 const API_BASE =
   import.meta.env.VITE_API_URL || "https://obisco-gadgets-backend.onrender.com";
@@ -770,10 +772,11 @@ export default function VTUPage({ onClose }) {
           data.code === "000" ||
           data.response_description === "TRANSACTION SUCCESSFUL"
         ) {
-          const token = data.content?.transactions?.token || "";
+          const token = data.token || data.content?.transactions?.token || "";
+          const units = data.units || "";
           setResult({
             success: true,
-            message: `✅ Electricity payment successful!${token ? ` Token: ${token}` : ""}`,
+            message: `✅ Electricity payment successful!${token ? ` Token: ${token}` : ""}${units ? ` (${units})` : ""}`,
             data,
           });
           setWalletBalance((prev) => prev - amount);
@@ -812,10 +815,11 @@ export default function VTUPage({ onClose }) {
           data.code === "000" ||
           data.response_description === "TRANSACTION SUCCESSFUL"
         ) {
-          const token = data.content?.transactions?.token || "";
+          const token = data.token || data.content?.transactions?.token || "";
+          const units = data.units || "";
           setResult({
             success: true,
-            message: `✅ Electricity payment successful!${token ? ` Token: ${token}` : ""}`,
+            message: `✅ Electricity payment successful!${token ? ` Token: ${token}` : ""}${units ? ` (${units})` : ""}`,
             data,
           });
         } else setError(data.response_description || "Transaction failed.");
@@ -1075,7 +1079,7 @@ export default function VTUPage({ onClose }) {
     </div>
   );
 
-  const SuccessCard = ({ message, transactionId }) => (
+  const SuccessCard = ({ message, transactionId, data }) => (
     <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
       <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center text-4xl mb-6">
         ✅
@@ -1085,10 +1089,25 @@ export default function VTUPage({ onClose }) {
       </h2>
       <p className="text-gray-600 text-sm mb-2 leading-relaxed">{message}</p>
       {transactionId && (
-        <p className="text-xs text-gray-400 mb-8">
+        <p className="text-xs text-gray-400 mb-6">
           Transaction ID: {transactionId}
         </p>
       )}
+
+      {data?.token && (
+        <PDFDownloadLink
+          document={<ElectricityReceipt data={data} />}
+          fileName={`electricity_receipt_${Date.now()}.pdf`}
+          style={{ width: "100%", marginBottom: "12px" }}
+        >
+          {({ loading }) => (
+            <button className="w-full bg-gray-800 text-white py-4 rounded-2xl font-bold text-sm hover:bg-gray-900 transition">
+              {loading ? "⏳ Preparing receipt..." : "📄 Download Receipt"}
+            </button>
+          )}
+        </PDFDownloadLink>
+      )}
+
       <button
         onClick={() => {
           setResult(null);
@@ -1580,6 +1599,7 @@ export default function VTUPage({ onClose }) {
                 transactionId={
                   result.data?.content?.transactions?.transactionId
                 }
+                data={result.data}
               />
             ) : (
               <>
