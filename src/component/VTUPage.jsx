@@ -1603,6 +1603,42 @@ export default function VTUPage({ onClose }) {
               />
             ) : (
               <>
+                {/* Saved Meters */}
+                {getElecBeneficiaries().length > 0 && (
+                  <div>
+                    <label className="text-sm font-bold text-gray-700 mb-2 block">
+                      Saved Meters
+                    </label>
+                    <div className="flex flex-col gap-2">
+                      {getElecBeneficiaries().map((b) => (
+                        <button
+                          key={b.meterNumber}
+                          onClick={() => {
+                            setDisco(b.disco);
+                            setMeterNumber(b.meterNumber);
+                            setMeterType(b.meterType);
+                            setMeterName(b.meterName);
+                          }}
+                          className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-2xl hover:border-orange-500 transition text-left"
+                        >
+                          <div>
+                            <p className="text-sm font-bold text-gray-800">
+                              {b.meterName}
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              {b.meterNumber} • {discoLabel(b.disco)} •{" "}
+                              {b.meterType}
+                            </p>
+                          </div>
+                          <span className="text-orange-500 text-xs font-bold">
+                            Use →
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <label className="text-sm font-bold text-gray-700 mb-2 block">
                     Electricity Provider
@@ -1628,6 +1664,7 @@ export default function VTUPage({ onClose }) {
                     </span>
                   </div>
                 </div>
+
                 <div>
                   <label className="text-sm font-bold text-gray-700 mb-3 block">
                     Meter Type
@@ -1644,6 +1681,7 @@ export default function VTUPage({ onClose }) {
                     ))}
                   </div>
                 </div>
+
                 <div>
                   <label className="text-sm font-bold text-gray-700 mb-2 block">
                     Meter Number
@@ -1673,6 +1711,7 @@ export default function VTUPage({ onClose }) {
                     </div>
                   )}
                 </div>
+
                 <div>
                   <label className="text-sm font-bold text-gray-700 mb-2 block">
                     Amount (₦)
@@ -1696,6 +1735,7 @@ export default function VTUPage({ onClose }) {
                     ))}
                   </div>
                 </div>
+
                 <div>
                   <label className="text-sm font-bold text-gray-700 mb-2 block">
                     Phone Number
@@ -1712,6 +1752,7 @@ export default function VTUPage({ onClose }) {
                     className={inputClass}
                   />
                 </div>
+
                 <PaymentToggle amount={Number(elecAmount) || 0} />
                 {error && (
                   <div className="p-4 bg-red-50 rounded-2xl text-sm text-red-600 font-medium">
