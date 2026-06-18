@@ -183,20 +183,33 @@ const App = () => {
 
   // ── Fetch wallet balance ──
   const refreshWallet = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    try {
-      const data = await getWallet();
-      setWalletBalance(data.balance || 0);
-    } catch {
-      // silent fail — wallet balance is non-critical
+  const token = localStorage.getItem('token')
+  if (!token || token === 'null') return
+  try {
+    const data = await getWallet()
+    if (data.balance !== undefined) {
+      setWalletBalance(data.balance)
     }
-  };
-
+  } catch {
+    // silent fail
+  }
+}
   // Load wallet balance on mount if user is logged in
-  useEffect(() => {
-    refreshWallet();
-  }, []);
+ useEffect(() => {
+  // Delay to ensure localStorage is ready
+  const timer = setTimeout(() => refreshWallet(), 300)
+
+  // Refetch when user comes back to the app
+  const handleFocus = () => refreshWallet()
+  window.addEventListener('focus', handleFocus)
+  window.addEventListener('wallet:updated', handleFocus)
+
+  return () => {
+    clearTimeout(timer)
+    window.removeEventListener('focus', handleFocus)
+    window.removeEventListener('wallet:updated', handleFocus)
+  }
+}, [])
 
   // Re-fetch wallet when auth modal closes (user may have just logged in)
   useEffect(() => {
