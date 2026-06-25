@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   AiOutlineClose,
   AiOutlinePlus,
@@ -116,6 +116,347 @@ const SMSBroadcast = ({ password }) => {
           "📱 Send SMS to All Users"
         )}
       </button>
+    </div>
+  );
+};
+
+// ── WHATSAPP INBOX COMPONENT ──
+const WhatsAppInbox = ({ password }) => {
+  const [conversations, setConversations] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedConv, setSelectedConv] = useState(null);
+  const [replyText, setReplyText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [filter, setFilter] = useState("all"); // all | escalated
+  const messagesEndRef = useRef(null);
+
+  const loadConversations = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/whatsapp/conversations`, {
+        headers: { "x-admin-password": password },
+      });
+      const data = await res.json();
+      setConversations(Array.isArray(data) ? data : []);
+    } catch {
+      setConversations([]);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadConversations();
+    const interval = setInterval(loadConversations, 30000); // auto-refresh every 30s
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [selectedConv]);
+
+  const handleReply = async () => {
+    if (!replyText.trim() || !selectedConv) return;
+    setSending(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/whatsapp/reply`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-password": password,
+        },
+        body: JSON.stringify({
+          phone: selectedConv.customerPhone,
+          message: replyText,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setReplyText("");
+        // Optimistically add message to conversation
+        setSelectedConv((prev) => ({
+          ...prev,
+          messages: [
+            ...prev.messages,
+            {
+              role: "assistant",
+              content: replyText,
+              timestamp: new Date().toISOString(),
+              manual: true,
+            },
+          ],
+        }));
+        // Refresh conversations
+        loadConversations();
+      } else {
+        alert("Failed to send reply");
+      }
+    } catch {
+      alert("Failed to send reply");
+    }
+    setSending(false);
+  };
+
+  const filteredConversations = conversations.filter((c) => {
+    if (filter === "escalated") return c.escalated;
+    return true;
+  });
+
+  const formatTime = (ts) => {
+    if (!ts) return "";
+    const date = new Date(ts);
+    const now = new Date();
+    const diff = now - date;
+    if (diff < 60000) return "Just now";
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+    return date.toLocaleDateString("en-NG", { day: "numeric", month: "short" });
+  };
+
+  const escalatedCount = conversations.filter((c) => c.escalated).length;
+
+  return (
+    <div className="flex h-full" style={{ minHeight: "500px" }}>
+      {/* Conversation List */}
+      <div
+        className={`${selectedConv ? "hidden sm:flex" : "flex"} flex-col w-full sm:w-80 border-r shrink-0`}
+      >
+        {/* Header */}
+        <div className="p-4 border-b">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-black text-gray-800">💬 WhatsApp Inbox</h3>
+            <button
+              onClick={loadConversations}
+              disabled={loading}
+              className="text-orange-500 text-xs font-semibold hover:underline disabled:opacity-50"
+            >
+              {loading ? "..." : "🔄 Refresh"}
+            </button>
+          </div>
+          {/* Stats */}
+          <div className="flex gap-2 mb-3">
+            <div className="flex-1 bg-green-50 rounded-xl p-2 text-center">
+              <p className="text-lg font-black text-green-600">
+                {conversations.length}
+              </p>
+              <p className="text-[10px] text-green-500 font-semibold">Total</p>
+            </div>
+            <div className="flex-1 bg-red-50 rounded-xl p-2 text-center">
+              <p className="text-lg font-black text-red-500">{escalatedCount}</p>
+              <p className="text-[10px] text-red-400 font-semibold">
+                Escalated
+              </p>
+            </div>
+          </div>
+          {/* Filter */}
+          <div className="flex gap-2">
+            {["all", "escalated"].map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`flex-1 py-1.5 rounded-full text-xs font-bold capitalize transition ${
+                  filter === f
+                    ? "bg-orange-500 text-white"
+                    : "bg-gray-100 text-gray-500 hover:bg-orange-50 hover:text-orange-500"
+                }`}
+              >
+                {f === "escalated" ? "🔴 Escalated" : "All Chats"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* List */}
+        <div className="flex-1 overflow-y-auto">
+          {loading && conversations.length === 0 ? (
+            <div className="flex justify-center py-10">
+              <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : filteredConversations.length === 0 ? (
+            <div className="text-center py-10 px-4">
+              <p className="text-4xl mb-3">💬</p>
+              <p className="text-gray-500 text-sm">
+                {filter === "escalated"
+                  ? "No escalated conversations"
+                  : "No conversations yet"}
+              </p>
+            </div>
+          ) : (
+            filteredConversations.map((conv) => {
+              const lastMsg = conv.messages?.[conv.messages.length - 1];
+              const isSelected = selectedConv?.customerPhone === conv.customerPhone;
+              return (
+                <div
+                  key={conv.customerPhone}
+                  onClick={() => setSelectedConv(conv)}
+                  className={`flex items-start gap-3 p-4 border-b cursor-pointer transition ${
+                    isSelected
+                      ? "bg-orange-50 border-l-4 border-l-orange-500"
+                      : conv.escalated
+                        ? "bg-red-50 hover:bg-red-100"
+                        : "hover:bg-gray-50"
+                  }`}
+                >
+                  {/* Avatar */}
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-black text-white text-sm ${
+                      conv.escalated ? "bg-red-400" : "bg-green-500"
+                    }`}
+                  >
+                    {conv.escalated ? "🔴" : "💬"}
+                  </div>
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1">
+                      <p className="font-bold text-sm text-gray-800 truncate">
+                        {conv.customerPhone}
+                      </p>
+                      <p className="text-[10px] text-gray-400 shrink-0">
+                        {formatTime(conv.updatedAt)}
+                      </p>
+                    </div>
+                    <p className="text-xs text-gray-500 truncate mt-0.5">
+                      {lastMsg?.content || "No messages"}
+                    </p>
+                    {conv.escalated && (
+                      <span className="text-[10px] bg-red-100 text-red-500 px-1.5 py-0.5 rounded-full font-semibold mt-1 inline-block">
+                        🔴 Needs attention
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* Chat Window */}
+      {selectedConv ? (
+        <div className="flex flex-col flex-1 min-w-0">
+          {/* Chat Header */}
+          <div className="flex items-center gap-3 p-4 border-b bg-gray-50 shrink-0">
+            <button
+              onClick={() => setSelectedConv(null)}
+              className="sm:hidden text-gray-500 hover:text-gray-700"
+            >
+              ←
+            </button>
+            <div
+              className={`w-9 h-9 rounded-full flex items-center justify-center font-black text-white text-sm shrink-0 ${
+                selectedConv.escalated ? "bg-red-400" : "bg-green-500"
+              }`}
+            >
+              {selectedConv.escalated ? "🔴" : "💬"}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sm text-gray-800">
+                {selectedConv.customerPhone}
+              </p>
+              <p className="text-xs text-gray-400">
+                {selectedConv.messages?.length || 0} messages
+                {selectedConv.escalated && (
+                  <span className="ml-2 text-red-500 font-semibold">
+                    🔴 Escalated
+                  </span>
+                )}
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                const refreshed = conversations.find(
+                  (c) => c.customerPhone === selectedConv.customerPhone,
+                );
+                if (refreshed) setSelectedConv(refreshed);
+              }}
+              className="text-orange-500 text-xs font-semibold hover:underline shrink-0"
+            >
+              🔄
+            </button>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+            {selectedConv.messages?.map((msg, i) => (
+              <div
+                key={i}
+                className={`flex ${msg.role === "user" ? "justify-start" : "justify-end"}`}
+              >
+                <div
+                  className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm ${
+                    msg.role === "user"
+                      ? "bg-gray-100 text-gray-800 rounded-tl-none"
+                      : msg.manual
+                        ? "bg-blue-500 text-white rounded-tr-none"
+                        : "bg-green-500 text-white rounded-tr-none"
+                  }`}
+                >
+                  <p className="leading-relaxed">{msg.content}</p>
+                  <p
+                    className={`text-[10px] mt-1 ${
+                      msg.role === "user" ? "text-gray-400" : "text-white/70"
+                    }`}
+                  >
+                    {msg.role === "user"
+                      ? "Customer"
+                      : msg.manual
+                        ? "You (manual)"
+                        : "AI Bot"}{" "}
+                    · {formatTime(msg.timestamp)}
+                  </p>
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Reply Box */}
+          <div className="p-4 border-t bg-white shrink-0">
+            <div className="flex gap-2">
+              <textarea
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleReply();
+                  }
+                }}
+                placeholder="Type a manual reply... (Enter to send)"
+                rows={2}
+                className="flex-1 border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 resize-none"
+              />
+              <button
+                onClick={handleReply}
+                disabled={sending || !replyText.trim()}
+                className="bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white font-bold px-4 rounded-xl transition flex items-center justify-center"
+              >
+                {sending ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  "Send"
+                )}
+              </button>
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              💡 This sends directly via WhatsApp Cloud API to the customer
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="hidden sm:flex flex-1 items-center justify-center text-center p-8">
+          <div>
+            <p className="text-5xl mb-4">💬</p>
+            <p className="text-gray-500 font-semibold">
+              Select a conversation to view
+            </p>
+            <p className="text-gray-400 text-sm mt-1">
+              {conversations.length} total conversations
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -605,6 +946,7 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                   "notifications",
                   "customers",
                   "sellers",
+                  "whatsapp",
                 ].map((tab) => (
                   <button
                     key={tab}
@@ -627,51 +969,62 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                               ? "🔔 Notifications"
                               : tab === "sellers"
                                 ? "🏪 Sellers"
-                                : "👥 Customers"}
+                                : tab === "whatsapp"
+                                  ? "💬 WhatsApp"
+                                  : "👥 Customers"}
                   </button>
                 ))}
               </div>
 
               {/* ── WALLET BALANCE CARD ── */}
-              <div className="px-4 sm:px-6 py-3 border-b bg-gray-50 shrink-0">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                      <span className="text-xl">💰</span>
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-gray-500 uppercase">
-                        VTpass Wallet
-                      </p>
-                      {walletLoading ? (
-                        <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mt-1" />
-                      ) : walletBalance === null ? (
-                        <p className="text-sm text-red-500 font-bold">
-                          Failed to load
+              {activeTab !== "whatsapp" && (
+                <div className="px-4 sm:px-6 py-3 border-b bg-gray-50 shrink-0">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                        <span className="text-xl">💰</span>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-gray-500 uppercase">
+                          VTpass Wallet
                         </p>
-                      ) : (
-                        <p
-                          className={`text-lg font-black ${walletBalance < 5000 ? "text-red-500" : "text-green-600"}`}
-                        >
-                          ₦{Number(walletBalance).toLocaleString()}
-                          {walletBalance < 5000 && (
-                            <span className="text-xs font-semibold text-red-400 ml-2">
-                              ⚠️ Low balance
-                            </span>
-                          )}
-                        </p>
-                      )}
+                        {walletLoading ? (
+                          <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mt-1" />
+                        ) : walletBalance === null ? (
+                          <p className="text-sm text-red-500 font-bold">
+                            Failed to load
+                          </p>
+                        ) : (
+                          <p
+                            className={`text-lg font-black ${walletBalance < 5000 ? "text-red-500" : "text-green-600"}`}
+                          >
+                            ₦{Number(walletBalance).toLocaleString()}
+                            {walletBalance < 5000 && (
+                              <span className="text-xs font-semibold text-red-400 ml-2">
+                                ⚠️ Low balance
+                              </span>
+                            )}
+                          </p>
+                        )}
+                      </div>
                     </div>
+                    <button
+                      onClick={loadWalletBalance}
+                      disabled={walletLoading}
+                      className="text-orange-500 text-sm font-semibold hover:underline disabled:opacity-50"
+                    >
+                      🔄 Refresh
+                    </button>
                   </div>
-                  <button
-                    onClick={loadWalletBalance}
-                    disabled={walletLoading}
-                    className="text-orange-500 text-sm font-semibold hover:underline disabled:opacity-50"
-                  >
-                    🔄 Refresh
-                  </button>
                 </div>
-              </div>
+              )}
+
+              {/* ── WHATSAPP INBOX TAB ── */}
+              {activeTab === "whatsapp" && (
+                <div className="flex-1 overflow-hidden">
+                  <WhatsAppInbox password={password} />
+                </div>
+              )}
 
               {/* ── ORDERS TAB ── */}
               {activeTab === "orders" && (
@@ -1225,7 +1578,6 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
               {/* ── PROMOS TAB ── */}
               {activeTab === "promos" && (
                 <div className="p-4 sm:p-6">
-                  {/* Create Promo Form */}
                   <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-6">
                     <h3 className="font-black text-gray-800 mb-4">
                       🏷️ Create Promo Code
@@ -1350,11 +1702,8 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                     </button>
                   </div>
 
-                  {/* Promos List */}
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-black text-gray-800">
-                      All Promo Codes
-                    </h3>
+                    <h3 className="font-black text-gray-800">All Promo Codes</h3>
                     <button
                       onClick={loadPromos}
                       className="text-orange-500 text-sm font-semibold hover:underline"
@@ -1370,68 +1719,28 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                   ) : promos.length === 0 ? (
                     <div className="text-center py-10">
                       <p className="text-4xl mb-3">🏷️</p>
-                      <p className="text-gray-500">
-                        No promo codes yet. Create one above!
-                      </p>
+                      <p className="text-gray-500">No promo codes yet. Create one above!</p>
                     </div>
                   ) : (
                     <div className="flex flex-col gap-3">
                       {promos.map((promo) => (
-                        <div
-                          key={promo._id}
-                          className="border rounded-xl p-4 hover:border-orange-200 transition bg-white"
-                        >
+                        <div key={promo._id} className="border rounded-xl p-4 hover:border-orange-200 transition bg-white">
                           <div className="flex justify-between items-start">
                             <div>
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="font-black text-lg text-gray-800 tracking-widest">
-                                  {promo.code}
-                                </span>
-                                <span
-                                  className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
-                                    promo.isActive
-                                      ? "bg-green-100 text-green-600"
-                                      : "bg-red-100 text-red-500"
-                                  }`}
-                                >
+                                <span className="font-black text-lg text-gray-800 tracking-widest">{promo.code}</span>
+                                <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${promo.isActive ? "bg-green-100 text-green-600" : "bg-red-100 text-red-500"}`}>
                                   {promo.isActive ? "Active" : "Inactive"}
                                 </span>
                               </div>
                               <p className="text-sm text-orange-500 font-bold">
-                                {promo.type === "percentage"
-                                  ? `${promo.value}% off`
-                                  : `₦${promo.value.toLocaleString()} off`}
+                                {promo.type === "percentage" ? `${promo.value}% off` : `₦${promo.value.toLocaleString()} off`}
                               </p>
                               <div className="flex flex-wrap gap-3 mt-2">
-                                <span className="text-xs text-gray-400">
-                                  Min Order:{" "}
-                                  <span className="font-semibold text-gray-600">
-                                    ₦{promo.minOrder?.toLocaleString() || "0"}
-                                  </span>
-                                </span>
-                                <span className="text-xs text-gray-400">
-                                  Used:{" "}
-                                  <span className="font-semibold text-gray-600">
-                                    {promo.usedCount || 0}
-                                    {promo.maxUses
-                                      ? `/${promo.maxUses}`
-                                      : ""}{" "}
-                                    times
-                                  </span>
-                                </span>
+                                <span className="text-xs text-gray-400">Min Order: <span className="font-semibold text-gray-600">₦{promo.minOrder?.toLocaleString() || "0"}</span></span>
+                                <span className="text-xs text-gray-400">Used: <span className="font-semibold text-gray-600">{promo.usedCount || 0}{promo.maxUses ? `/${promo.maxUses}` : ""} times</span></span>
                                 {promo.expiresAt && (
-                                  <span className="text-xs text-gray-400">
-                                    Expires:{" "}
-                                    <span className="font-semibold text-gray-600">
-                                      {new Date(
-                                        promo.expiresAt,
-                                      ).toLocaleDateString("en-NG", {
-                                        day: "numeric",
-                                        month: "short",
-                                        year: "numeric",
-                                      })}
-                                    </span>
-                                  </span>
+                                  <span className="text-xs text-gray-400">Expires: <span className="font-semibold text-gray-600">{new Date(promo.expiresAt).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</span></span>
                                 )}
                               </div>
                             </div>
@@ -1440,11 +1749,7 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
                               disabled={deletingPromo === promo._id}
                               className="flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-500 text-xs font-semibold px-3 py-1.5 rounded-full transition shrink-0"
                             >
-                              {deletingPromo === promo._id ? (
-                                <div className="w-3 h-3 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
-                              ) : (
-                                "🗑 Delete"
-                              )}
+                              {deletingPromo === promo._id ? <div className="w-3 h-3 border-2 border-red-400 border-t-transparent rounded-full animate-spin" /> : "🗑 Delete"}
                             </button>
                           </div>
                         </div>
@@ -1458,162 +1763,38 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
               {activeTab === "broadcast" && (
                 <div className="p-4 sm:p-6">
                   <div className="max-w-2xl mx-auto">
-                    {/* Info Banner */}
                     <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-6 flex gap-3">
                       <p className="text-2xl">📢</p>
                       <div>
-                        <p className="font-bold text-blue-700 text-sm">
-                          Broadcast Message
-                        </p>
-                        <p className="text-xs text-blue-500 mt-0.5">
-                          Send an email to ALL registered customers at once. Use
-                          this for promotions, new arrivals or important
-                          announcements.
-                        </p>
+                        <p className="font-bold text-blue-700 text-sm">Broadcast Message</p>
+                        <p className="text-xs text-blue-500 mt-0.5">Send an email to ALL registered customers at once.</p>
                       </div>
                     </div>
-
-                    {/* Broadcast Form */}
                     <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-6">
-                      <h3 className="font-black text-gray-800 mb-4">
-                        ✍️ Compose Message
-                      </h3>
+                      <h3 className="font-black text-gray-800 mb-4">✍️ Compose Message</h3>
                       <div className="flex flex-col gap-3">
                         <div>
-                          <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
-                            Email Subject *
-                          </label>
-                          <input
-                            value={broadcastForm.subject}
-                            onChange={(e) =>
-                              setBroadcastForm({
-                                ...broadcastForm,
-                                subject: e.target.value,
-                              })
-                            }
-                            placeholder="e.g 🔥 Flash Sale — 20% off everything today!"
-                            className="w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white"
-                          />
+                          <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Email Subject *</label>
+                          <input value={broadcastForm.subject} onChange={(e) => setBroadcastForm({ ...broadcastForm, subject: e.target.value })} placeholder="e.g 🔥 Flash Sale — 20% off everything today!" className="w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white" />
                         </div>
                         <div>
-                          <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
-                            Message *
-                          </label>
-                          <textarea
-                            value={broadcastForm.message}
-                            onChange={(e) =>
-                              setBroadcastForm({
-                                ...broadcastForm,
-                                message: e.target.value,
-                              })
-                            }
-                            placeholder={`Hi there! 👋\n\nWe have an exciting announcement for you...\n\nUse promo code OBISCO10 for 10% off your next order!\n\nShop now at obisco.store 🛒`}
-                            rows={8}
-                            className="w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white resize-none"
-                          />
+                          <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">Message *</label>
+                          <textarea value={broadcastForm.message} onChange={(e) => setBroadcastForm({ ...broadcastForm, message: e.target.value })} placeholder={`Hi there! 👋\n\nWe have an exciting announcement...`} rows={8} className="w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white resize-none" />
                         </div>
-
-                        {/* Preview */}
-                        {broadcastForm.message && (
-                          <div className="bg-white border border-gray-200 rounded-xl p-4">
-                            <p className="text-xs font-bold text-gray-400 uppercase mb-2">
-                              📧 Preview
-                            </p>
-                            <p className="text-sm font-bold text-gray-800 mb-2">
-                              {broadcastForm.subject || "No subject"}
-                            </p>
-                            <div className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">
-                              {broadcastForm.message}
-                            </div>
-                          </div>
-                        )}
-
-                        <button
-                          onClick={handleSendBroadcast}
-                          disabled={sendingBroadcast}
-                          className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold py-3 rounded-full transition text-sm flex items-center justify-center gap-2"
-                        >
-                          {sendingBroadcast ? (
-                            <>
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                              Sending to all customers...
-                            </>
-                          ) : (
-                            "📢 Send to All Customers"
-                          )}
+                        <button onClick={handleSendBroadcast} disabled={sendingBroadcast} className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold py-3 rounded-full transition text-sm flex items-center justify-center gap-2">
+                          {sendingBroadcast ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Sending...</> : "📢 Send to All Customers"}
                         </button>
                       </div>
                     </div>
-
-                    {/* Result */}
                     {broadcastResult && (
-                      <div
-                        className={`rounded-2xl p-4 border mb-6 ${
-                          broadcastResult.sent > 0
-                            ? "bg-green-50 border-green-100"
-                            : "bg-red-50 border-red-100"
-                        }`}
-                      >
-                        <p
-                          className={`font-black text-lg mb-2 ${
-                            broadcastResult.sent > 0
-                              ? "text-green-600"
-                              : "text-red-500"
-                          }`}
-                        >
-                          {broadcastResult.sent > 0
-                            ? "✅ Broadcast Sent!"
-                            : "❌ Broadcast Failed"}
-                        </p>
+                      <div className={`rounded-2xl p-4 border mb-6 ${broadcastResult.sent > 0 ? "bg-green-50 border-green-100" : "bg-red-50 border-red-100"}`}>
+                        <p className={`font-black text-lg mb-2 ${broadcastResult.sent > 0 ? "text-green-600" : "text-red-500"}`}>{broadcastResult.sent > 0 ? "✅ Broadcast Sent!" : "❌ Broadcast Failed"}</p>
                         <div className="flex gap-4">
-                          <div className="text-center">
-                            <p className="text-2xl font-black text-green-600">
-                              {broadcastResult.sent || 0}
-                            </p>
-                            <p className="text-xs text-gray-500">Sent</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-2xl font-black text-red-500">
-                              {broadcastResult.failed || 0}
-                            </p>
-                            <p className="text-xs text-gray-500">Failed</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-2xl font-black text-gray-700">
-                              {broadcastResult.total || 0}
-                            </p>
-                            <p className="text-xs text-gray-500">Total</p>
-                          </div>
+                          <div className="text-center"><p className="text-2xl font-black text-green-600">{broadcastResult.sent || 0}</p><p className="text-xs text-gray-500">Sent</p></div>
+                          <div className="text-center"><p className="text-2xl font-black text-red-500">{broadcastResult.failed || 0}</p><p className="text-xs text-gray-500">Failed</p></div>
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">
-                          {broadcastResult.message}
-                        </p>
                       </div>
                     )}
-
-                    {/* Tips */}
-                    <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">
-                      <p className="font-bold text-gray-700 text-sm mb-3">
-                        💡 Broadcast Tips
-                      </p>
-                      <div className="flex flex-col gap-2">
-                        <p className="text-xs text-gray-500">
-                          ✅ Use for flash sales, new arrivals and promo codes
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          ✅ Keep subject short and exciting with emojis
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          ✅ Always include a clear call to action
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          ⚠️ Don't send more than 1-2 emails per week
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          ⚠️ Make sure every message adds value to customers
-                        </p>
-                      </div>
-                    </div>
                   </div>
                 </div>
               )}
@@ -1622,173 +1803,36 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
               {activeTab === "notifications" && (
                 <div className="p-4 sm:p-6">
                   <div className="max-w-2xl mx-auto">
-                    {/* Info Banner */}
                     <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-6 flex gap-3">
                       <p className="text-2xl">🔔</p>
                       <div>
-                        <p className="font-bold text-orange-700 text-sm">
-                          Push Notifications
-                        </p>
-                        <p className="text-xs text-orange-500 mt-0.5">
-                          Send instant push notifications to ALL users and
-                          guests who allowed notifications.
-                        </p>
+                        <p className="font-bold text-orange-700 text-sm">Push Notifications</p>
+                        <p className="text-xs text-orange-500 mt-0.5">Send instant push notifications to ALL users and guests.</p>
                       </div>
                     </div>
-
-                    {/* Form */}
                     <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 mb-6">
-                      <h3 className="font-black text-gray-800 mb-4">
-                        ✍️ Compose Notification
-                      </h3>
+                      <h3 className="font-black text-gray-800 mb-4">✍️ Compose Notification</h3>
                       <div className="flex flex-col gap-3">
-                        <div>
-                          <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
-                            Title *
-                          </label>
-                          <input
-                            value={notifForm.title}
-                            onChange={(e) =>
-                              setNotifForm({
-                                ...notifForm,
-                                title: e.target.value,
-                              })
-                            }
-                            placeholder="e.g 🔥 Flash Sale — Today Only!"
-                            className="w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-gray-500 uppercase mb-1 block">
-                            Message *
-                          </label>
-                          <textarea
-                            value={notifForm.body}
-                            onChange={(e) =>
-                              setNotifForm({
-                                ...notifForm,
-                                body: e.target.value,
-                              })
-                            }
-                            placeholder="e.g Get 20% off all gadgets today. Shop now at obisco.store!"
-                            rows={4}
-                            className="w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white resize-none"
-                          />
-                        </div>
-
-                        {/* Preview */}
-                        {(notifForm.title || notifForm.body) && (
-                          <div className="bg-white border border-gray-200 rounded-xl p-4">
-                            <p className="text-xs font-bold text-gray-400 uppercase mb-3">
-                              📱 Preview
-                            </p>
-                            <div className="bg-gray-900 rounded-2xl p-4 flex gap-3 items-start">
-                              <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center shrink-0">
-                                <span className="text-white text-lg">🛍️</span>
-                              </div>
-                              <div>
-                                <p className="text-white font-bold text-sm">
-                                  {notifForm.title || "Notification Title"}
-                                </p>
-                                <p className="text-gray-400 text-xs mt-0.5">
-                                  {notifForm.body || "Notification message..."}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        <button
-                          onClick={handleSendNotification}
-                          disabled={sendingNotif}
-                          className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold py-3 rounded-full transition text-sm flex items-center justify-center gap-2"
-                        >
-                          {sendingNotif ? (
-                            <>
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                              Sending notifications...
-                            </>
-                          ) : (
-                            "🔔 Send Push Notification"
-                          )}
+                        <input value={notifForm.title} onChange={(e) => setNotifForm({ ...notifForm, title: e.target.value })} placeholder="e.g 🔥 Flash Sale — Today Only!" className="w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white" />
+                        <textarea value={notifForm.body} onChange={(e) => setNotifForm({ ...notifForm, body: e.target.value })} placeholder="e.g Get 20% off all gadgets today. Shop now at obisco.store!" rows={4} className="w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 bg-white resize-none" />
+                        <button onClick={handleSendNotification} disabled={sendingNotif} className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-bold py-3 rounded-full transition text-sm flex items-center justify-center gap-2">
+                          {sendingNotif ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Sending...</> : "🔔 Send Push Notification"}
                         </button>
                       </div>
                     </div>
-
-                    {/* Result */}
                     {notifResult && (
-                      <div
-                        className={`rounded-2xl p-4 border mb-6 ${
-                          notifResult.successCount > 0
-                            ? "bg-green-50 border-green-100"
-                            : "bg-red-50 border-red-100"
-                        }`}
-                      >
-                        <p
-                          className={`font-black text-lg mb-2 ${
-                            notifResult.successCount > 0
-                              ? "text-green-600"
-                              : "text-red-500"
-                          }`}
-                        >
-                          {notifResult.successCount > 0
-                            ? "✅ Notifications Sent!"
-                            : "❌ Send Failed"}
-                        </p>
+                      <div className={`rounded-2xl p-4 border mb-6 ${notifResult.successCount > 0 ? "bg-green-50 border-green-100" : "bg-red-50 border-red-100"}`}>
+                        <p className={`font-black text-lg mb-2 ${notifResult.successCount > 0 ? "text-green-600" : "text-red-500"}`}>{notifResult.successCount > 0 ? "✅ Sent!" : "❌ Failed"}</p>
                         <div className="flex gap-4">
-                          <div className="text-center">
-                            <p className="text-2xl font-black text-green-600">
-                              {notifResult.successCount || 0}
-                            </p>
-                            <p className="text-xs text-gray-500">Delivered</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-2xl font-black text-red-500">
-                              {notifResult.failureCount || 0}
-                            </p>
-                            <p className="text-xs text-gray-500">Failed</p>
-                          </div>
+                          <div className="text-center"><p className="text-2xl font-black text-green-600">{notifResult.successCount || 0}</p><p className="text-xs text-gray-500">Delivered</p></div>
+                          <div className="text-center"><p className="text-2xl font-black text-red-500">{notifResult.failureCount || 0}</p><p className="text-xs text-gray-500">Failed</p></div>
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">
-                          {notifResult.message}
-                        </p>
                       </div>
                     )}
-
-                    {/* ── SMS Broadcast ── */}
                     <div className="bg-green-50 border border-green-100 rounded-2xl p-4 mb-6">
-                      <h3 className="font-black text-gray-800 mb-1">
-                        📱 SMS Broadcast
-                      </h3>
-                      <p className="text-xs text-gray-400 mb-4">
-                        Send SMS to all users with a phone number (
-                        {customers.length > 0
-                          ? customers.filter((c) => c.phone).length
-                          : "..."}{" "}
-                        users)
-                      </p>
+                      <h3 className="font-black text-gray-800 mb-1">📱 SMS Broadcast</h3>
+                      <p className="text-xs text-gray-400 mb-4">Send SMS to all users with a phone number</p>
                       <SMSBroadcast password={password} />
-                    </div>
-
-                    {/* Tips */}
-                    <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4">
-                      <p className="font-bold text-gray-700 text-sm mb-3">
-                        💡 Notification Tips
-                      </p>
-                      <div className="flex flex-col gap-2">
-                        <p className="text-xs text-gray-500">
-                          ✅ Keep titles short and punchy
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          ✅ Use for flash sales, restocks and order updates
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          ✅ Include a clear action in the message
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          ⚠️ Don't send more than 1-2 notifications per day
-                        </p>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -1797,147 +1841,32 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
               {/* ── CUSTOMERS TAB ── */}
               {activeTab === "customers" && (
                 <div className="p-4 sm:p-6">
-                  {/* Stats */}
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-                    <div className="bg-blue-50 text-blue-600 rounded-xl p-4 text-center">
-                      <p className="text-2xl font-black">{customers.length}</p>
-                      <p className="text-xs font-semibold mt-1">
-                        Total Customers
-                      </p>
-                    </div>
-                    <div className="bg-green-50 text-green-600 rounded-xl p-4 text-center">
-                      <p className="text-2xl font-black">
-                        {
-                          customers.filter((c) => {
-                            const date = new Date(c.createdAt);
-                            const now = new Date();
-                            return (
-                              date.getMonth() === now.getMonth() &&
-                              date.getFullYear() === now.getFullYear()
-                            );
-                          }).length
-                        }
-                      </p>
-                      <p className="text-xs font-semibold mt-1">This Month</p>
-                    </div>
-                    <div className="bg-orange-50 text-orange-600 rounded-xl p-4 text-center">
-                      <p className="text-2xl font-black">
-                        {customers.filter((c) => c.isGoogleUser).length}
-                      </p>
-                      <p className="text-xs font-semibold mt-1">
-                        Google Signups
-                      </p>
-                    </div>
+                    <div className="bg-blue-50 text-blue-600 rounded-xl p-4 text-center"><p className="text-2xl font-black">{customers.length}</p><p className="text-xs font-semibold mt-1">Total Customers</p></div>
+                    <div className="bg-green-50 text-green-600 rounded-xl p-4 text-center"><p className="text-2xl font-black">{customers.filter((c) => { const date = new Date(c.createdAt); const now = new Date(); return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear(); }).length}</p><p className="text-xs font-semibold mt-1">This Month</p></div>
+                    <div className="bg-orange-50 text-orange-600 rounded-xl p-4 text-center"><p className="text-2xl font-black">{customers.filter((c) => c.isGoogleUser).length}</p><p className="text-xs font-semibold mt-1">Google Signups</p></div>
                   </div>
-
-                  {/* Search & Refresh */}
                   <div className="flex gap-3 mb-4">
-                    <input
-                      placeholder="Search by name or email..."
-                      value={customerSearch}
-                      onChange={(e) => setCustomerSearch(e.target.value)}
-                      className="flex-1 border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500"
-                    />
-                    <button
-                      onClick={loadCustomers}
-                      className="text-orange-500 text-sm font-semibold hover:underline shrink-0"
-                    >
-                      🔄 Refresh
-                    </button>
+                    <input placeholder="Search by name or email..." value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} className="flex-1 border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500" />
+                    <button onClick={loadCustomers} className="text-orange-500 text-sm font-semibold hover:underline shrink-0">🔄 Refresh</button>
                   </div>
-
                   {customersLoading ? (
-                    <div className="flex justify-center py-10">
-                      <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-                    </div>
-                  ) : customers.length === 0 ? (
-                    <div className="text-center py-10">
-                      <p className="text-4xl mb-3">👥</p>
-                      <p className="text-gray-500">No customers yet</p>
-                    </div>
+                    <div className="flex justify-center py-10"><div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" /></div>
                   ) : (
                     <div className="flex flex-col gap-3">
-                      <p className="text-xs text-gray-400">
-                        Showing{" "}
-                        {
-                          customers.filter(
-                            (c) =>
-                              c.fullName
-                                ?.toLowerCase()
-                                .includes(customerSearch.toLowerCase()) ||
-                              c.email
-                                ?.toLowerCase()
-                                .includes(customerSearch.toLowerCase()),
-                          ).length
-                        }{" "}
-                        of {customers.length} customers
-                      </p>
-                      {customers
-                        .filter(
-                          (c) =>
-                            c.fullName
-                              ?.toLowerCase()
-                              .includes(customerSearch.toLowerCase()) ||
-                            c.email
-                              ?.toLowerCase()
-                              .includes(customerSearch.toLowerCase()),
-                        )
-                        .map((customer) => (
-                          <div
-                            key={customer._id}
-                            className="border rounded-xl p-4 hover:border-orange-200 transition bg-white"
-                          >
-                            <div className="flex items-center gap-3">
-                              {/* Avatar */}
-                              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center shrink-0">
-                                <span className="text-orange-500 font-black text-sm">
-                                  {customer.fullName?.charAt(0).toUpperCase()}
-                                </span>
-                              </div>
-                              {/* Info */}
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <p className="font-bold text-sm text-gray-800 truncate">
-                                    {customer.fullName}
-                                  </p>
-                                  {customer.isGoogleUser && (
-                                    <span className="text-[10px] bg-blue-100 text-blue-500 px-1.5 py-0.5 rounded-full font-semibold shrink-0">
-                                      Google
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-xs text-gray-400 truncate">
-                                  {customer.email}
-                                </p>
-                                {customer.phone && (
-                                  <p className="text-xs text-gray-400">
-                                    {customer.phone}
-                                  </p>
-                                )}
-                              </div>
-                              {/* Date */}
-                              <div className="text-right shrink-0">
-                                <p className="text-xs text-gray-400">
-                                  {new Date(
-                                    customer.createdAt,
-                                  ).toLocaleDateString("en-NG", {
-                                    day: "numeric",
-                                    month: "short",
-                                    year: "numeric",
-                                  })}
-                                </p>
-                                <p className="text-[10px] text-gray-300 mt-0.5">
-                                  {new Date(
-                                    customer.createdAt,
-                                  ).toLocaleTimeString("en-NG", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
-                                </p>
-                              </div>
+                      {customers.filter((c) => c.fullName?.toLowerCase().includes(customerSearch.toLowerCase()) || c.email?.toLowerCase().includes(customerSearch.toLowerCase())).map((customer) => (
+                        <div key={customer._id} className="border rounded-xl p-4 hover:border-orange-200 transition bg-white">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center shrink-0"><span className="text-orange-500 font-black text-sm">{customer.fullName?.charAt(0).toUpperCase()}</span></div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2"><p className="font-bold text-sm text-gray-800 truncate">{customer.fullName}</p>{customer.isGoogleUser && <span className="text-[10px] bg-blue-100 text-blue-500 px-1.5 py-0.5 rounded-full font-semibold shrink-0">Google</span>}</div>
+                              <p className="text-xs text-gray-400 truncate">{customer.email}</p>
+                              {customer.phone && <p className="text-xs text-gray-400">{customer.phone}</p>}
                             </div>
+                            <div className="text-right shrink-0"><p className="text-xs text-gray-400">{new Date(customer.createdAt).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}</p></div>
                           </div>
-                        ))}
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -1946,181 +1875,45 @@ const AdminDashboard = ({ adminOpen, setAdminOpen }) => {
               {/* ── SELLERS TAB ── */}
               {activeTab === "sellers" && (
                 <div className="p-4 sm:p-6">
-                  {/* Stats */}
                   <div className="grid grid-cols-3 gap-3 mb-6">
-                    <div className="bg-yellow-50 text-yellow-600 rounded-xl p-4 text-center">
-                      <p className="text-2xl font-black">
-                        {
-                          sellers.filter((s) => s.sellerStatus === "pending")
-                            .length
-                        }
-                      </p>
-                      <p className="text-xs font-semibold mt-1">Pending</p>
-                    </div>
-                    <div className="bg-green-50 text-green-600 rounded-xl p-4 text-center">
-                      <p className="text-2xl font-black">
-                        {
-                          sellers.filter((s) => s.sellerStatus === "approved")
-                            .length
-                        }
-                      </p>
-                      <p className="text-xs font-semibold mt-1">Approved</p>
-                    </div>
-                    <div className="bg-red-50 text-red-500 rounded-xl p-4 text-center">
-                      <p className="text-2xl font-black">
-                        {
-                          sellers.filter((s) => s.sellerStatus === "rejected")
-                            .length
-                        }
-                      </p>
-                      <p className="text-xs font-semibold mt-1">Rejected</p>
-                    </div>
+                    <div className="bg-yellow-50 text-yellow-600 rounded-xl p-4 text-center"><p className="text-2xl font-black">{sellers.filter((s) => s.sellerStatus === "pending").length}</p><p className="text-xs font-semibold mt-1">Pending</p></div>
+                    <div className="bg-green-50 text-green-600 rounded-xl p-4 text-center"><p className="text-2xl font-black">{sellers.filter((s) => s.sellerStatus === "approved").length}</p><p className="text-xs font-semibold mt-1">Approved</p></div>
+                    <div className="bg-red-50 text-red-500 rounded-xl p-4 text-center"><p className="text-2xl font-black">{sellers.filter((s) => s.sellerStatus === "rejected").length}</p><p className="text-xs font-semibold mt-1">Rejected</p></div>
                   </div>
-
-                  {/* Search & Refresh */}
                   <div className="flex gap-3 mb-4">
-                    <input
-                      placeholder="Search by name or business..."
-                      value={sellerSearch}
-                      onChange={(e) => setSellerSearch(e.target.value)}
-                      className="flex-1 border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500"
-                    />
-                    <button
-                      onClick={loadSellers}
-                      className="text-orange-500 text-sm font-semibold hover:underline shrink-0"
-                    >
-                      🔄 Refresh
-                    </button>
+                    <input placeholder="Search by name or business..." value={sellerSearch} onChange={(e) => setSellerSearch(e.target.value)} className="flex-1 border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500" />
+                    <button onClick={loadSellers} className="text-orange-500 text-sm font-semibold hover:underline shrink-0">🔄 Refresh</button>
                   </div>
-
                   {sellersLoading ? (
-                    <div className="flex justify-center py-10">
-                      <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-                    </div>
+                    <div className="flex justify-center py-10"><div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" /></div>
                   ) : sellers.length === 0 ? (
-                    <div className="text-center py-10">
-                      <p className="text-4xl mb-3">🏪</p>
-                      <p className="text-gray-500">
-                        No seller applications yet
-                      </p>
-                    </div>
+                    <div className="text-center py-10"><p className="text-4xl mb-3">🏪</p><p className="text-gray-500">No seller applications yet</p></div>
                   ) : (
                     <div className="flex flex-col gap-3">
-                      {sellers
-                        .filter(
-                          (s) =>
-                            s.fullName
-                              ?.toLowerCase()
-                              .includes(sellerSearch.toLowerCase()) ||
-                            s.businessName
-                              ?.toLowerCase()
-                              .includes(sellerSearch.toLowerCase()) ||
-                            s.email
-                              ?.toLowerCase()
-                              .includes(sellerSearch.toLowerCase()),
-                        )
-                        .map((seller) => (
-                          <div
-                            key={seller._id}
-                            className="border rounded-xl p-4 hover:border-orange-200 transition bg-white"
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <p className="font-bold text-sm text-gray-800">
-                                    {seller.fullName}
-                                  </p>
-                                  <span
-                                    className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
-                                      seller.sellerStatus === "approved"
-                                        ? "bg-green-100 text-green-600"
-                                        : seller.sellerStatus === "rejected"
-                                          ? "bg-red-100 text-red-500"
-                                          : "bg-yellow-100 text-yellow-600"
-                                    }`}
-                                  >
-                                    {seller.sellerStatus}
-                                  </span>
-                                </div>
-                                <p className="text-xs font-bold text-orange-500">
-                                  {seller.businessName}
-                                </p>
-                                <p className="text-xs text-gray-400">
-                                  {seller.email}
-                                </p>
-                                <p className="text-xs text-gray-400">
-                                  {seller.businessCategory}
-                                </p>
-                                <p className="text-xs text-gray-400">
-                                  {seller.businessLocation},{" "}
-                                  {seller.businessState}
-                                </p>
-                                {seller.whatsapp && (
-                                  <p className="text-xs text-green-500">
-                                    📱 {seller.whatsapp}
-                                  </p>
-                                )}
-                                {seller.businessDescription && (
-                                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-                                    {seller.businessDescription}
-                                  </p>
-                                )}
-                                <p className="text-xs text-gray-300 mt-1">
-                                  Applied:{" "}
-                                  {new Date(
-                                    seller.createdAt,
-                                  ).toLocaleDateString("en-NG", {
-                                    day: "numeric",
-                                    month: "short",
-                                    year: "numeric",
-                                  })}
-                                </p>
+                      {sellers.filter((s) => s.fullName?.toLowerCase().includes(sellerSearch.toLowerCase()) || s.businessName?.toLowerCase().includes(sellerSearch.toLowerCase()) || s.email?.toLowerCase().includes(sellerSearch.toLowerCase())).map((seller) => (
+                        <div key={seller._id} className="border rounded-xl p-4 hover:border-orange-200 transition bg-white">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <p className="font-bold text-sm text-gray-800">{seller.fullName}</p>
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${seller.sellerStatus === "approved" ? "bg-green-100 text-green-600" : seller.sellerStatus === "rejected" ? "bg-red-100 text-red-500" : "bg-yellow-100 text-yellow-600"}`}>{seller.sellerStatus}</span>
                               </div>
-
-                              {/* Action Buttons */}
-                              {seller.sellerStatus === "pending" && (
-                                <div className="flex flex-col gap-2 shrink-0">
-                                  <button
-                                    onClick={() =>
-                                      handleApproveSeller(seller._id)
-                                    }
-                                    disabled={approvingSeller === seller._id}
-                                    className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-full transition"
-                                  >
-                                    {approvingSeller === seller._id ? (
-                                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                    ) : (
-                                      "✅ Approve"
-                                    )}
-                                  </button>
-                                  <button
-                                    onClick={() =>
-                                      handleRejectSeller(seller._id)
-                                    }
-                                    disabled={rejectingSeller === seller._id}
-                                    className="flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-500 text-xs font-bold px-3 py-1.5 rounded-full transition"
-                                  >
-                                    {rejectingSeller === seller._id ? (
-                                      <div className="w-3 h-3 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
-                                    ) : (
-                                      "❌ Reject"
-                                    )}
-                                  </button>
-                                </div>
-                              )}
-                              {seller.sellerStatus === "approved" && (
-                                <span className="text-green-500 text-xs font-bold shrink-0">
-                                  ✅ Approved
-                                </span>
-                              )}
-                              {seller.sellerStatus === "rejected" && (
-                                <span className="text-red-400 text-xs font-bold shrink-0">
-                                  ❌ Rejected
-                                </span>
-                              )}
+                              <p className="text-xs font-bold text-orange-500">{seller.businessName}</p>
+                              <p className="text-xs text-gray-400">{seller.email}</p>
                             </div>
+                            {seller.sellerStatus === "pending" && (
+                              <div className="flex flex-col gap-2 shrink-0">
+                                <button onClick={() => handleApproveSeller(seller._id)} disabled={approvingSeller === seller._id} className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded-full transition">
+                                  {approvingSeller === seller._id ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : "✅ Approve"}
+                                </button>
+                                <button onClick={() => handleRejectSeller(seller._id)} disabled={rejectingSeller === seller._id} className="flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-500 text-xs font-bold px-3 py-1.5 rounded-full transition">
+                                  {rejectingSeller === seller._id ? <div className="w-3 h-3 border-2 border-red-400 border-t-transparent rounded-full animate-spin" /> : "❌ Reject"}
+                                </button>
+                              </div>
+                            )}
                           </div>
-                        ))}
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
