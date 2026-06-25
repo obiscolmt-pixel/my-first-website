@@ -175,13 +175,6 @@ const App = () => {
     };
   }, []);
 
-  // Secret admin URL trigger — standalone page
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('openAdmin') === 'true') {
-      window.history.replaceState({}, '', '/admin-panel');
-    }
-  }, []);
 
   useEffect(() => {
     if (!authOpen) {
@@ -355,9 +348,7 @@ const App = () => {
   if (window.location.pathname === "/privacy-policy") {
     return <PrivacyPolicy open={true} setOpen={() => {}} />;
   }
-  if (window.location.pathname === "/admin-panel") {
-    return <AdminDashboard adminOpen={true} setAdminOpen={() => window.location.href = '/'} />;
-  }
+ 
 
   return (
     <>
@@ -437,7 +428,7 @@ const App = () => {
       <AuthModal authOpen={authOpen} setAuthOpen={setAuthOpen} />
       <TrackOrder trackOpen={trackOpen} setTrackOpen={setTrackOpen} />
       <AdminDashboard adminOpen={adminOpen} setAdminOpen={setAdminOpen} />
-      {window.location.pathname !== '/admin-panel' && <ChatBot />}
+      <ChatBot />
       <RegisterBusiness
         registerBizOpen={registerBizOpen}
         setRegisterBizOpen={setRegisterBizOpen}
