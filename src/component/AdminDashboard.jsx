@@ -167,7 +167,7 @@ const WhatsAppInbox = ({ password }) => {
           "x-admin-password": password,
         },
         body: JSON.stringify({
-          phone: selectedConv.customerPhone,
+          phone: selectedConv.phoneNumber,
           message: replyText,
         }),
       });
@@ -199,7 +199,7 @@ const WhatsAppInbox = ({ password }) => {
   };
 
   const filteredConversations = conversations.filter((c) => {
-    if (filter === "escalated") return c.escalated;
+    if (filter === "escalated") return c.isEscalated;
     return true;
   });
 
@@ -214,7 +214,7 @@ const WhatsAppInbox = ({ password }) => {
     return date.toLocaleDateString("en-NG", { day: "numeric", month: "short" });
   };
 
-  const escalatedCount = conversations.filter((c) => c.escalated).length;
+  const escalatedCount = conversations.filter((c) => c.isEscalated).length;
 
   return (
     <div className="flex h-full" style={{ minHeight: "500px" }}>
@@ -285,15 +285,15 @@ const WhatsAppInbox = ({ password }) => {
           ) : (
             filteredConversations.map((conv) => {
               const lastMsg = conv.messages?.[conv.messages.length - 1];
-              const isSelected = selectedConv?.customerPhone === conv.customerPhone;
+              const isSelected = selectedConv?.phoneNumber === conv.phoneNumber;
               return (
                 <div
-                  key={conv.customerPhone}
+                  key={conv.phoneNumber}
                   onClick={() => setSelectedConv(conv)}
                   className={`flex items-start gap-3 p-4 border-b cursor-pointer transition ${
                     isSelected
                       ? "bg-orange-50 border-l-4 border-l-orange-500"
-                      : conv.escalated
+                      : conv.isEscalated
                         ? "bg-red-50 hover:bg-red-100"
                         : "hover:bg-gray-50"
                   }`}
@@ -301,16 +301,16 @@ const WhatsAppInbox = ({ password }) => {
                   {/* Avatar */}
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-black text-white text-sm ${
-                      conv.escalated ? "bg-red-400" : "bg-green-500"
+                      conv.isEscalated ? "bg-red-400" : "bg-green-500"
                     }`}
                   >
-                    {conv.escalated ? "🔴" : "💬"}
+                    {conv.isEscalated ? "🔴" : "💬"}
                   </div>
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-1">
                       <p className="font-bold text-sm text-gray-800 truncate">
-                        {conv.customerPhone}
+                        {conv.phoneNumber}
                       </p>
                       <p className="text-[10px] text-gray-400 shrink-0">
                         {formatTime(conv.updatedAt)}
@@ -319,7 +319,7 @@ const WhatsAppInbox = ({ password }) => {
                     <p className="text-xs text-gray-500 truncate mt-0.5">
                       {lastMsg?.content || "No messages"}
                     </p>
-                    {conv.escalated && (
+                    {conv.isEscalated && (
                       <span className="text-[10px] bg-red-100 text-red-500 px-1.5 py-0.5 rounded-full font-semibold mt-1 inline-block">
                         🔴 Needs attention
                       </span>
@@ -345,18 +345,18 @@ const WhatsAppInbox = ({ password }) => {
             </button>
             <div
               className={`w-9 h-9 rounded-full flex items-center justify-center font-black text-white text-sm shrink-0 ${
-                selectedConv.escalated ? "bg-red-400" : "bg-green-500"
+                selectedConv.isEscalated ? "bg-red-400" : "bg-green-500"
               }`}
             >
-              {selectedConv.escalated ? "🔴" : "💬"}
+              {selectedConv.isEscalated ? "🔴" : "💬"}
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-bold text-sm text-gray-800">
-                {selectedConv.customerPhone}
+                {selectedConv.phoneNumber}
               </p>
               <p className="text-xs text-gray-400">
                 {selectedConv.messages?.length || 0} messages
-                {selectedConv.escalated && (
+                {selectedConv.isEscalated && (
                   <span className="ml-2 text-red-500 font-semibold">
                     🔴 Escalated
                   </span>
@@ -366,7 +366,7 @@ const WhatsAppInbox = ({ password }) => {
             <button
               onClick={() => {
                 const refreshed = conversations.find(
-                  (c) => c.customerPhone === selectedConv.customerPhone,
+                  (c) => c.phoneNumber === selectedConv.phoneNumber,
                 );
                 if (refreshed) setSelectedConv(refreshed);
               }}
