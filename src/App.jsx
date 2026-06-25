@@ -437,7 +437,7 @@ const App = () => {
       <AuthModal authOpen={authOpen} setAuthOpen={setAuthOpen} />
       <TrackOrder trackOpen={trackOpen} setTrackOpen={setTrackOpen} />
       <AdminDashboard adminOpen={adminOpen} setAdminOpen={setAdminOpen} />
-      <ChatBot />
+      {window.location.pathname !== '/admin-panel' && <ChatBot />}
       <RegisterBusiness
         registerBizOpen={registerBizOpen}
         setRegisterBizOpen={setRegisterBizOpen}
