@@ -403,7 +403,7 @@ const App = () => {
         />
       )}
       {activeDepartment === "fashion" && <FashionPage {...sharedProps} />}
-      {activeDepartment === "lifestyle" && <LifestylePage {...sharedProps} />}
+      
 
       <Footer
         setPrivacyOpen={setPrivacyOpen}

@@ -28,7 +28,7 @@ const DEPARTMENTS = [
 
   { key: "gadgets", label: "Gadgets", icon: <FaMobileAlt size={14} /> },
   { key: "fashion", label: "Fashion", icon: <FaTshirt size={14} /> },
-  { key: "lifestyle", label: "Lifestyle", icon: <FaStar size={14} /> },
+  
 ];
 
 const Navbar = ({
@@ -654,18 +654,6 @@ const Navbar = ({
               className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
             >
               <FaTshirt size={22} className="mr-4 text-orange-500" /> Fashion
-            </li>
-
-            <li
-              onClick={() => {
-                setActiveDepartment("lifestyle");
-                setSearchQuery("");
-                setNav(false);
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className="text-lg py-3 flex items-center border-b border-gray-100 cursor-pointer hover:text-orange-500 transition"
-            >
-              <FaStar size={22} className="mr-4 text-orange-500" /> Lifestyle
             </li>
 
             {/* obisco library */}
