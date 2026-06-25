@@ -211,6 +211,14 @@ const App = () => {
   }
 }, [])
 
+// Secret admin URL trigger
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('openAdmin') === 'true') {
+    setAdminOpen(true);
+  }
+}, []);
+
   // Re-fetch wallet when auth modal closes (user may have just logged in)
   useEffect(() => {
     if (!authOpen) {

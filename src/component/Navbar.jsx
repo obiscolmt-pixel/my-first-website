@@ -766,15 +766,7 @@ const Navbar = ({
               <FaStore size={22} className="mr-4 text-orange-500" /> Seller
               Dashboard
             </li>
-            <li
-              onClick={() => {
-                setAdminOpen(true);
-                setNav(false);
-              }}
-              className="text-lg py-3 flex items-center cursor-pointer hover:text-orange-500 transition"
-            >
-              <AiFillTag size={22} className="mr-4 text-orange-500" /> ⚙️ Admin
-            </li>
+           
           </ul>
         </nav>
 
