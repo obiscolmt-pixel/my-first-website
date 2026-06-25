@@ -60,7 +60,7 @@ function Footer({
               <FaTiktok size={26} />
             </a>
             <a
-              href="https://wa.me/message/MZYPNJ5JS22EE1"
+              href="https://wa.me/2348145674093"
               target="_blank"
               rel="noreferrer"
               className="text-gray-400 hover:text-green-500 transition"
@@ -117,8 +117,9 @@ function Footer({
             </li>
             <li className="flex items-center gap-3">
               <FaWhatsapp size={20} className="text-green-500 shrink-0" />
+
               <a
-                href="https://wa.me/message/MZYPNJ5JS22EE1"
+                href="https://wa.me/2348145674093"
                 target="_blank"
                 rel="noreferrer"
                 className="text-sm text-gray-400 hover:text-green-500 transition"
