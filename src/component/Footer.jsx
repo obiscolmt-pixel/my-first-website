@@ -76,22 +76,18 @@ function Footer({
             Shop
           </h6>
           <ul className="flex flex-col gap-2">
-            {[
-              "Gadgets & Electronics",
-              "Fashion & Clothing",
-              "Lifestyle & Beauty",
-              "Pay Bills",
-              "More Coming Soon...",
-            ].map((item) => (
-              <li key={item}>
-                <a
-                  href="#"
-                  className={`text-sm transition ${item === "More Coming Soon..." ? "text-orange-500 font-semibold italic" : "text-gray-400 hover:text-orange-500"}`}
-                >
-                  {item}
-                </a>
-              </li>
-            ))}
+            {["Gadgets & Electronics", "Fashion & Clothing", "Pay Bills"].map(
+              (item) => (
+                <li key={item}>
+                  <a
+                    href="#"
+                    className="text-sm text-gray-400 hover:text-orange-500 transition"
+                  >
+                    {item}
+                  </a>
+                </li>
+              ),
+            )}
           </ul>
         </div>
 
@@ -101,31 +97,22 @@ function Footer({
             Contact Us
           </h6>
           <ul className="flex flex-col gap-4">
-            <li className="flex items-start gap-3">
-              <MdLocationOn
-                size={20}
-                className="text-orange-500 mt-0.5 shrink-0"
-              />
-              <span className="text-sm text-gray-400">
-                Plot 928 Amokpo Umuchigbo Ujem Nike, Enugu State, Nigeria
-              </span>
-            </li>
             <li className="flex items-center gap-3">
               <MdPhone size={20} className="text-orange-500 shrink-0" />
               <a
-                href="tel:+2349049863067"
+                href="tel:+2348145674093"
                 className="text-sm text-gray-400 hover:text-orange-500 transition"
               >
-                +234 904 986 3067
+                +234 814 567 4093
               </a>
             </li>
             <li className="flex items-center gap-3">
               <MdEmail size={20} className="text-orange-500 shrink-0" />
               <a
-                href="mailto:obiscostore1@gmail.com"
+                href="mailto:obiscolmt@gmail.com"
                 className="text-sm text-gray-400 hover:text-orange-500 transition"
               >
-                obiscostore1@gmail.com
+                obiscolmt@gmail.com
               </a>
             </li>
             <li className="flex items-center gap-3">
@@ -233,8 +220,8 @@ function Footer({
             <span className="bg-gray-800 text-xs text-gray-300 px-2 py-1 rounded">
               USSD
             </span>
-            <span className="bg-gray-800 text-xs text-orange-400 px-2 py-1 rounded border border-orange-500/30">
-              Paystack 🔜
+            <span className="bg-gray-800 text-xs text-gray-300 px-2 py-1 rounded">
+              Paystack ✅
             </span>
           </div>
         </div>
