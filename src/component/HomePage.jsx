@@ -6,7 +6,6 @@ import { AiOutlineClose } from "react-icons/ai";
 import {
   FaMobileAlt,
   FaTshirt,
-  FaStar,
   FaBolt,
   FaWallet,
   FaArrowRight,
@@ -57,12 +56,7 @@ const CATEGORIES = [
     dept: "fashion",
     color: "bg-pink-100 text-pink-600",
   },
-  {
-    label: "Lifestyle",
-    icon: <FaStar size={22} />,
-    dept: "lifestyle",
-    color: "bg-purple-100 text-purple-600",
-  },
+
   {
     label: "Pay Bills",
     icon: <FaBolt size={22} />,
@@ -260,9 +254,6 @@ export default function HomePage({
   // ── Filter products ──
   const gadgets = featuredProducts.filter((p) => p.department === "gadgets");
   const fashion = featuredProducts.filter((p) => p.department === "fashion");
-  const lifestyle = featuredProducts.filter(
-    (p) => p.department === "lifestyle",
-  );
   const hotDeals = allProducts.filter((p) => p.hotDeal);
 
   // ── Horizontal scroll product card ──
@@ -628,7 +619,7 @@ export default function HomePage({
       </div>
 
       {/* ── CATEGORY ICONS ── */}
-      <div className="mt-6 grid grid-cols-5 gap-2 sm:gap-4">
+      <div className="mt-6 grid grid-cols-4 gap-2 sm:gap-4">
         {CATEGORIES.map((cat) => (
           <button
             key={cat.label}
@@ -684,17 +675,12 @@ export default function HomePage({
             products={gadgets}
             dept="gadgets"
           />
+
           <SectionRow
             title="Featured Fashion"
             emoji="👗"
             products={fashion}
             dept="fashion"
-          />
-          <SectionRow
-            title="Featured Lifestyle"
-            emoji="✨"
-            products={lifestyle}
-            dept="lifestyle"
           />
 
           {/* Pay Bills dark banner */}
