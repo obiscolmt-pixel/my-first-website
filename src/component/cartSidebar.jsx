@@ -71,7 +71,7 @@ const CartSidebar = ({
     return true;
   };
 
-  const createOrder = async (paid = false, method = null) => {
+  const createOrder = async (paid = false, method = null, paystackRef = null) => {
     const user = JSON.parse(localStorage.getItem("user"));
     const resolvedMethod = method || paymentMethod;
     const res = await placeOrder({
@@ -91,14 +91,15 @@ const CartSidebar = ({
       discount: discountAmount || 0,
       paymentStatus: paid ? "paid" : "unpaid",
       paymentMethod: resolvedMethod,
+      paystackRef: paystackRef || null, // ✅ save the Paystack reference
     });
     return res;
   };
 
-  const onPaystackSuccess = async (response) => {
+  const onPaystackSuccess = async (response, ref) => {
     setLoading(true);
     try {
-      const res = await createOrder(true, "paystack");
+      const res = await createOrder(true, "paystack", ref);
       if (res.orderId) {
         if (promoResult?.code) await usePromo(promoResult.code);
         setTotalAmountSnapshot(finalAmount);
@@ -119,12 +120,13 @@ const CartSidebar = ({
 
   const handlePaystackPayment = () => {
     if (!validateForm()) return;
+    const ref = `obisco_${Date.now()}`; // ✅ generate ref once and reuse
     const handler = window.PaystackPop.setup({
       key: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
       email: form.email,
       amount: finalAmount * 100,
       currency: "NGN",
-      ref: `obisco_${Date.now()}`,
+      ref,
       metadata: {
         custom_fields: [
           { display_name: "Customer Name", variable_name: "customer_name", value: form.fullName },
@@ -133,7 +135,7 @@ const CartSidebar = ({
         ],
       },
       callback: function (response) {
-        onPaystackSuccess(response);
+        onPaystackSuccess(response, ref); // ✅ pass ref to callback
       },
       onClose: function () {
         console.log("Payment closed");
