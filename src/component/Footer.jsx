@@ -19,10 +19,9 @@ function Footer({
         {/* Brand */}
         <div className="lg:col-span-2">
           <div className="mb-4">
-            <h2 className="text-2xl font-black tracking-tight">
-              <span className="text-orange-500">OBISCO</span>
-              <span className="text-white"> STORE</span>
-            </h2>
+            <p className="text-gray-500 text-xs mt-1">
+              Obisco Prime Limited (RC-9542773)
+            </p>
             <p className="text-orange-500 text-xs font-semibold tracking-widest mt-1">
               Shop Dey Go! 🛒
             </p>
