@@ -23,10 +23,10 @@ const DISCOS = [
   { id: "ikeja-electric", name: "Ikeja Electric" },
   { id: "eko-electric", name: "Eko Electric" },
   { id: "kano-electric", name: "Kano Electric" },
-  { id: "phed", name: "PHED (Port Harcourt)" },
-  { id: "eedc", name: "EEDC (Enugu)" },
-  { id: "ibedc", name: "IBEDC (Ibadan)" },
-  { id: "kedco", name: "KEDCO (Kaduna)" },
+  { id: "portharcourt-electric", name: "PHED (Port Harcourt)" },
+  { id: "enugu-electric", name: "EEDC (Enugu)" },
+  { id: "ibadan-electric", name: "IBEDC (Ibadan)" },
+  { id: "kaduna-electric", name: "KEDCO (Kaduna)" },
   { id: "abuja-electric", name: "Abuja Electric" },
 ];
 
@@ -109,10 +109,10 @@ const discoLabel = (id) => {
     'ikeja-electric': 'Ikeja Electric',
     'eko-electric': 'Eko Electric',
     'kano-electric': 'Kano Electric',
-    'phed': 'PHED',
-    'eedc': 'EEDC',
-    'ibedc': 'IBEDC',
-    'kedco': 'KEDCO',
+    'portharcourt-electric': 'PHED',
+    'enugu-electric': 'EEDC',
+    'ibadan-electric': 'IBEDC',
+    'kaduna-electric': 'KEDCO',
     'abuja-electric': 'Abuja Electric',
   };
   return map[id] || id;
